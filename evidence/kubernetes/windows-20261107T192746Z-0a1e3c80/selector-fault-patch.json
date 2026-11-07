@@ -1,0 +1,7 @@
+{
+    "spec":  {
+                 "selector":  {
+                                  "app":  "mlops-deliberately-no-match"
+                              }
+             }
+}

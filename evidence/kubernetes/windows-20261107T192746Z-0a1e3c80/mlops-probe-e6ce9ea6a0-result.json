@@ -1,0 +1,50 @@
+{
+    "/health/live":  {
+                         "http_status":  200,
+                         "body":  {
+                                      "status":  "live"
+                                  }
+                     },
+    "/health/ready":  {
+                          "http_status":  200,
+                          "body":  {
+                                       "status":  "ready"
+                                   }
+                      },
+    "/version":  {
+                     "http_status":  200,
+                     "body":  {
+                                  "application_version":  "0.1.0",
+                                  "ready":  true,
+                                  "run_id":  "339b16bb4dc3467aa6004ff170f7f504",
+                                  "git_commit":  "5a35d39d1d0e7041ca78a5d0c416f05c9d15d5c8",
+                                  "dataset_hash":  "3eacf7ec7241e7f914d7a1aca0346328",
+                                  "feature_names":  [
+                                                        "feature_0",
+                                                        "feature_1",
+                                                        "feature_2",
+                                                        "feature_3",
+                                                        "feature_4",
+                                                        "feature_5",
+                                                        "feature_6",
+                                                        "feature_7"
+                                                    ]
+                              }
+                 },
+    "/predict":  {
+                     "http_status":  200,
+                     "body":  {
+                                  "predictions":  [
+                                                      1
+                                                  ],
+                                  "probabilities":  [
+                                                        [
+                                                            0.49899095670384497,
+                                                            0.501009043296155
+                                                        ]
+                                                    ],
+                                  "run_id":  "339b16bb4dc3467aa6004ff170f7f504"
+                              }
+                 },
+    "reachable":  true
+}

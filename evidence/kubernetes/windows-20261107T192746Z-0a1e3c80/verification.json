@@ -1,0 +1,1314 @@
+{
+    "timestamp":  "2026-11-07T19:27:46.2375432Z",
+    "status":  "VERIFIED_REAL",
+    "scope":  "real operator-run local kind cluster",
+    "context":  "kind-mlops-assignment",
+    "namespace":  "mlops",
+    "image":  "mlops-inference:git-d912f4bede42ac84d1d27ed6c63fcc9a02db43f6",
+    "model_run_id":  "339b16bb4dc3467aa6004ff170f7f504",
+    "model_sha256":  "4958e4b3b1765d5aca1d4e4f7f14df4b0335d8f0a8cb75dee79326223231f271",
+    "model_training_git_commit":  "5a35d39d1d0e7041ca78a5d0c416f05c9d15d5c8",
+    "deployment":  {
+                       "apiVersion":  "apps/v1",
+                       "kind":  "Deployment",
+                       "metadata":  {
+                                        "annotations":  {
+                                                            "deployment.kubernetes.io/revision":  "1",
+                                                            "kubectl.kubernetes.io/last-applied-configuration":  "{\"apiVersion\":\"apps/v1\",\"kind\":\"Deployment\",\"metadata\":{\"annotations\":{\"mlops.git-commit\":\"d912f4bede42ac84d1d27ed6c63fcc9a02db43f6\",\"mlops.model-git-commit\":\"5a35d39d1d0e7041ca78a5d0c416f05c9d15d5c8\",\"mlops.model-run-id\":\"339b16bb4dc3467aa6004ff170f7f504\"},\"labels\":{\"app\":\"inference\",\"app.kubernetes.io/version\":\"0.1.0\"},\"name\":\"inference\",\"namespace\":\"mlops\"},\"spec\":{\"replicas\":2,\"revisionHistoryLimit\":3,\"selector\":{\"matchLabels\":{\"app\":\"inference\"}},\"strategy\":{},\"template\":{\"metadata\":{\"labels\":{\"app\":\"inference\",\"app.kubernetes.io/version\":\"0.1.0\"}},\"spec\":{\"automountServiceAccountToken\":false,\"containers\":[{\"envFrom\":[{\"configMapRef\":{\"name\":\"inference-config\"}}],\"image\":\"mlops-inference:git-d912f4bede42ac84d1d27ed6c63fcc9a02db43f6\",\"imagePullPolicy\":\"IfNotPresent\",\"livenessProbe\":{\"httpGet\":{\"path\":\"/health/live\",\"port\":\"http\"},\"initialDelaySeconds\":5,\"periodSeconds\":10,\"timeoutSeconds\":2},\"name\":\"inference\",\"ports\":[{\"containerPort\":8001,\"name\":\"http\"}],\"readinessProbe\":{\"failureThreshold\":3,\"httpGet\":{\"path\":\"/health/ready\",\"port\":\"http\"},\"initialDelaySeconds\":2,\"periodSeconds\":3,\"timeoutSeconds\":2},\"resources\":{\"limits\":{\"cpu\":\"500m\",\"memory\":\"512Mi\"},\"requests\":{\"cpu\":\"100m\",\"memory\":\"128Mi\"}},\"securityContext\":{\"allowPrivilegeEscalation\":false,\"capabilities\":{\"drop\":[\"ALL\"]},\"readOnlyRootFilesystem\":true},\"volumeMounts\":[{\"mountPath\":\"/tmp\",\"name\":\"tmp\"}]}],\"securityContext\":{\"fsGroup\":10001,\"runAsGroup\":10001,\"runAsNonRoot\":true,\"runAsUser\":10001,\"seccompProfile\":{\"type\":\"RuntimeDefault\"}},\"volumes\":[{\"emptyDir\":{\"medium\":\"Memory\",\"sizeLimit\":\"32Mi\"},\"name\":\"tmp\"}]}}},\"status\":{}}\n",
+                                                            "mlops.git-commit":  "d912f4bede42ac84d1d27ed6c63fcc9a02db43f6",
+                                                            "mlops.model-git-commit":  "5a35d39d1d0e7041ca78a5d0c416f05c9d15d5c8",
+                                                            "mlops.model-run-id":  "339b16bb4dc3467aa6004ff170f7f504"
+                                                        },
+                                        "creationTimestamp":  "2026-11-07T19:30:32Z",
+                                        "generation":  1,
+                                        "labels":  {
+                                                       "app":  "inference",
+                                                       "app.kubernetes.io/version":  "0.1.0"
+                                                   },
+                                        "name":  "inference",
+                                        "namespace":  "mlops",
+                                        "resourceVersion":  "8603",
+                                        "uid":  "42cc48a1-dd3f-4c83-8d0b-3273a30456ac"
+                                    },
+                       "spec":  {
+                                    "progressDeadlineSeconds":  600,
+                                    "replicas":  2,
+                                    "revisionHistoryLimit":  3,
+                                    "selector":  {
+                                                     "matchLabels":  {
+                                                                         "app":  "inference"
+                                                                     }
+                                                 },
+                                    "strategy":  {
+                                                     "rollingUpdate":  {
+                                                                           "maxSurge":  "25%",
+                                                                           "maxUnavailable":  "25%"
+                                                                       },
+                                                     "type":  "RollingUpdate"
+                                                 },
+                                    "template":  {
+                                                     "metadata":  {
+                                                                      "labels":  {
+                                                                                     "app":  "inference",
+                                                                                     "app.kubernetes.io/version":  "0.1.0"
+                                                                                 }
+                                                                  },
+                                                     "spec":  {
+                                                                  "automountServiceAccountToken":  false,
+                                                                  "containers":  [
+                                                                                     {
+                                                                                         "envFrom":  [
+                                                                                                         {
+                                                                                                             "configMapRef":  {
+                                                                                                                                  "name":  "inference-config"
+                                                                                                                              }
+                                                                                                         }
+                                                                                                     ],
+                                                                                         "image":  "mlops-inference:git-d912f4bede42ac84d1d27ed6c63fcc9a02db43f6",
+                                                                                         "imagePullPolicy":  "IfNotPresent",
+                                                                                         "livenessProbe":  {
+                                                                                                               "failureThreshold":  3,
+                                                                                                               "httpGet":  {
+                                                                                                                               "path":  "/health/live",
+                                                                                                                               "port":  "http",
+                                                                                                                               "scheme":  "HTTP"
+                                                                                                                           },
+                                                                                                               "initialDelaySeconds":  5,
+                                                                                                               "periodSeconds":  10,
+                                                                                                               "successThreshold":  1,
+                                                                                                               "timeoutSeconds":  2
+                                                                                                           },
+                                                                                         "name":  "inference",
+                                                                                         "ports":  [
+                                                                                                       {
+                                                                                                           "containerPort":  8001,
+                                                                                                           "name":  "http",
+                                                                                                           "protocol":  "TCP"
+                                                                                                       }
+                                                                                                   ],
+                                                                                         "readinessProbe":  {
+                                                                                                                "failureThreshold":  3,
+                                                                                                                "httpGet":  {
+                                                                                                                                "path":  "/health/ready",
+                                                                                                                                "port":  "http",
+                                                                                                                                "scheme":  "HTTP"
+                                                                                                                            },
+                                                                                                                "initialDelaySeconds":  2,
+                                                                                                                "periodSeconds":  3,
+                                                                                                                "successThreshold":  1,
+                                                                                                                "timeoutSeconds":  2
+                                                                                                            },
+                                                                                         "resources":  {
+                                                                                                           "limits":  {
+                                                                                                                          "cpu":  "500m",
+                                                                                                                          "memory":  "512Mi"
+                                                                                                                      },
+                                                                                                           "requests":  {
+                                                                                                                            "cpu":  "100m",
+                                                                                                                            "memory":  "128Mi"
+                                                                                                                        }
+                                                                                                       },
+                                                                                         "securityContext":  {
+                                                                                                                 "allowPrivilegeEscalation":  false,
+                                                                                                                 "capabilities":  {
+                                                                                                                                      "drop":  [
+                                                                                                                                                   "ALL"
+                                                                                                                                               ]
+                                                                                                                                  },
+                                                                                                                 "readOnlyRootFilesystem":  true
+                                                                                                             },
+                                                                                         "terminationMessagePath":  "/dev/termination-log",
+                                                                                         "terminationMessagePolicy":  "File",
+                                                                                         "volumeMounts":  [
+                                                                                                              {
+                                                                                                                  "mountPath":  "/tmp",
+                                                                                                                  "name":  "tmp"
+                                                                                                              }
+                                                                                                          ]
+                                                                                     }
+                                                                                 ],
+                                                                  "dnsPolicy":  "ClusterFirst",
+                                                                  "restartPolicy":  "Always",
+                                                                  "schedulerName":  "default-scheduler",
+                                                                  "securityContext":  {
+                                                                                          "fsGroup":  10001,
+                                                                                          "runAsGroup":  10001,
+                                                                                          "runAsNonRoot":  true,
+                                                                                          "runAsUser":  10001,
+                                                                                          "seccompProfile":  {
+                                                                                                                 "type":  "RuntimeDefault"
+                                                                                                             }
+                                                                                      },
+                                                                  "terminationGracePeriodSeconds":  30,
+                                                                  "volumes":  [
+                                                                                  {
+                                                                                      "emptyDir":  {
+                                                                                                       "medium":  "Memory",
+                                                                                                       "sizeLimit":  "32Mi"
+                                                                                                   },
+                                                                                      "name":  "tmp"
+                                                                                  }
+                                                                              ]
+                                                              }
+                                                 }
+                                },
+                       "status":  {
+                                      "availableReplicas":  2,
+                                      "conditions":  [
+                                                         {
+                                                             "lastTransitionTime":  "2026-11-07T19:30:39Z",
+                                                             "lastUpdateTime":  "2026-11-07T19:30:39Z",
+                                                             "message":  "Deployment has minimum availability.",
+                                                             "reason":  "MinimumReplicasAvailable",
+                                                             "status":  "True",
+                                                             "type":  "Available"
+                                                         },
+                                                         {
+                                                             "lastTransitionTime":  "2026-11-07T19:30:32Z",
+                                                             "lastUpdateTime":  "2026-11-07T19:30:39Z",
+                                                             "message":  "ReplicaSet \"inference-7549f48f7c\" has successfully progressed.",
+                                                             "reason":  "NewReplicaSetAvailable",
+                                                             "status":  "True",
+                                                             "type":  "Progressing"
+                                                         }
+                                                     ],
+                                      "observedGeneration":  1,
+                                      "readyReplicas":  2,
+                                      "replicas":  2,
+                                      "terminatingReplicas":  0,
+                                      "updatedReplicas":  2
+                                  }
+                   },
+    "service":  {
+                    "apiVersion":  "v1",
+                    "kind":  "Service",
+                    "metadata":  {
+                                     "annotations":  {
+                                                         "kubectl.kubernetes.io/last-applied-configuration":  "{\"apiVersion\":\"v1\",\"kind\":\"Service\",\"metadata\":{\"annotations\":{},\"labels\":{\"app\":\"inference\"},\"name\":\"inference\",\"namespace\":\"mlops\"},\"spec\":{\"ports\":[{\"name\":\"http\",\"port\":80,\"protocol\":\"TCP\",\"targetPort\":\"http\"}],\"selector\":{\"app\":\"inference\"},\"type\":\"ClusterIP\"}}\n"
+                                                     },
+                                     "creationTimestamp":  "2026-11-07T19:30:31Z",
+                                     "labels":  {
+                                                    "app":  "inference"
+                                                },
+                                     "name":  "inference",
+                                     "namespace":  "mlops",
+                                     "resourceVersion":  "8544",
+                                     "uid":  "1c847184-ae44-4a8a-b962-fbccb87d707e"
+                                 },
+                    "spec":  {
+                                 "clusterIP":  "10.96.85.199",
+                                 "clusterIPs":  [
+                                                    "10.96.85.199"
+                                                ],
+                                 "internalTrafficPolicy":  "Cluster",
+                                 "ipFamilies":  [
+                                                    "IPv4"
+                                                ],
+                                 "ipFamilyPolicy":  "SingleStack",
+                                 "ports":  [
+                                               {
+                                                   "name":  "http",
+                                                   "port":  80,
+                                                   "protocol":  "TCP",
+                                                   "targetPort":  "http"
+                                               }
+                                           ],
+                                 "selector":  {
+                                                  "app":  "inference"
+                                              },
+                                 "sessionAffinity":  "None",
+                                 "type":  "ClusterIP"
+                             },
+                    "status":  {
+                                   "loadBalancer":  {
+
+                                                    }
+                               }
+                },
+    "endpoints":  {
+                      "apiVersion":  "v1",
+                      "kind":  "Endpoints",
+                      "metadata":  {
+                                       "annotations":  {
+                                                           "endpoints.kubernetes.io/last-change-trigger-time":  "2026-11-07T19:30:39Z"
+                                                       },
+                                       "creationTimestamp":  "2026-11-07T19:30:31Z",
+                                       "labels":  {
+                                                      "app":  "inference",
+                                                      "endpoints.kubernetes.io/managed-by":  "endpoint-controller"
+                                                  },
+                                       "name":  "inference",
+                                       "namespace":  "mlops",
+                                       "resourceVersion":  "8600",
+                                       "uid":  "9bad3aa1-c856-45cc-a5d2-2ba39d8ccfbd"
+                                   },
+                      "subsets":  [
+                                      {
+                                          "addresses":  [
+                                                            {
+                                                                "ip":  "10.244.0.5",
+                                                                "nodeName":  "mlops-assignment-control-plane",
+                                                                "targetRef":  {
+                                                                                  "kind":  "Pod",
+                                                                                  "name":  "inference-7549f48f7c-mns4x",
+                                                                                  "namespace":  "mlops",
+                                                                                  "uid":  "392eb6e2-50ce-4cd2-8df7-20055e5c6ac7"
+                                                                              }
+                                                            },
+                                                            {
+                                                                "ip":  "10.244.0.6",
+                                                                "nodeName":  "mlops-assignment-control-plane",
+                                                                "targetRef":  {
+                                                                                  "kind":  "Pod",
+                                                                                  "name":  "inference-7549f48f7c-kv68b",
+                                                                                  "namespace":  "mlops",
+                                                                                  "uid":  "bb9e2d66-c7de-4546-ac12-a19cfe8fb9a2"
+                                                                              }
+                                                            }
+                                                        ],
+                                          "ports":  [
+                                                        {
+                                                            "name":  "http",
+                                                            "port":  8001,
+                                                            "protocol":  "TCP"
+                                                        }
+                                                    ]
+                                      }
+                                  ]
+                  },
+    "baseline_clusterip_probe":  {
+                                     "/health/live":  {
+                                                          "http_status":  200,
+                                                          "body":  {
+                                                                       "status":  "live"
+                                                                   }
+                                                      },
+                                     "/health/ready":  {
+                                                           "http_status":  200,
+                                                           "body":  {
+                                                                        "status":  "ready"
+                                                                    }
+                                                       },
+                                     "/version":  {
+                                                      "http_status":  200,
+                                                      "body":  {
+                                                                   "application_version":  "0.1.0",
+                                                                   "ready":  true,
+                                                                   "run_id":  "339b16bb4dc3467aa6004ff170f7f504",
+                                                                   "git_commit":  "5a35d39d1d0e7041ca78a5d0c416f05c9d15d5c8",
+                                                                   "dataset_hash":  "3eacf7ec7241e7f914d7a1aca0346328",
+                                                                   "feature_names":  [
+                                                                                         "feature_0",
+                                                                                         "feature_1",
+                                                                                         "feature_2",
+                                                                                         "feature_3",
+                                                                                         "feature_4",
+                                                                                         "feature_5",
+                                                                                         "feature_6",
+                                                                                         "feature_7"
+                                                                                     ]
+                                                               }
+                                                  },
+                                     "/predict":  {
+                                                      "http_status":  200,
+                                                      "body":  {
+                                                                   "predictions":  [
+                                                                                       1
+                                                                                   ],
+                                                                   "probabilities":  [
+                                                                                         [
+                                                                                             0.49899095670384497,
+                                                                                             0.501009043296155
+                                                                                         ]
+                                                                                     ],
+                                                                   "run_id":  "339b16bb4dc3467aa6004ff170f7f504"
+                                                               }
+                                                  },
+                                     "reachable":  true
+                                 },
+    "selector_failure":  {
+                             "diagnosis":  "Operator changed the Service selector; the inference Pods remain healthy but no matching ready endpoints route Service traffic.",
+                             "endpoints":  {
+                                               "apiVersion":  "v1",
+                                               "kind":  "Endpoints",
+                                               "metadata":  {
+                                                                "creationTimestamp":  "2026-11-07T19:30:31Z",
+                                                                "labels":  {
+                                                                               "app":  "inference",
+                                                                               "endpoints.kubernetes.io/managed-by":  "endpoint-controller"
+                                                                           },
+                                                                "name":  "inference",
+                                                                "namespace":  "mlops",
+                                                                "resourceVersion":  "8626",
+                                                                "uid":  "9bad3aa1-c856-45cc-a5d2-2ba39d8ccfbd"
+                                                            }
+                                           },
+                             "service":  {
+                                             "apiVersion":  "v1",
+                                             "kind":  "Service",
+                                             "metadata":  {
+                                                              "annotations":  {
+                                                                                  "kubectl.kubernetes.io/last-applied-configuration":  "{\"apiVersion\":\"v1\",\"kind\":\"Service\",\"metadata\":{\"annotations\":{},\"labels\":{\"app\":\"inference\"},\"name\":\"inference\",\"namespace\":\"mlops\"},\"spec\":{\"ports\":[{\"name\":\"http\",\"port\":80,\"protocol\":\"TCP\",\"targetPort\":\"http\"}],\"selector\":{\"app\":\"inference\"},\"type\":\"ClusterIP\"}}\n"
+                                                                              },
+                                                              "creationTimestamp":  "2026-11-07T19:30:31Z",
+                                                              "labels":  {
+                                                                             "app":  "inference"
+                                                                         },
+                                                              "name":  "inference",
+                                                              "namespace":  "mlops",
+                                                              "resourceVersion":  "8624",
+                                                              "uid":  "1c847184-ae44-4a8a-b962-fbccb87d707e"
+                                                          },
+                                             "spec":  {
+                                                          "clusterIP":  "10.96.85.199",
+                                                          "clusterIPs":  [
+                                                                             "10.96.85.199"
+                                                                         ],
+                                                          "internalTrafficPolicy":  "Cluster",
+                                                          "ipFamilies":  [
+                                                                             "IPv4"
+                                                                         ],
+                                                          "ipFamilyPolicy":  "SingleStack",
+                                                          "ports":  [
+                                                                        {
+                                                                            "name":  "http",
+                                                                            "port":  80,
+                                                                            "protocol":  "TCP",
+                                                                            "targetPort":  "http"
+                                                                        }
+                                                                    ],
+                                                          "selector":  {
+                                                                           "app":  "mlops-deliberately-no-match"
+                                                                       },
+                                                          "sessionAffinity":  "None",
+                                                          "type":  "ClusterIP"
+                                                      },
+                                             "status":  {
+                                                            "loadBalancer":  {
+
+                                                                             }
+                                                        }
+                                         },
+                             "clusterip_probe":  {
+                                                     "reachable":  false,
+                                                     "error_type":  "URLError"
+                                                 }
+                         },
+    "recovery_clusterip_probe":  {
+                                     "/health/live":  {
+                                                          "http_status":  200,
+                                                          "body":  {
+                                                                       "status":  "live"
+                                                                   }
+                                                      },
+                                     "/health/ready":  {
+                                                           "http_status":  200,
+                                                           "body":  {
+                                                                        "status":  "ready"
+                                                                    }
+                                                       },
+                                     "/version":  {
+                                                      "http_status":  200,
+                                                      "body":  {
+                                                                   "application_version":  "0.1.0",
+                                                                   "ready":  true,
+                                                                   "run_id":  "339b16bb4dc3467aa6004ff170f7f504",
+                                                                   "git_commit":  "5a35d39d1d0e7041ca78a5d0c416f05c9d15d5c8",
+                                                                   "dataset_hash":  "3eacf7ec7241e7f914d7a1aca0346328",
+                                                                   "feature_names":  [
+                                                                                         "feature_0",
+                                                                                         "feature_1",
+                                                                                         "feature_2",
+                                                                                         "feature_3",
+                                                                                         "feature_4",
+                                                                                         "feature_5",
+                                                                                         "feature_6",
+                                                                                         "feature_7"
+                                                                                     ]
+                                                               }
+                                                  },
+                                     "/predict":  {
+                                                      "http_status":  200,
+                                                      "body":  {
+                                                                   "predictions":  [
+                                                                                       1
+                                                                                   ],
+                                                                   "probabilities":  [
+                                                                                         [
+                                                                                             0.49899095670384497,
+                                                                                             0.501009043296155
+                                                                                         ]
+                                                                                     ],
+                                                                   "run_id":  "339b16bb4dc3467aa6004ff170f7f504"
+                                                               }
+                                                  },
+                                     "reachable":  true
+                                 },
+    "pods":  {
+                 "apiVersion":  "v1",
+                 "items":  [
+                               {
+                                   "apiVersion":  "v1",
+                                   "kind":  "Pod",
+                                   "metadata":  {
+                                                    "creationTimestamp":  "2026-11-07T19:30:32Z",
+                                                    "generateName":  "inference-7549f48f7c-",
+                                                    "generation":  1,
+                                                    "labels":  {
+                                                                   "app":  "inference",
+                                                                   "app.kubernetes.io/version":  "0.1.0",
+                                                                   "pod-template-hash":  "7549f48f7c"
+                                                               },
+                                                    "name":  "inference-7549f48f7c-kv68b",
+                                                    "namespace":  "mlops",
+                                                    "ownerReferences":  [
+                                                                            {
+                                                                                "apiVersion":  "apps/v1",
+                                                                                "blockOwnerDeletion":  true,
+                                                                                "controller":  true,
+                                                                                "kind":  "ReplicaSet",
+                                                                                "name":  "inference-7549f48f7c",
+                                                                                "uid":  "c44b51ad-ccf9-45e0-9055-82c89e414eca"
+                                                                            }
+                                                                        ],
+                                                    "resourceVersion":  "8597",
+                                                    "uid":  "bb9e2d66-c7de-4546-ac12-a19cfe8fb9a2"
+                                                },
+                                   "spec":  {
+                                                "automountServiceAccountToken":  false,
+                                                "containers":  [
+                                                                   {
+                                                                       "envFrom":  [
+                                                                                       {
+                                                                                           "configMapRef":  {
+                                                                                                                "name":  "inference-config"
+                                                                                                            }
+                                                                                       }
+                                                                                   ],
+                                                                       "image":  "mlops-inference:git-d912f4bede42ac84d1d27ed6c63fcc9a02db43f6",
+                                                                       "imagePullPolicy":  "IfNotPresent",
+                                                                       "livenessProbe":  {
+                                                                                             "failureThreshold":  3,
+                                                                                             "httpGet":  {
+                                                                                                             "path":  "/health/live",
+                                                                                                             "port":  "http",
+                                                                                                             "scheme":  "HTTP"
+                                                                                                         },
+                                                                                             "initialDelaySeconds":  5,
+                                                                                             "periodSeconds":  10,
+                                                                                             "successThreshold":  1,
+                                                                                             "timeoutSeconds":  2
+                                                                                         },
+                                                                       "name":  "inference",
+                                                                       "ports":  [
+                                                                                     {
+                                                                                         "containerPort":  8001,
+                                                                                         "name":  "http",
+                                                                                         "protocol":  "TCP"
+                                                                                     }
+                                                                                 ],
+                                                                       "readinessProbe":  {
+                                                                                              "failureThreshold":  3,
+                                                                                              "httpGet":  {
+                                                                                                              "path":  "/health/ready",
+                                                                                                              "port":  "http",
+                                                                                                              "scheme":  "HTTP"
+                                                                                                          },
+                                                                                              "initialDelaySeconds":  2,
+                                                                                              "periodSeconds":  3,
+                                                                                              "successThreshold":  1,
+                                                                                              "timeoutSeconds":  2
+                                                                                          },
+                                                                       "resources":  {
+                                                                                         "limits":  {
+                                                                                                        "cpu":  "500m",
+                                                                                                        "memory":  "512Mi"
+                                                                                                    },
+                                                                                         "requests":  {
+                                                                                                          "cpu":  "100m",
+                                                                                                          "memory":  "128Mi"
+                                                                                                      }
+                                                                                     },
+                                                                       "securityContext":  {
+                                                                                               "allowPrivilegeEscalation":  false,
+                                                                                               "capabilities":  {
+                                                                                                                    "drop":  [
+                                                                                                                                 "ALL"
+                                                                                                                             ]
+                                                                                                                },
+                                                                                               "readOnlyRootFilesystem":  true
+                                                                                           },
+                                                                       "terminationMessagePath":  "/dev/termination-log",
+                                                                       "terminationMessagePolicy":  "File",
+                                                                       "volumeMounts":  [
+                                                                                            {
+                                                                                                "mountPath":  "/tmp",
+                                                                                                "name":  "tmp"
+                                                                                            }
+                                                                                        ]
+                                                                   }
+                                                               ],
+                                                "dnsPolicy":  "ClusterFirst",
+                                                "enableServiceLinks":  true,
+                                                "nodeName":  "mlops-assignment-control-plane",
+                                                "preemptionPolicy":  "PreemptLowerPriority",
+                                                "priority":  0,
+                                                "restartPolicy":  "Always",
+                                                "schedulerName":  "default-scheduler",
+                                                "securityContext":  {
+                                                                        "fsGroup":  10001,
+                                                                        "runAsGroup":  10001,
+                                                                        "runAsNonRoot":  true,
+                                                                        "runAsUser":  10001,
+                                                                        "seccompProfile":  {
+                                                                                               "type":  "RuntimeDefault"
+                                                                                           }
+                                                                    },
+                                                "serviceAccount":  "default",
+                                                "serviceAccountName":  "default",
+                                                "terminationGracePeriodSeconds":  30,
+                                                "tolerations":  [
+                                                                    {
+                                                                        "effect":  "NoExecute",
+                                                                        "key":  "node.kubernetes.io/not-ready",
+                                                                        "operator":  "Exists",
+                                                                        "tolerationSeconds":  300
+                                                                    },
+                                                                    {
+                                                                        "effect":  "NoExecute",
+                                                                        "key":  "node.kubernetes.io/unreachable",
+                                                                        "operator":  "Exists",
+                                                                        "tolerationSeconds":  300
+                                                                    }
+                                                                ],
+                                                "volumes":  [
+                                                                {
+                                                                    "emptyDir":  {
+                                                                                     "medium":  "Memory",
+                                                                                     "sizeLimit":  "32Mi"
+                                                                                 },
+                                                                    "name":  "tmp"
+                                                                }
+                                                            ]
+                                            },
+                                   "status":  {
+                                                  "allocatedResources":  {
+                                                                             "cpu":  "100m",
+                                                                             "memory":  "128Mi"
+                                                                         },
+                                                  "conditions":  [
+                                                                     {
+                                                                         "lastProbeTime":  null,
+                                                                         "lastTransitionTime":  "2026-11-07T19:30:32Z",
+                                                                         "observedGeneration":  1,
+                                                                         "status":  "True",
+                                                                         "type":  "PodReadyToStartContainers"
+                                                                     },
+                                                                     {
+                                                                         "lastProbeTime":  null,
+                                                                         "lastTransitionTime":  "2026-11-07T19:30:32Z",
+                                                                         "observedGeneration":  1,
+                                                                         "status":  "True",
+                                                                         "type":  "Initialized"
+                                                                     },
+                                                                     {
+                                                                         "lastProbeTime":  null,
+                                                                         "lastTransitionTime":  "2026-11-07T19:30:39Z",
+                                                                         "observedGeneration":  1,
+                                                                         "status":  "True",
+                                                                         "type":  "Ready"
+                                                                     },
+                                                                     {
+                                                                         "lastProbeTime":  null,
+                                                                         "lastTransitionTime":  "2026-11-07T19:30:39Z",
+                                                                         "observedGeneration":  1,
+                                                                         "status":  "True",
+                                                                         "type":  "ContainersReady"
+                                                                     },
+                                                                     {
+                                                                         "lastProbeTime":  null,
+                                                                         "lastTransitionTime":  "2026-11-07T19:30:32Z",
+                                                                         "observedGeneration":  1,
+                                                                         "status":  "True",
+                                                                         "type":  "PodScheduled"
+                                                                     }
+                                                                 ],
+                                                  "containerStatuses":  [
+                                                                            {
+                                                                                "allocatedResources":  {
+                                                                                                           "cpu":  "100m",
+                                                                                                           "memory":  "128Mi"
+                                                                                                       },
+                                                                                "containerID":  "containerd://9d6ae91cd46ed78be2fcbe43db736ea26373f726055a00868719eeba69dc6c20",
+                                                                                "image":  "docker.io/library/mlops-inference:git-d912f4bede42ac84d1d27ed6c63fcc9a02db43f6",
+                                                                                "imageID":  "docker.io/library/import-2026-11-07@sha256:9b561ac78dc7c79c227d94c1ab253130b58076fd8407abad389112ea9eb08db6",
+                                                                                "lastState":  {
+
+                                                                                              },
+                                                                                "name":  "inference",
+                                                                                "ready":  true,
+                                                                                "resources":  {
+                                                                                                  "limits":  {
+                                                                                                                 "cpu":  "500m",
+                                                                                                                 "memory":  "512Mi"
+                                                                                                             },
+                                                                                                  "requests":  {
+                                                                                                                   "cpu":  "100m",
+                                                                                                                   "memory":  "128Mi"
+                                                                                                               }
+                                                                                              },
+                                                                                "restartCount":  0,
+                                                                                "started":  true,
+                                                                                "state":  {
+                                                                                              "running":  {
+                                                                                                              "startedAt":  "2026-11-07T19:30:33Z"
+                                                                                                          }
+                                                                                          },
+                                                                                "user":  {
+                                                                                             "linux":  {
+                                                                                                           "gid":  10001,
+                                                                                                           "supplementalGroups":  [
+                                                                                                                                      10001
+                                                                                                                                  ],
+                                                                                                           "uid":  10001
+                                                                                                       }
+                                                                                         },
+                                                                                "volumeMounts":  [
+                                                                                                     {
+                                                                                                         "mountPath":  "/tmp",
+                                                                                                         "name":  "tmp"
+                                                                                                     }
+                                                                                                 ]
+                                                                            }
+                                                                        ],
+                                                  "hostIP":  "172.18.0.2",
+                                                  "hostIPs":  [
+                                                                  {
+                                                                      "ip":  "172.18.0.2"
+                                                                  }
+                                                              ],
+                                                  "observedGeneration":  1,
+                                                  "phase":  "Running",
+                                                  "podIP":  "10.244.0.6",
+                                                  "podIPs":  [
+                                                                 {
+                                                                     "ip":  "10.244.0.6"
+                                                                 }
+                                                             ],
+                                                  "qosClass":  "Burstable",
+                                                  "resources":  {
+                                                                    "limits":  {
+                                                                                   "cpu":  "500m",
+                                                                                   "memory":  "512Mi"
+                                                                               },
+                                                                    "requests":  {
+                                                                                     "cpu":  "79m",
+                                                                                     "memory":  "128Mi"
+                                                                                 }
+                                                                },
+                                                  "startTime":  "2026-11-07T19:30:32Z"
+                                              }
+                               },
+                               {
+                                   "apiVersion":  "v1",
+                                   "kind":  "Pod",
+                                   "metadata":  {
+                                                    "creationTimestamp":  "2026-11-07T19:30:32Z",
+                                                    "generateName":  "inference-7549f48f7c-",
+                                                    "generation":  1,
+                                                    "labels":  {
+                                                                   "app":  "inference",
+                                                                   "app.kubernetes.io/version":  "0.1.0",
+                                                                   "pod-template-hash":  "7549f48f7c"
+                                                               },
+                                                    "name":  "inference-7549f48f7c-mns4x",
+                                                    "namespace":  "mlops",
+                                                    "ownerReferences":  [
+                                                                            {
+                                                                                "apiVersion":  "apps/v1",
+                                                                                "blockOwnerDeletion":  true,
+                                                                                "controller":  true,
+                                                                                "kind":  "ReplicaSet",
+                                                                                "name":  "inference-7549f48f7c",
+                                                                                "uid":  "c44b51ad-ccf9-45e0-9055-82c89e414eca"
+                                                                            }
+                                                                        ],
+                                                    "resourceVersion":  "8599",
+                                                    "uid":  "392eb6e2-50ce-4cd2-8df7-20055e5c6ac7"
+                                                },
+                                   "spec":  {
+                                                "automountServiceAccountToken":  false,
+                                                "containers":  [
+                                                                   {
+                                                                       "envFrom":  [
+                                                                                       {
+                                                                                           "configMapRef":  {
+                                                                                                                "name":  "inference-config"
+                                                                                                            }
+                                                                                       }
+                                                                                   ],
+                                                                       "image":  "mlops-inference:git-d912f4bede42ac84d1d27ed6c63fcc9a02db43f6",
+                                                                       "imagePullPolicy":  "IfNotPresent",
+                                                                       "livenessProbe":  {
+                                                                                             "failureThreshold":  3,
+                                                                                             "httpGet":  {
+                                                                                                             "path":  "/health/live",
+                                                                                                             "port":  "http",
+                                                                                                             "scheme":  "HTTP"
+                                                                                                         },
+                                                                                             "initialDelaySeconds":  5,
+                                                                                             "periodSeconds":  10,
+                                                                                             "successThreshold":  1,
+                                                                                             "timeoutSeconds":  2
+                                                                                         },
+                                                                       "name":  "inference",
+                                                                       "ports":  [
+                                                                                     {
+                                                                                         "containerPort":  8001,
+                                                                                         "name":  "http",
+                                                                                         "protocol":  "TCP"
+                                                                                     }
+                                                                                 ],
+                                                                       "readinessProbe":  {
+                                                                                              "failureThreshold":  3,
+                                                                                              "httpGet":  {
+                                                                                                              "path":  "/health/ready",
+                                                                                                              "port":  "http",
+                                                                                                              "scheme":  "HTTP"
+                                                                                                          },
+                                                                                              "initialDelaySeconds":  2,
+                                                                                              "periodSeconds":  3,
+                                                                                              "successThreshold":  1,
+                                                                                              "timeoutSeconds":  2
+                                                                                          },
+                                                                       "resources":  {
+                                                                                         "limits":  {
+                                                                                                        "cpu":  "500m",
+                                                                                                        "memory":  "512Mi"
+                                                                                                    },
+                                                                                         "requests":  {
+                                                                                                          "cpu":  "100m",
+                                                                                                          "memory":  "128Mi"
+                                                                                                      }
+                                                                                     },
+                                                                       "securityContext":  {
+                                                                                               "allowPrivilegeEscalation":  false,
+                                                                                               "capabilities":  {
+                                                                                                                    "drop":  [
+                                                                                                                                 "ALL"
+                                                                                                                             ]
+                                                                                                                },
+                                                                                               "readOnlyRootFilesystem":  true
+                                                                                           },
+                                                                       "terminationMessagePath":  "/dev/termination-log",
+                                                                       "terminationMessagePolicy":  "File",
+                                                                       "volumeMounts":  [
+                                                                                            {
+                                                                                                "mountPath":  "/tmp",
+                                                                                                "name":  "tmp"
+                                                                                            }
+                                                                                        ]
+                                                                   }
+                                                               ],
+                                                "dnsPolicy":  "ClusterFirst",
+                                                "enableServiceLinks":  true,
+                                                "nodeName":  "mlops-assignment-control-plane",
+                                                "preemptionPolicy":  "PreemptLowerPriority",
+                                                "priority":  0,
+                                                "restartPolicy":  "Always",
+                                                "schedulerName":  "default-scheduler",
+                                                "securityContext":  {
+                                                                        "fsGroup":  10001,
+                                                                        "runAsGroup":  10001,
+                                                                        "runAsNonRoot":  true,
+                                                                        "runAsUser":  10001,
+                                                                        "seccompProfile":  {
+                                                                                               "type":  "RuntimeDefault"
+                                                                                           }
+                                                                    },
+                                                "serviceAccount":  "default",
+                                                "serviceAccountName":  "default",
+                                                "terminationGracePeriodSeconds":  30,
+                                                "tolerations":  [
+                                                                    {
+                                                                        "effect":  "NoExecute",
+                                                                        "key":  "node.kubernetes.io/not-ready",
+                                                                        "operator":  "Exists",
+                                                                        "tolerationSeconds":  300
+                                                                    },
+                                                                    {
+                                                                        "effect":  "NoExecute",
+                                                                        "key":  "node.kubernetes.io/unreachable",
+                                                                        "operator":  "Exists",
+                                                                        "tolerationSeconds":  300
+                                                                    }
+                                                                ],
+                                                "volumes":  [
+                                                                {
+                                                                    "emptyDir":  {
+                                                                                     "medium":  "Memory",
+                                                                                     "sizeLimit":  "32Mi"
+                                                                                 },
+                                                                    "name":  "tmp"
+                                                                }
+                                                            ]
+                                            },
+                                   "status":  {
+                                                  "allocatedResources":  {
+                                                                             "cpu":  "100m",
+                                                                             "memory":  "128Mi"
+                                                                         },
+                                                  "conditions":  [
+                                                                     {
+                                                                         "lastProbeTime":  null,
+                                                                         "lastTransitionTime":  "2026-11-07T19:30:32Z",
+                                                                         "observedGeneration":  1,
+                                                                         "status":  "True",
+                                                                         "type":  "PodReadyToStartContainers"
+                                                                     },
+                                                                     {
+                                                                         "lastProbeTime":  null,
+                                                                         "lastTransitionTime":  "2026-11-07T19:30:32Z",
+                                                                         "observedGeneration":  1,
+                                                                         "status":  "True",
+                                                                         "type":  "Initialized"
+                                                                     },
+                                                                     {
+                                                                         "lastProbeTime":  null,
+                                                                         "lastTransitionTime":  "2026-11-07T19:30:39Z",
+                                                                         "observedGeneration":  1,
+                                                                         "status":  "True",
+                                                                         "type":  "Ready"
+                                                                     },
+                                                                     {
+                                                                         "lastProbeTime":  null,
+                                                                         "lastTransitionTime":  "2026-11-07T19:30:39Z",
+                                                                         "observedGeneration":  1,
+                                                                         "status":  "True",
+                                                                         "type":  "ContainersReady"
+                                                                     },
+                                                                     {
+                                                                         "lastProbeTime":  null,
+                                                                         "lastTransitionTime":  "2026-11-07T19:30:32Z",
+                                                                         "observedGeneration":  1,
+                                                                         "status":  "True",
+                                                                         "type":  "PodScheduled"
+                                                                     }
+                                                                 ],
+                                                  "containerStatuses":  [
+                                                                            {
+                                                                                "allocatedResources":  {
+                                                                                                           "cpu":  "100m",
+                                                                                                           "memory":  "128Mi"
+                                                                                                       },
+                                                                                "containerID":  "containerd://6e43730dffadf63fd08231ea7b7124d29063bc4218111c2fce6f92538f8be6b2",
+                                                                                "image":  "docker.io/library/mlops-inference:git-d912f4bede42ac84d1d27ed6c63fcc9a02db43f6",
+                                                                                "imageID":  "docker.io/library/import-2026-11-07@sha256:9b561ac78dc7c79c227d94c1ab253130b58076fd8407abad389112ea9eb08db6",
+                                                                                "lastState":  {
+
+                                                                                              },
+                                                                                "name":  "inference",
+                                                                                "ready":  true,
+                                                                                "resources":  {
+                                                                                                  "limits":  {
+                                                                                                                 "cpu":  "500m",
+                                                                                                                 "memory":  "512Mi"
+                                                                                                             },
+                                                                                                  "requests":  {
+                                                                                                                   "cpu":  "100m",
+                                                                                                                   "memory":  "128Mi"
+                                                                                                               }
+                                                                                              },
+                                                                                "restartCount":  0,
+                                                                                "started":  true,
+                                                                                "state":  {
+                                                                                              "running":  {
+                                                                                                              "startedAt":  "2026-11-07T19:30:33Z"
+                                                                                                          }
+                                                                                          },
+                                                                                "user":  {
+                                                                                             "linux":  {
+                                                                                                           "gid":  10001,
+                                                                                                           "supplementalGroups":  [
+                                                                                                                                      10001
+                                                                                                                                  ],
+                                                                                                           "uid":  10001
+                                                                                                       }
+                                                                                         },
+                                                                                "volumeMounts":  [
+                                                                                                     {
+                                                                                                         "mountPath":  "/tmp",
+                                                                                                         "name":  "tmp"
+                                                                                                     }
+                                                                                                 ]
+                                                                            }
+                                                                        ],
+                                                  "hostIP":  "172.18.0.2",
+                                                  "hostIPs":  [
+                                                                  {
+                                                                      "ip":  "172.18.0.2"
+                                                                  }
+                                                              ],
+                                                  "observedGeneration":  1,
+                                                  "phase":  "Running",
+                                                  "podIP":  "10.244.0.5",
+                                                  "podIPs":  [
+                                                                 {
+                                                                     "ip":  "10.244.0.5"
+                                                                 }
+                                                             ],
+                                                  "qosClass":  "Burstable",
+                                                  "resources":  {
+                                                                    "limits":  {
+                                                                                   "cpu":  "500m",
+                                                                                   "memory":  "512Mi"
+                                                                               },
+                                                                    "requests":  {
+                                                                                     "cpu":  "79m",
+                                                                                     "memory":  "128Mi"
+                                                                                 }
+                                                                },
+                                                  "startTime":  "2026-11-07T19:30:32Z"
+                                              }
+                               }
+                           ],
+                 "kind":  "List",
+                 "metadata":  {
+                                  "resourceVersion":  ""
+                              }
+             },
+    "events":  [
+                   {
+                       "apiVersion":  "v1",
+                       "count":  1,
+                       "eventTime":  null,
+                       "firstTimestamp":  "2026-11-07T19:30:32Z",
+                       "involvedObject":  {
+                                              "apiVersion":  "v1",
+                                              "kind":  "Pod",
+                                              "name":  "inference-7549f48f7c-kv68b",
+                                              "namespace":  "mlops",
+                                              "resourceVersion":  "8554",
+                                              "uid":  "bb9e2d66-c7de-4546-ac12-a19cfe8fb9a2"
+                                          },
+                       "kind":  "Event",
+                       "lastTimestamp":  "2026-11-07T19:30:32Z",
+                       "message":  "Successfully assigned mlops/inference-7549f48f7c-kv68b to mlops-assignment-control-plane",
+                       "metadata":  {
+                                        "creationTimestamp":  "2026-11-07T19:30:32Z",
+                                        "name":  "inference-7549f48f7c-kv68b.18e5da1a1a2afe33",
+                                        "namespace":  "mlops",
+                                        "resourceVersion":  "8562",
+                                        "uid":  "219751b2-716e-4fd7-a706-a807707151e7"
+                                    },
+                       "reason":  "Scheduled",
+                       "reportingComponent":  "default-scheduler",
+                       "reportingInstance":  "",
+                       "source":  {
+                                      "component":  "default-scheduler"
+                                  },
+                       "type":  "Normal"
+                   },
+                   {
+                       "apiVersion":  "v1",
+                       "count":  1,
+                       "eventTime":  null,
+                       "firstTimestamp":  "2026-11-07T19:30:32Z",
+                       "involvedObject":  {
+                                              "apiVersion":  "v1",
+                                              "fieldPath":  "spec.containers{inference}",
+                                              "kind":  "Pod",
+                                              "name":  "inference-7549f48f7c-kv68b",
+                                              "namespace":  "mlops",
+                                              "resourceVersion":  "8558",
+                                              "uid":  "bb9e2d66-c7de-4546-ac12-a19cfe8fb9a2"
+                                          },
+                       "kind":  "Event",
+                       "lastTimestamp":  "2026-11-07T19:30:32Z",
+                       "message":  "Container image \"mlops-inference:git-d912f4bede42ac84d1d27ed6c63fcc9a02db43f6\" already present on machine and can be accessed by the pod",
+                       "metadata":  {
+                                        "creationTimestamp":  "2026-11-07T19:30:32Z",
+                                        "name":  "inference-7549f48f7c-kv68b.18e5da1a40ef137c",
+                                        "namespace":  "mlops",
+                                        "resourceVersion":  "8565",
+                                        "uid":  "cd6268db-5e8a-4360-8acf-dba71f412924"
+                                    },
+                       "reason":  "Pulled",
+                       "reportingComponent":  "kubelet",
+                       "reportingInstance":  "mlops-assignment-control-plane",
+                       "source":  {
+                                      "component":  "kubelet",
+                                      "host":  "mlops-assignment-control-plane"
+                                  },
+                       "type":  "Normal"
+                   },
+                   {
+                       "apiVersion":  "v1",
+                       "count":  1,
+                       "eventTime":  null,
+                       "firstTimestamp":  "2026-11-07T19:30:32Z",
+                       "involvedObject":  {
+                                              "apiVersion":  "v1",
+                                              "fieldPath":  "spec.containers{inference}",
+                                              "kind":  "Pod",
+                                              "name":  "inference-7549f48f7c-kv68b",
+                                              "namespace":  "mlops",
+                                              "resourceVersion":  "8558",
+                                              "uid":  "bb9e2d66-c7de-4546-ac12-a19cfe8fb9a2"
+                                          },
+                       "kind":  "Event",
+                       "lastTimestamp":  "2026-11-07T19:30:32Z",
+                       "message":  "Container created",
+                       "metadata":  {
+                                        "creationTimestamp":  "2026-11-07T19:30:32Z",
+                                        "name":  "inference-7549f48f7c-kv68b.18e5da1a442d8aca",
+                                        "namespace":  "mlops",
+                                        "resourceVersion":  "8569",
+                                        "uid":  "d724931d-8ea5-420c-82b7-fe5dc8d2078e"
+                                    },
+                       "reason":  "Created",
+                       "reportingComponent":  "kubelet",
+                       "reportingInstance":  "mlops-assignment-control-plane",
+                       "source":  {
+                                      "component":  "kubelet",
+                                      "host":  "mlops-assignment-control-plane"
+                                  },
+                       "type":  "Normal"
+                   },
+                   {
+                       "apiVersion":  "v1",
+                       "count":  1,
+                       "eventTime":  null,
+                       "firstTimestamp":  "2026-11-07T19:30:33Z",
+                       "involvedObject":  {
+                                              "apiVersion":  "v1",
+                                              "fieldPath":  "spec.containers{inference}",
+                                              "kind":  "Pod",
+                                              "name":  "inference-7549f48f7c-kv68b",
+                                              "namespace":  "mlops",
+                                              "resourceVersion":  "8558",
+                                              "uid":  "bb9e2d66-c7de-4546-ac12-a19cfe8fb9a2"
+                                          },
+                       "kind":  "Event",
+                       "lastTimestamp":  "2026-11-07T19:30:33Z",
+                       "message":  "Container started",
+                       "metadata":  {
+                                        "creationTimestamp":  "2026-11-07T19:30:33Z",
+                                        "name":  "inference-7549f48f7c-kv68b.18e5da1a4cdd950a",
+                                        "namespace":  "mlops",
+                                        "resourceVersion":  "8571",
+                                        "uid":  "aba25e96-dca9-44d6-9b68-991366e3ea3d"
+                                    },
+                       "reason":  "Started",
+                       "reportingComponent":  "kubelet",
+                       "reportingInstance":  "mlops-assignment-control-plane",
+                       "source":  {
+                                      "component":  "kubelet",
+                                      "host":  "mlops-assignment-control-plane"
+                                  },
+                       "type":  "Normal"
+                   },
+                   {
+                       "apiVersion":  "v1",
+                       "count":  1,
+                       "eventTime":  null,
+                       "firstTimestamp":  "2026-11-07T19:30:36Z",
+                       "involvedObject":  {
+                                              "apiVersion":  "v1",
+                                              "fieldPath":  "spec.containers{inference}",
+                                              "kind":  "Pod",
+                                              "name":  "inference-7549f48f7c-kv68b",
+                                              "namespace":  "mlops",
+                                              "resourceVersion":  "8558",
+                                              "uid":  "bb9e2d66-c7de-4546-ac12-a19cfe8fb9a2"
+                                          },
+                       "kind":  "Event",
+                       "lastTimestamp":  "2026-11-07T19:30:36Z",
+                       "message":  "Readiness probe failed: Get \"http://10.244.0.6:8001/health/ready\": dial tcp 10.244.0.6:8001: connect: connection refused",
+                       "metadata":  {
+                                        "creationTimestamp":  "2026-11-07T19:30:36Z",
+                                        "name":  "inference-7549f48f7c-kv68b.18e5da1b1d9febf2",
+                                        "namespace":  "mlops",
+                                        "resourceVersion":  "8587",
+                                        "uid":  "abbfa24c-24bf-4659-8329-7db1c1a89c63"
+                                    },
+                       "reason":  "Unhealthy",
+                       "reportingComponent":  "kubelet",
+                       "reportingInstance":  "mlops-assignment-control-plane",
+                       "source":  {
+                                      "component":  "kubelet",
+                                      "host":  "mlops-assignment-control-plane"
+                                  },
+                       "type":  "Warning"
+                   },
+                   {
+                       "apiVersion":  "v1",
+                       "count":  1,
+                       "eventTime":  null,
+                       "firstTimestamp":  "2026-11-07T19:30:32Z",
+                       "involvedObject":  {
+                                              "apiVersion":  "v1",
+                                              "kind":  "Pod",
+                                              "name":  "inference-7549f48f7c-mns4x",
+                                              "namespace":  "mlops",
+                                              "resourceVersion":  "8551",
+                                              "uid":  "392eb6e2-50ce-4cd2-8df7-20055e5c6ac7"
+                                          },
+                       "kind":  "Event",
+                       "lastTimestamp":  "2026-11-07T19:30:32Z",
+                       "message":  "Successfully assigned mlops/inference-7549f48f7c-mns4x to mlops-assignment-control-plane",
+                       "metadata":  {
+                                        "creationTimestamp":  "2026-11-07T19:30:32Z",
+                                        "name":  "inference-7549f48f7c-mns4x.18e5da1a1a2a4451",
+                                        "namespace":  "mlops",
+                                        "resourceVersion":  "8560",
+                                        "uid":  "053e8200-83e9-4884-9210-4c3c4eae287a"
+                                    },
+                       "reason":  "Scheduled",
+                       "reportingComponent":  "default-scheduler",
+                       "reportingInstance":  "",
+                       "source":  {
+                                      "component":  "default-scheduler"
+                                  },
+                       "type":  "Normal"
+                   },
+                   {
+                       "apiVersion":  "v1",
+                       "count":  1,
+                       "eventTime":  null,
+                       "firstTimestamp":  "2026-11-07T19:30:32Z",
+                       "involvedObject":  {
+                                              "apiVersion":  "v1",
+                                              "fieldPath":  "spec.containers{inference}",
+                                              "kind":  "Pod",
+                                              "name":  "inference-7549f48f7c-mns4x",
+                                              "namespace":  "mlops",
+                                              "resourceVersion":  "8557",
+                                              "uid":  "392eb6e2-50ce-4cd2-8df7-20055e5c6ac7"
+                                          },
+                       "kind":  "Event",
+                       "lastTimestamp":  "2026-11-07T19:30:32Z",
+                       "message":  "Container image \"mlops-inference:git-d912f4bede42ac84d1d27ed6c63fcc9a02db43f6\" already present on machine and can be accessed by the pod",
+                       "metadata":  {
+                                        "creationTimestamp":  "2026-11-07T19:30:32Z",
+                                        "name":  "inference-7549f48f7c-mns4x.18e5da1a41293a7f",
+                                        "namespace":  "mlops",
+                                        "resourceVersion":  "8567",
+                                        "uid":  "62f82b7d-6a95-44d9-a511-30e7f62216c8"
+                                    },
+                       "reason":  "Pulled",
+                       "reportingComponent":  "kubelet",
+                       "reportingInstance":  "mlops-assignment-control-plane",
+                       "source":  {
+                                      "component":  "kubelet",
+                                      "host":  "mlops-assignment-control-plane"
+                                  },
+                       "type":  "Normal"
+                   },
+                   {
+                       "apiVersion":  "v1",
+                       "count":  1,
+                       "eventTime":  null,
+                       "firstTimestamp":  "2026-11-07T19:30:32Z",
+                       "involvedObject":  {
+                                              "apiVersion":  "v1",
+                                              "fieldPath":  "spec.containers{inference}",
+                                              "kind":  "Pod",
+                                              "name":  "inference-7549f48f7c-mns4x",
+                                              "namespace":  "mlops",
+                                              "resourceVersion":  "8557",
+                                              "uid":  "392eb6e2-50ce-4cd2-8df7-20055e5c6ac7"
+                                          },
+                       "kind":  "Event",
+                       "lastTimestamp":  "2026-11-07T19:30:32Z",
+                       "message":  "Container created",
+                       "metadata":  {
+                                        "creationTimestamp":  "2026-11-07T19:30:32Z",
+                                        "name":  "inference-7549f48f7c-mns4x.18e5da1a44c0a179",
+                                        "namespace":  "mlops",
+                                        "resourceVersion":  "8570",
+                                        "uid":  "cadd8e69-abfd-4c11-80db-83dec0e7ca60"
+                                    },
+                       "reason":  "Created",
+                       "reportingComponent":  "kubelet",
+                       "reportingInstance":  "mlops-assignment-control-plane",
+                       "source":  {
+                                      "component":  "kubelet",
+                                      "host":  "mlops-assignment-control-plane"
+                                  },
+                       "type":  "Normal"
+                   },
+                   {
+                       "apiVersion":  "v1",
+                       "count":  1,
+                       "eventTime":  null,
+                       "firstTimestamp":  "2026-11-07T19:30:33Z",
+                       "involvedObject":  {
+                                              "apiVersion":  "v1",
+                                              "fieldPath":  "spec.containers{inference}",
+                                              "kind":  "Pod",
+                                              "name":  "inference-7549f48f7c-mns4x",
+                                              "namespace":  "mlops",
+                                              "resourceVersion":  "8557",
+                                              "uid":  "392eb6e2-50ce-4cd2-8df7-20055e5c6ac7"
+                                          },
+                       "kind":  "Event",
+                       "lastTimestamp":  "2026-11-07T19:30:33Z",
+                       "message":  "Container started",
+                       "metadata":  {
+                                        "creationTimestamp":  "2026-11-07T19:30:33Z",
+                                        "name":  "inference-7549f48f7c-mns4x.18e5da1a4d529403",
+                                        "namespace":  "mlops",
+                                        "resourceVersion":  "8572",
+                                        "uid":  "89941dfc-6493-40de-9939-6a8244537504"
+                                    },
+                       "reason":  "Started",
+                       "reportingComponent":  "kubelet",
+                       "reportingInstance":  "mlops-assignment-control-plane",
+                       "source":  {
+                                      "component":  "kubelet",
+                                      "host":  "mlops-assignment-control-plane"
+                                  },
+                       "type":  "Normal"
+                   },
+                   {
+                       "apiVersion":  "v1",
+                       "count":  1,
+                       "eventTime":  null,
+                       "firstTimestamp":  "2026-11-07T19:30:36Z",
+                       "involvedObject":  {
+                                              "apiVersion":  "v1",
+                                              "fieldPath":  "spec.containers{inference}",
+                                              "kind":  "Pod",
+                                              "name":  "inference-7549f48f7c-mns4x",
+                                              "namespace":  "mlops",
+                                              "resourceVersion":  "8557",
+                                              "uid":  "392eb6e2-50ce-4cd2-8df7-20055e5c6ac7"
+                                          },
+                       "kind":  "Event",
+                       "lastTimestamp":  "2026-11-07T19:30:36Z",
+                       "message":  "Readiness probe failed: Get \"http://10.244.0.5:8001/health/ready\": dial tcp 10.244.0.5:8001: connect: connection refused",
+                       "metadata":  {
+                                        "creationTimestamp":  "2026-11-07T19:30:36Z",
+                                        "name":  "inference-7549f48f7c-mns4x.18e5da1b1d89fbeb",
+                                        "namespace":  "mlops",
+                                        "resourceVersion":  "8586",
+                                        "uid":  "cb17a048-6b5f-4992-bf47-11a3828b8e23"
+                                    },
+                       "reason":  "Unhealthy",
+                       "reportingComponent":  "kubelet",
+                       "reportingInstance":  "mlops-assignment-control-plane",
+                       "source":  {
+                                      "component":  "kubelet",
+                                      "host":  "mlops-assignment-control-plane"
+                                  },
+                       "type":  "Warning"
+                   }
+               ],
+    "cleanup":  {
+                    "errors":  [
+
+                               ],
+                    "service_restored":  true
+                }
+}

@@ -1,0 +1,51 @@
+{
+    "spec":  {
+                 "automountServiceAccountToken":  false,
+                 "restartPolicy":  "Never",
+                 "securityContext":  {
+                                         "runAsUser":  10001,
+                                         "runAsNonRoot":  true,
+                                         "runAsGroup":  10001
+                                     },
+                 "containers":  [
+                                    {
+                                        "securityContext":  {
+                                                                "allowPrivilegeEscalation":  false,
+                                                                "readOnlyRootFilesystem":  true,
+                                                                "capabilities":  {
+                                                                                     "drop":  [
+                                                                                                  "ALL"
+                                                                                              ]
+                                                                                 }
+                                                            },
+                                        "name":  "probe",
+                                        "resources":  {
+                                                          "limits":  {
+                                                                         "cpu":  "200m",
+                                                                         "memory":  "128Mi"
+                                                                     },
+                                                          "requests":  {
+                                                                           "cpu":  "25m",
+                                                                           "memory":  "64Mi"
+                                                                       }
+                                                      },
+                                        "imagePullPolicy":  "IfNotPresent",
+                                        "image":  "mlops-inference:git-d912f4bede42ac84d1d27ed6c63fcc9a02db43f6",
+                                        "command":  [
+                                                        "python",
+                                                        "-c",
+                                                        "import json,urllib.request,urllib.error\r\nbase=\u0027http://inference.mlops.svc.cluster.local\u0027\r\nresult={}\r\ntry:\r\n    for path in [\u0027/health/live\u0027,\u0027/health/ready\u0027,\u0027/version\u0027]:\r\n        with urllib.request.urlopen(base+path,timeout=5) as response:\r\n            result[path]={\u0027http_status\u0027:response.status,\u0027body\u0027:json.load(response)}\r\n    request=urllib.request.Request(base+\u0027/predict\u0027,data=b\u0027{\"instances\":[[0,0,0,0,0,0,0,0]]}\u0027,headers={\u0027Content-Type\u0027:\u0027application/json\u0027})\r\n    with urllib.request.urlopen(request,timeout=5) as response:\r\n        result[\u0027/predict\u0027]={\u0027http_status\u0027:response.status,\u0027body\u0027:json.load(response)}\r\n    result[\u0027reachable\u0027]=True\r\nexcept (urllib.error.URLError,TimeoutError,OSError) as error:\r\n    result[\u0027reachable\u0027]=False\r\n    result[\u0027error_type\u0027]=type(error).__name__\r\nprint(json.dumps(result))"
+                                                    ]
+                                    }
+                                ]
+             },
+    "metadata":  {
+                     "labels":  {
+                                    "app":  "mlops-route-probe"
+                                },
+                     "name":  "mlops-probe-e6ce9ea6a0",
+                     "namespace":  "mlops"
+                 },
+    "apiVersion":  "v1",
+    "kind":  "Pod"
+}
