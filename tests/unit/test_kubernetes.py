@@ -148,3 +148,107 @@ def test_registry_exposes_only_read_permissions_and_no_mutation():
 def test_invalid_pod_cannot_inject_field_selectors():
     with pytest.raises(ValueError):
         PodInput(pod="pod-1,involvedObject.namespace=other")
+
+
+def test_remote_https_uses_isolated_verified_client_and_inherited_proxy(monkeypatch, tmp_path, caplog):
+    from kubernetes import client, config
+
+    certificate = tmp_path / "combined-public-ca.pem"
+    certificate.write_text("public CA fixture")
+    monkeypatch.setenv("SSL_CERT_FILE", str(certificate))
+    monkeypatch.setenv("HTTPS_PROXY", "http://managed-proxy:8080")
+    monkeypatch.delenv("https_proxy", raising=False)
+    monkeypatch.setenv("NO_PROXY", "localhost,127.0.0.1")
+    monkeypatch.delenv("no_proxy", raising=False)
+    api_client = Mock()
+    constructor = Mock(return_value=api_client)
+    core_constructor, apps_constructor = Mock(), Mock()
+    monkeypatch.setattr(client, "ApiClient", constructor)
+    monkeypatch.setattr(client, "CoreV1Api", core_constructor)
+    monkeypatch.setattr(client, "AppsV1Api", apps_constructor)
+    global_config = Mock()
+    monkeypatch.setattr(config, "load_kube_config", global_config)
+    tools = KubernetesTools(kube_api_url="https://demo.example.test/", kube_api_token="read-only-test-token")
+    tools._clients()
+    configuration = constructor.call_args.kwargs["configuration"]
+    assert configuration.host == "https://demo.example.test"
+    assert configuration.verify_ssl is True
+    assert configuration.debug is False
+    assert configuration.ssl_ca_cert == str(certificate)
+    assert configuration.proxy == "http://managed-proxy:8080"
+    assert configuration.no_proxy == "localhost,127.0.0.1"
+    assert configuration.auth_settings()["BearerToken"]["value"] == "Bearer read-only-test-token"
+    core_constructor.assert_called_once_with(api_client=api_client)
+    apps_constructor.assert_called_once_with(api_client=api_client)
+    global_config.assert_not_called()
+    assert "read-only-test-token" not in caplog.text
+
+
+def test_remote_token_is_required_before_client_creation(monkeypatch):
+    from kubernetes import client
+
+    constructor = Mock()
+    monkeypatch.setattr(client, "ApiClient", constructor)
+    with pytest.raises(RuntimeError, match="AUTHENTICATION_MISSING"):
+        KubernetesTools(kube_api_url="https://demo.example.test")._clients()
+    constructor.assert_not_called()
+
+
+def test_remote_explicit_ca_must_exist(monkeypatch):
+    from kubernetes import client
+
+    constructor = Mock()
+    monkeypatch.setattr(client, "ApiClient", constructor)
+    with pytest.raises(RuntimeError, match="CA_UNAVAILABLE"):
+        KubernetesTools(
+            kube_api_url="https://demo.example.test",
+            kube_api_token="fixture-token",
+            kube_ca_cert="/missing/public-ca.pem",
+        )._clients()
+    constructor.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "http://demo.example.test",
+        "https://user:secret@demo.example.test",
+        "https://demo.example.test/api",
+        "https://demo.example.test?token=secret",
+        "https://demo.example.test#fragment",
+        "https://demo.example.test:99999",
+        "https://demo.example.test:0",
+        "https://*.example.test",
+        "https://demo.example.test/\\elsewhere",
+        "https://demo.example.test\n",
+    ],
+)
+def test_remote_api_rejects_invalid_origins(url):
+    from agent.config import Settings
+
+    with pytest.raises(ValueError):
+        Settings(kube_api_url=url)
+    with pytest.raises(ValueError):
+        KubernetesTools(kube_api_url=url)
+
+
+def test_remote_settings_keep_token_secret_and_private_https_origins_supported():
+    from agent.config import Settings
+
+    settings = Settings(kube_api_url="https://100.100.100.1:6443/", kube_api_token="fixture-private-token")
+    assert settings.kube_api_url == "https://100.100.100.1:6443"
+    assert "fixture-private-token" not in repr(settings)
+    with pytest.raises(ValueError) as error:
+        Settings(kube_api_url="https://user:fixture-private-token@example.test")
+    assert "fixture-private-token" not in str(error.value)
+
+
+def test_existing_kubeconfig_route_remains_supported(monkeypatch):
+    from kubernetes import client, config
+
+    loader = Mock()
+    monkeypatch.setattr(config, "load_kube_config", loader)
+    monkeypatch.setattr(client, "CoreV1Api", Mock())
+    monkeypatch.setattr(client, "AppsV1Api", Mock())
+    KubernetesTools(kubeconfig="/safe/config", kube_context="approved-context")._clients()
+    loader.assert_called_once_with(config_file="/safe/config", context="approved-context")

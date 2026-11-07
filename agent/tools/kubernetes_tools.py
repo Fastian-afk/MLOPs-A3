@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import os
 import re
+from pathlib import Path
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, SecretStr
+
+from agent.config import validate_kube_api_url
 
 
 class ScopedInput(BaseModel):
@@ -155,6 +159,9 @@ class KubernetesTools:
         namespace: str = "mlops",
         kubeconfig: str | None = None,
         kube_context: str | None = None,
+        kube_api_url: str | None = None,
+        kube_api_token: SecretStr | str | None = None,
+        kube_ca_cert: str | None = None,
         http_timeout: float = 10,
     ):
         self.core = core_api
@@ -162,6 +169,9 @@ class KubernetesTools:
         self.namespace = namespace
         self.kubeconfig = kubeconfig
         self.kube_context = kube_context
+        self.kube_api_url = validate_kube_api_url(kube_api_url)
+        self.kube_api_token = SecretStr(kube_api_token) if isinstance(kube_api_token, str) else kube_api_token
+        self.kube_ca_cert = kube_ca_cert
         self.http_timeout = http_timeout
 
     def _namespace(self, requested: str | None) -> str:
@@ -175,6 +185,36 @@ class KubernetesTools:
         from kubernetes.config.config_exception import ConfigException
 
         from kubernetes import client, config
+
+        if self.kube_api_url:
+            token = self.kube_api_token.get_secret_value() if self.kube_api_token else ""
+            if not token:
+                raise RuntimeError("KUBERNETES_AUTHENTICATION_MISSING: configure the remote read-only token")
+            configuration = client.Configuration(host=self.kube_api_url)
+            configuration.api_key["authorization"] = token
+            configuration.api_key_prefix["authorization"] = "Bearer"
+            configuration.verify_ssl = True
+            configuration.debug = False
+            certificate = self.kube_ca_cert or os.environ.get("SSL_CERT_FILE")
+            if certificate:
+                if not Path(certificate).is_file():
+                    raise RuntimeError("KUBERNETES_CA_UNAVAILABLE: configured CA file does not exist")
+                configuration.ssl_ca_cert = certificate
+            elif Path("/etc/ssl/certs/ca-certificates.crt").is_file():
+                configuration.ssl_ca_cert = "/etc/ssl/certs/ca-certificates.crt"
+            # urllib3 does not consistently infer proxy/CA environment settings.
+            # Preserve the managed proxy route and the caller's bypass policy.
+            configuration.proxy = (
+                os.environ.get("https_proxy")
+                or os.environ.get("HTTPS_PROXY")
+                or os.environ.get("http_proxy")
+                or os.environ.get("HTTP_PROXY")
+            )
+            configuration.no_proxy = os.environ.get("no_proxy") or os.environ.get("NO_PROXY")
+            api_client = client.ApiClient(configuration=configuration)
+            self.core = self.core or client.CoreV1Api(api_client=api_client)
+            self.apps = self.apps or client.AppsV1Api(api_client=api_client)
+            return
 
         try:
             if self.kubeconfig or self.kube_context:
@@ -426,6 +466,9 @@ def register(registry: Any, settings: Any) -> None:
         namespace=settings.namespace,
         kubeconfig=settings.kubeconfig,
         kube_context=settings.kube_context,
+        kube_api_url=getattr(settings, "kube_api_url", None),
+        kube_api_token=getattr(settings, "kube_api_token", None),
+        kube_ca_cert=getattr(settings, "kube_ca_cert", None),
         http_timeout=settings.http_timeout,
     )
     definitions = [

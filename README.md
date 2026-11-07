@@ -17,7 +17,7 @@ The repository began empty. The uploaded assignment defines the requirements; th
 
 See [architecture.md](architecture.md) for data flow, trust boundaries and the confirmation lifecycle.
 
-Recorded local verification: 109 unit tests, 3 live integration tests and 2 local API end-to-end tests passed. DVC reproduction, five-run MLflow training from committed clean operational source, five-stage Airflow execution and Docker inference have real exports. Live Kubernetes deployment is blocked by unavailable cgroup delegation; live LLM-provider calls need a credential. See `evidence/validation.json` for exact commands/outcomes.
+Recorded local verification: 124 unit tests, 3 live integration tests and 2 local API end-to-end tests passed. DVC reproduction, five-run MLflow training from committed clean operational source, five-stage Airflow execution and Docker inference have real exports. Live Kubernetes deployment is blocked by unavailable cgroup delegation; live LLM-provider calls need a credential. See `evidence/validation.json` for exact commands/outcomes.
 
 
 ## Prerequisites
@@ -249,3 +249,5 @@ docker compose down
 Do not use `down -v` unless you intend to delete service state. Local Python processes should be stopped in their own terminals. Preserve DVC remote data and MLflow evidence needed for assessment.
 
 Groq and remaining live-cluster setup: [NEXT_STEPS.md](NEXT_STEPS.md). Provider routing is unit-tested; live Groq requires securely configured credentials and permitted access.
+
+Windows-to-cloud Kubernetes connection: [WINDOWS_KUBERNETES.md](WINDOWS_KUBERNETES.md). The HTTPS reader supports a separately scoped bearer token and inherited proxy/CA trust. Live connectivity is unverified until a real endpoint/token is configured.

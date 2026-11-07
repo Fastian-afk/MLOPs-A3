@@ -53,7 +53,7 @@ The final command/test exports under `evidence/` establish executed commands, ex
 | --- | ---: | --- | --- |
 | `.venv/bin/ruff check .` | 0 | All checks passed | Real static check |
 | `.venv/bin/mypy` | 0 | No issues in the configured 3-file schema/configuration/permissions scope | Real static check; not a claim of whole-repository type checking |
-| `.venv/bin/python -m pytest -q tests/unit` | 0 | **109 passed**, 72 dependency deprecation warnings | CI-safe local/fixture tests; external services mocked |
+| `.venv/bin/python -m pytest -q tests/unit` | 0 | **124 passed**, 72 dependency deprecation warnings | CI-safe local/fixture tests; external services mocked |
 | `.venv/bin/python scripts/verify_submission.py` | 0 | Required files present; configured secret scan had no findings | Real repository check at recorded revision |
 | `RUN_INTEGRATION=1 .venv/bin/python -m pytest -q tests/integration` | 0 | **3 passed** | Real MLflow and Airflow services |
 | `RUN_INTEGRATION=1 .venv/bin/python -m pytest -q tests/e2e` | 0 | **2 passed** | Real authenticated local agent and inference; does not prove Kubernetes health |
@@ -128,4 +128,8 @@ The known cluster-provisioning blocker limits live Kubernetes and cluster fault 
 
 ## Groq provider extension
 
-The `groq` planner uses the fixed Groq OpenAI-compatible endpoint and its own `MLOPS_GROQ_API_KEY`. Three additional mocked tests verify endpoint/model selection, credential separation, missing-key handling and read-only integrated coverage. The current unit total is 109. Live Groq calls remain blocked until a key and applied network access are available; no provider success is claimed. See [NEXT_STEPS.md](NEXT_STEPS.md).
+The `groq` planner uses the fixed Groq OpenAI-compatible endpoint and its own `MLOPS_GROQ_API_KEY`. Three additional mocked tests verify endpoint/model selection, credential separation, missing-key handling and read-only integrated coverage. The current unit total is 124. Live Groq calls remain blocked until a key and applied network access are available; no provider success is claimed. See [NEXT_STEPS.md](NEXT_STEPS.md).
+
+## Remote Kubernetes connection preparation
+
+The optional HTTPS API-origin mode uses an isolated Kubernetes client with verified TLS, inherited proxy/CA settings and a separate namespaced read-only token. Fifteen additional tests cover origin validation, missing credentials, credential redaction, proxy/TLS configuration and the unchanged kubeconfig route. The current suite has 124 unit tests. WINDOWS_KUBERNETES.md gives operator-side Docker Desktop/kind and TLS-verified Cloudflare Quick Tunnel commands; these Windows commands are documented/reviewed, not claimed executed in this Linux environment. Live remote Kubernetes reads, deployment and cluster faults remain unverified until a real endpoint and token are available.
