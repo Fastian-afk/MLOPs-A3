@@ -19,6 +19,8 @@ bad token, an empty cluster or application health. See
 
 ## 1. Native PowerShell: real local inference and Kubernetes
 
+For the existing `MLOPs-A3-demo` checkout, follow [WINDOWS_LIVE_CHECKS.md](WINDOWS_LIVE_CHECKS.md) for exact update, deployment, verification and evidence commit/push commands. The helper now uses explicit native argument arrays to support Windows PowerShell 5.1.
+
 Use your existing Docker Desktop Linux-container engine and local
 `mlops-assignment` kind cluster. Have Git, kind and kubectl available. This path
 needs no Windows Python, registry account, cloud tunnel or Groq key.
@@ -26,13 +28,13 @@ needs no Windows Python, registry account, cloud tunnel or Groq key.
 From a reviewed local checkout, run:
 
 ```powershell
-Set-Location "$env:USERPROFILE\MLOPs-A3"
+Set-Location "$env:USERPROFILE\MLOPs-A3-demo"
 git pull --ff-only
 .\scripts\windows_deploy.ps1 -ConfirmDeploy -InjectSelectorFailure
 ```
 
 If the repository has not been cloned, first run `git clone
-https://github.com/Fastian-afk/MLOPs-A3.git "$env:USERPROFILE\MLOPs-A3"`. If local
+https://github.com/Fastian-afk/MLOPs-A3.git "$env:USERPROFILE\MLOPs-A3-demo"`. If local
 changes prevent a fast-forward, preserve them rather than resetting the checkout.
 If the local PowerShell execution policy blocks the reviewed script, an approved
 process-scoped invocation is:

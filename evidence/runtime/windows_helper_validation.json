@@ -1,5 +1,6 @@
 {
-  "timestamp": "2026-11-07T18:41:54.579720+00:00",
+  "native_argument_mock_policy": "Exact argv arrays; no joined-string splitting or permissive Docker fallback",
+  "timestamp": "2026-11-07T19:07:29.764993+00:00",
   "status": "VERIFIED_MOCKED",
   "scope": "PowerShell7.5.4 on Linux, native Docker/kind/kubectl commands mocked; NOT Windows or live Kubernetes execution",
   "powershell_distribution": {
@@ -7,14 +8,14 @@
     "official_archive_sha256": "1fd7983fe56ca9e6233f126925edb24bf6b6b33e356b69996d925c4db94e2fef",
     "source": "https://github.com/PowerShell/PowerShell/releases/download/v7.5.4/powershell-7.5.4-linux-x64.tar.gz"
   },
-  "script_sha256": "fdba4c3d94afeb585b09c5f55d4be91c1b575b543cbbc84cf31f780ed18aa77b",
+  "script_sha256": "d025a4313c1755ad3a56a4629a03255cc26915922b2cba6691af9aaaa1015bb6",
   "syntax_parse": "passed",
   "cases": [
     {
       "case": "confirmation_denied",
       "exit_code": 1,
       "expected_exit": 1,
-      "duration_seconds": 0.448,
+      "duration_seconds": 0.444,
       "command_count": 0,
       "probe_count": 0,
       "probe_cleanup_verified": true,
@@ -24,7 +25,7 @@
       "case": "successful_deploy_and_fault_recovery",
       "exit_code": 0,
       "expected_exit": 0,
-      "duration_seconds": 12.047,
+      "duration_seconds": 12.01,
       "command_count": 37,
       "probe_count": 3,
       "probe_cleanup_verified": true,
@@ -34,7 +35,7 @@
       "case": "fault_failure_cleanup",
       "exit_code": 1,
       "expected_exit": 1,
-      "duration_seconds": 6.792,
+      "duration_seconds": 6.738,
       "command_count": 28,
       "probe_count": 2,
       "probe_cleanup_verified": true,

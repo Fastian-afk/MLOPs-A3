@@ -1,0 +1,17 @@
+{
+  "timestamp": "2026-11-07T19:08:21.6419772Z",
+  "status": "VERIFIED_REAL",
+  "scope": "Actual native process argument boundaries; no Docker/Kubernetes service commands executed",
+  "operating_system": "Unix",
+  "powershell_version": "7.5.4",
+  "windows_powershell51": false,
+  "native_argument_mode": "Legacy on PowerShell 7; intrinsic Desktop behavior on Windows PowerShell 5.1",
+  "original_bug_reproduced": null,
+  "checks": [
+    "docker_info_three_native_arguments",
+    "paths_spaces_and_jsonpath_preserved",
+    "kubectl_context_namespace_and_arguments_separate",
+    "native_nonzero_exit_rejected",
+    "successful_stderr_does_not_corrupt_stdout"
+  ]
+}

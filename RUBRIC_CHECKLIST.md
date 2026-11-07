@@ -46,3 +46,5 @@ The original assignment totals 100 marks. This table maps requirements to implem
 | No secrets or large runtime state | `.gitignore`, `.env.example`, source review | Tracked-file and secret scan before commit |
 
 Screenshots are optional when the environment is headless; timestamped API/CLI exports provide auditable evidence. Fabricated images and synthetic transcripts are never labeled as real service verification.
+
+Windows helper correction: `evidence/runtime/windows_fix_validation.json` records 133 unit passes; `windows_powershell51_ci.json` records actual hosted Desktop 5.1 native-argument verification. Actual Windows cluster output must still be produced with [WINDOWS_LIVE_CHECKS.md](WINDOWS_LIVE_CHECKS.md).

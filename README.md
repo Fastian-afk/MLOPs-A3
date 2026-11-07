@@ -267,3 +267,7 @@ Do not use `down -v` unless you intend to delete service state. Local Python pro
 Groq and local verification steps: [NEXT_STEPS.md](NEXT_STEPS.md). Live provider authentication/tool calling has real evidence in `evidence/groq/`; quotas and model availability remain account-specific.
 
 Windows-to-cloud connection instructions remain in [WINDOWS_KUBERNETES.md](WINDOWS_KUBERNETES.md). A credential and exact tunnel hostname were configured, but actual requests received an upstream Envoy 403 (`evidence/kubernetes/remote_live.json`). Local Windows verification avoids that cloud route; the cloud agent does not bypass its egress policy. Hosted lint/tests have also passed at the source commit linked in `evidence/runtime/github_actions.json`; later commits need their own Actions result.
+
+Exact PowerShell live checks and evidence upload commands: [WINDOWS_LIVE_CHECKS.md](WINDOWS_LIVE_CHECKS.md).
+
+Windows PowerShell 5.1 native-argument regression now passes in [hosted Windows CI](https://github.com/Fastian-afk/MLOPs-A3/actions/runs/42404721165). This verifies command argument handling, not a live Kubernetes deployment.

@@ -1,0 +1,21 @@
+{
+  "timestamp": "2026-11-07T19:13:38.098476+00:00",
+  "status": "VERIFIED_REAL",
+  "scope": "Hosted Windows PowerShell 5.1 actual native argument-boundary regression; not a Kubernetes deployment",
+  "verified_source_commit": "76458d1642632d3bc4f14c643d8c9d6d8b225bbe",
+  "workflow": "windows-helper-arguments",
+  "workflow_run_url": "https://github.com/Fastian-afk/MLOPs-A3/actions/runs/42404721165",
+  "job_url": "https://github.com/Fastian-afk/MLOPs-A3/actions/runs/42404721165/job/128499834268",
+  "observed_success_label": "completed successfully: ",
+  "required_shell": "Windows PowerShell 5.1",
+  "helper_sha256": "d025a4313c1755ad3a56a4629a03255cc26915922b2cba6691af9aaaa1015bb6",
+  "assertions_enforced_by_successful_job": [
+    "actual production Docker-info call passes exactly three native arguments",
+    "paths with spaces and JSONPath remain separate native arguments",
+    "kubectl context and namespace prefix remain separate",
+    "native exit code 7 is rejected",
+    "successful native stderr does not corrupt stdout",
+    "old Windows PowerShell remaining-arguments bug reproduced"
+  ],
+  "raw_job_artifact_downloaded": false
+}

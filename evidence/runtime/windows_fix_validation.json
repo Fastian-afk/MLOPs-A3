@@ -1,0 +1,30 @@
+{
+  "timestamp": "2026-11-07T19:13:38.098733+00:00",
+  "source_commit": "76458d1642632d3bc4f14c643d8c9d6d8b225bbe",
+  "commands": [
+    {
+      "command": "PWSH_PATH=/tmp/mlops-windows-helper-validation/runtime/pwsh .venv/bin/python -m pytest -q tests/unit",
+      "exit_code": 0,
+      "passed": 133,
+      "warnings": 81,
+      "pytest_reported_seconds": 8.69,
+      "scope": "Unit suite with mocked external services plus actual portable native-argument test"
+    },
+    {
+      "command": ".venv/bin/ruff check .",
+      "exit_code": 0
+    },
+    {
+      "command": ".venv/bin/mypy",
+      "exit_code": 0,
+      "configured_files": 3
+    }
+  ],
+  "cloud_probe": {
+    "command": ".venv/bin/python -m scripts.verify_remote_kubernetes --expect-deployed --output evidence/kubernetes/remote_recheck.json",
+    "exit_code": 1,
+    "status": "BLOCKED",
+    "http_status": 403,
+    "scope": "Upstream Envoy/plain-text denial; no Kubernetes response"
+  }
+}

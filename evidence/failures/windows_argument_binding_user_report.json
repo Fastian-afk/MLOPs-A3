@@ -1,0 +1,12 @@
+{
+  "status": "FAILED",
+  "source": "User-supplied Windows console output",
+  "independently_observed_on_user_PC": false,
+  "command": "powershell.exe -NoProfile -ExecutionPolicy RemoteSigned -File .\\scripts\\windows_deploy.ps1 -ConfirmDeploy -InjectSelectorFailure",
+  "error": "docker: unknown command: docker info --format {{.OSType}}",
+  "stage": "First Docker info preflight; deployment did not start",
+  "root_cause": "Windows PowerShell remaining-argument binding flattened the native command array into a single argument",
+  "correction": "Explicit named Executable/ArgumentList arrays in wrappers and every call site",
+  "regression": "Actual Windows PowerShell 5.1 CI reproduces old behavior and verifies corrected native argument boundaries",
+  "regression_run": "https://github.com/Fastian-afk/MLOPs-A3/actions/runs/42404721165"
+}
