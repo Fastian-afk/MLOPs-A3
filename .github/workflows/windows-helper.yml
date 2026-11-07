@@ -1,0 +1,19 @@
+name: windows-helper-arguments
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  windows-powershell51:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify actual Windows PowerShell 5.1 native arguments
+        shell: powershell
+        run: .\scripts\test_windows_arguments.ps1 -RequireWindowsPowerShell51 -OutputPath .\test-results\windows-powershell51-arguments.json
+      - name: Upload native argument verification
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-powershell51-arguments
+          path: test-results/windows-powershell51-arguments.json
+          if-no-files-found: warn

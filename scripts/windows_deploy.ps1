@@ -28,14 +28,19 @@ $kubectl = (Get-Command kubectl -ErrorAction Stop).Source
 foreach ($tool in @('docker', 'kind', 'git')) { Get-Command $tool -ErrorAction Stop | Out-Null }
 
 function Invoke-Checked {
-    param([string]$Executable, [Parameter(ValueFromRemainingArguments = $true)][string[]]$Arguments)
-    $result = & $Executable @Arguments
+    param(
+        [Parameter(Mandatory = $true)][string]$Executable,
+        [Parameter(Mandatory = $true)][string[]]$ArgumentList
+    )
+    # Named array binding is required: Windows PowerShell 5.1 can stringify an
+    # array passed through ValueFromRemainingArguments into one native argument.
+    $result = & $Executable @ArgumentList
     if ($LASTEXITCODE -ne 0) { throw "$Executable failed with exit code $LASTEXITCODE" }
     return $result
 }
 function Kube {
-    param([Parameter(ValueFromRemainingArguments = $true)][string[]]$Arguments)
-    Invoke-Checked $kubectl (@('--context', $context, '--namespace', $namespace) + $Arguments)
+    param([Parameter(Mandatory = $true)][string[]]$ArgumentList)
+    Invoke-Checked -Executable $kubectl -ArgumentList (@('--context', $context, '--namespace', $namespace) + $ArgumentList)
 }
 function Write-Json {
     param([string]$Path, [object]$Value)
@@ -44,7 +49,7 @@ function Write-Json {
 }
 function Read-Resource {
     param([string]$Kind, [string]$Name)
-    return ((Kube @('get', $Kind, $Name, '-o', 'json')) -join "`n" | ConvertFrom-Json)
+    return ((Kube -ArgumentList @('get', $Kind, $Name, '-o', 'json')) -join "`n" | ConvertFrom-Json)
 }
 
 Push-Location $repoRoot
@@ -94,9 +99,9 @@ print(json.dumps(result))
     }
     $file = Join-Path $evidenceDir ($name + '.json')
     Write-Json $file $pod
-    Kube @('apply', '-f', $file) | Out-Host
-    Kube @('wait', '--for=jsonpath={.status.phase}=Succeeded', ('pod/' + $name), '--timeout=90s') | Out-Host
-    $text = (Kube @('logs', $name)) -join "`n"
+    Kube -ArgumentList @('apply', '-f', $file) | Out-Host
+    Kube -ArgumentList @('wait', '--for=jsonpath={.status.phase}=Succeeded', ('pod/' + $name), '--timeout=90s') | Out-Host
+    $text = (Kube -ArgumentList @('logs', $name)) -join "`n"
     $result = $text | ConvertFrom-Json
     Write-Json (Join-Path $evidenceDir ($name + '-result.json')) $result
     if ($ExpectFailure -and $result.reachable) { throw 'Injected selector fault unexpectedly remained reachable.' }
@@ -109,13 +114,13 @@ print(json.dumps(result))
 }
 
 try {
-    $osType = [string](Invoke-Checked docker @('info', '--format', '{{.OSType}}'))
+    $osType = [string](Invoke-Checked -Executable docker -ArgumentList @('info', '--format', '{{.OSType}}'))
     if ($osType.Trim() -ne 'linux') { throw 'Docker Desktop must use Linux containers.' }
-    $clusters = @(Invoke-Checked kind @('get', 'clusters'))
+    $clusters = @(Invoke-Checked -Executable kind -ArgumentList @('get', 'clusters'))
     if ($clusters -notcontains $ClusterName) { throw "Create the local kind cluster '$ClusterName' first." }
-    $revision = ([string](Invoke-Checked git @('rev-parse', '--verify', 'HEAD'))).Trim()
+    $revision = ([string](Invoke-Checked -Executable git -ArgumentList @('rev-parse', '--verify', 'HEAD'))).Trim()
     if ($revision -notmatch '^[0-9a-f]{40}$') { throw 'Cannot derive an immutable image tag from the local Git commit.' }
-    $sourceChanges = @(Invoke-Checked git @('status', '--porcelain', '--', 'inference', 'Dockerfile.inference', 'demo_artifacts', 'kubernetes', 'scripts/windows_deploy.ps1'))
+    $sourceChanges = @(Invoke-Checked -Executable git -ArgumentList @('status', '--porcelain', '--', 'inference', 'Dockerfile.inference', 'demo_artifacts', 'kubernetes', 'scripts/windows_deploy.ps1'))
     if ($sourceChanges.Count -gt 0) { throw 'Commit or preserve/review modified deployment source before building an immutable Git-tagged image.' }
     $image = 'mlops-inference:git-' + $revision
     $manifest = Get-Content -Raw (Join-Path $repoRoot 'demo_artifacts\metadata.json') | ConvertFrom-Json
@@ -138,12 +143,12 @@ try {
         $ca = (Resolve-Path -LiteralPath $BuildCaBundle).Path
         $buildArguments += @('--secret', ('id=proxy_ca,src=' + $ca))
     }
-    Invoke-Checked docker ($buildArguments + @('.')) | Out-Host
-    Invoke-Checked kind @('load', 'docker-image', '--name', $ClusterName, $image) | Out-Host
+    Invoke-Checked -Executable docker -ArgumentList ($buildArguments + @('.')) | Out-Host
+    Invoke-Checked -Executable kind -ArgumentList @('load', 'docker-image', '--name', $ClusterName, $image) | Out-Host
     foreach ($file in @('namespace.yaml', 'configmap.yaml', 'service.yaml', 'rbac.yaml')) {
-        Kube @('apply', '-f', (Join-Path $repoRoot ('kubernetes\' + $file))) | Out-Host
+        Kube -ArgumentList @('apply', '-f', (Join-Path $repoRoot ('kubernetes\' + $file))) | Out-Host
     }
-    $deployment = Invoke-Checked $kubectl @('set', 'image', '--local', '-f', 'kubernetes/deployment.yaml', ('inference=' + $image), '-o', 'json')
+    $deployment = Invoke-Checked -Executable $kubectl -ArgumentList @('set', 'image', '--local', '-f', 'kubernetes/deployment.yaml', ('inference=' + $image), '-o', 'json')
     $deploymentObject = ($deployment -join "`n") | ConvertFrom-Json
     $deploymentObject.metadata | Add-Member -Force -NotePropertyName annotations -NotePropertyValue @{
         'mlops.model-run-id' = [string]$manifest.run_id
@@ -152,8 +157,8 @@ try {
     }
     $deploymentFile = Join-Path $evidenceDir 'deployment-request.json'
     Write-Json $deploymentFile $deploymentObject
-    Kube @('apply', '-f', $deploymentFile) | Out-Host
-    Kube @('rollout', 'status', 'deployment/inference', '--timeout=180s') | Out-Host
+    Kube -ArgumentList @('apply', '-f', $deploymentFile) | Out-Host
+    Kube -ArgumentList @('rollout', 'status', 'deployment/inference', '--timeout=180s') | Out-Host
     $state = Read-Resource 'deployment' 'inference'
     if ($state.spec.replicas -lt 2 -or $state.status.readyReplicas -lt 2 -or $state.status.availableReplicas -lt 2) {
         throw 'Deployment must have at least two desired, Ready and available replicas.'
@@ -171,7 +176,7 @@ try {
         $patchFile = Join-Path $evidenceDir 'selector-fault-patch.json'
         Write-Json $patchFile @{ spec = @{ selector = @{ app = 'mlops-deliberately-no-match' } } }
         $serviceChanged = $true
-        Kube @('patch', 'service', 'inference', '--type=merge', '--patch-file', $patchFile) | Out-Host
+        Kube -ArgumentList @('patch', 'service', 'inference', '--type=merge', '--patch-file', $patchFile) | Out-Host
         Start-Sleep -Seconds 5
         $record.selector_failure = @{
             service = (Read-Resource 'service' 'inference')
@@ -179,17 +184,17 @@ try {
             clusterip_probe = (Run-ClusterProbe $true)
             diagnosis = 'Operator changed the Service selector; the inference Pods remain healthy but no matching ready endpoints route Service traffic.'
         }
-        Kube @('apply', '-f', 'kubernetes/service.yaml') | Out-Host
+        Kube -ArgumentList @('apply', '-f', 'kubernetes/service.yaml') | Out-Host
         $serviceChanged = $false
         Start-Sleep -Seconds 5
         $record.recovery_clusterip_probe = Run-ClusterProbe $false
     }
-    $record.pods = ((Kube @('get', 'pods', '-l', 'app=inference', '-o', 'json')) -join "`n" | ConvertFrom-Json)
+    $record.pods = ((Kube -ArgumentList @('get', 'pods', '-l', 'app=inference', '-o', 'json')) -join "`n" | ConvertFrom-Json)
     $record.events = @()
     foreach ($pod in $record.pods.items) {
-        $events = ((Kube @('get', 'events', '--field-selector', ('involvedObject.name=' + $pod.metadata.name), '-o', 'json')) -join "`n" | ConvertFrom-Json)
+        $events = ((Kube -ArgumentList @('get', 'events', '--field-selector', ('involvedObject.name=' + $pod.metadata.name), '-o', 'json')) -join "`n" | ConvertFrom-Json)
         $record.events += $events.items
-        $log = (Kube @('logs', $pod.metadata.name, '--tail=100')) -join "`n"
+        $log = (Kube -ArgumentList @('logs', $pod.metadata.name, '--tail=100')) -join "`n"
         [IO.File]::WriteAllText((Join-Path $evidenceDir ($pod.metadata.name + '.log')), $log, (New-Object Text.UTF8Encoding($false)))
     }
     $record.status = 'VERIFIED_REAL'
@@ -202,12 +207,12 @@ try {
     $cleanupErrors = New-Object 'System.Collections.Generic.List[string]'
     if ($serviceChanged) {
         try {
-            Kube @('apply', '-f', 'kubernetes/service.yaml') | Out-Host
+            Kube -ArgumentList @('apply', '-f', 'kubernetes/service.yaml') | Out-Host
             $serviceChanged = $false
         } catch { $cleanupErrors.Add('Service restoration failed; apply kubernetes/service.yaml in the approved context.') }
     }
     foreach ($name in $probeNames) {
-        try { Kube @('delete', 'pod', $name, '--ignore-not-found=true', '--wait=false') | Out-Host }
+        try { Kube -ArgumentList @('delete', 'pod', $name, '--ignore-not-found=true', '--wait=false') | Out-Host }
         catch { $cleanupErrors.Add('Probe Pod cleanup failed: ' + $name) }
     }
     $record.cleanup = @{ service_restored = (-not $serviceChanged); errors = @($cleanupErrors.ToArray()) }
