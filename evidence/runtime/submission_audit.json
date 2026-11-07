@@ -1,0 +1,10 @@
+{
+  "timestamp": "2026-11-07T18:53:52.659035+00:00",
+  "audited_source_commit": "f367ea6752f9006dd54aa84d898004496b38c00b",
+  "tracked_files": 151,
+  "configured_secret_pattern_scan": "passed",
+  "known_runtime_credential_scan_findings": [],
+  "demo_model_bytes": 2686,
+  "credential_values_recorded": false,
+  "scope": "Final implementation source plus metadata/evidence updates; runtime stores and caches excluded by gitignore"
+}
