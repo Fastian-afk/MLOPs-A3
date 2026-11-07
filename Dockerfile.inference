@@ -1,0 +1,17 @@
+# syntax=docker/dockerfile:1
+FROM python:3.12-slim
+WORKDIR /app
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 MODEL_PATH=/app/artifacts/model.joblib
+# The optional secret preserves verification in managed HTTPS-inspection environments.
+RUN --mount=type=secret,id=proxy_ca \
+    if [ -f /run/secrets/proxy_ca ]; then export PIP_CERT=/run/secrets/proxy_ca; fi; \
+    python -m pip install --no-cache-dir \
+      fastapi==0.119.1 uvicorn==0.38.0 pydantic==2.12.3 \
+      scikit-learn==1.7.2 numpy==2.5.4 joblib==1.5.2
+COPY --chown=10001:10001 inference /app/inference
+COPY --chown=10001:10001 artifacts/model.joblib /app/artifacts/model.joblib
+USER 10001:10001
+EXPOSE 8001
+HEALTHCHECK --interval=10s --timeout=3s --start-period=5s \
+  CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8001/health/ready', timeout=2)"
+CMD ["python", "-m", "uvicorn", "inference.main:app", "--host", "0.0.0.0", "--port", "8001"]

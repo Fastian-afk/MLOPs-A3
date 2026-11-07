@@ -1,0 +1,85 @@
+{
+  "timestamp": "2026-11-07T16:39:11.206736+00:00",
+  "status": "VERIFIED_MOCKED",
+  "environment": "unittest.mock Kubernetes API; no real cluster incident",
+  "command": "python -m scripts.kubernetes_fault_demo",
+  "injected_failure": "Service selector changed from app=inference to app=injected-wrong-selector",
+  "root_cause": "Service selector matches no application Pods, producing no ready backend addresses",
+  "corrective_action": "Restore selector app=inference and verify ready addresses return",
+  "baseline": {
+    "name": "inference",
+    "namespace": "mlops",
+    "service_type": "ClusterIP",
+    "cluster_ip": "10.96.0.10",
+    "selector": {
+      "app": "inference"
+    },
+    "ports": [
+      {
+        "port": 80,
+        "target_port": "http",
+        "protocol": "TCP"
+      }
+    ],
+    "matching_pods": [
+      "mock-inference-1"
+    ],
+    "ready_addresses": [
+      "10.244.0.2"
+    ],
+    "not_ready_addresses": [],
+    "diagnoses": []
+  },
+  "failure": {
+    "name": "inference",
+    "namespace": "mlops",
+    "service_type": "ClusterIP",
+    "cluster_ip": "10.96.0.10",
+    "selector": {
+      "app": "injected-wrong-selector"
+    },
+    "ports": [
+      {
+        "port": 80,
+        "target_port": "http",
+        "protocol": "TCP"
+      }
+    ],
+    "matching_pods": [],
+    "ready_addresses": [],
+    "not_ready_addresses": [],
+    "diagnoses": [
+      "Service selector matches no Pods; selector mismatch can make the API unavailable",
+      "Service has no ready endpoint addresses; requests cannot reach a ready backend"
+    ]
+  },
+  "recovered": {
+    "name": "inference",
+    "namespace": "mlops",
+    "service_type": "ClusterIP",
+    "cluster_ip": "10.96.0.10",
+    "selector": {
+      "app": "inference"
+    },
+    "ports": [
+      {
+        "port": 80,
+        "target_port": "http",
+        "protocol": "TCP"
+      }
+    ],
+    "matching_pods": [
+      "mock-inference-1"
+    ],
+    "ready_addresses": [
+      "10.244.0.2"
+    ],
+    "not_ready_addresses": [],
+    "diagnoses": []
+  },
+  "checks": {
+    "diagnosis_detected": true,
+    "ready_endpoints_restored": true
+  },
+  "limitation": "API transport responses are mocked; real cluster reproduction remains BLOCKED"
+}

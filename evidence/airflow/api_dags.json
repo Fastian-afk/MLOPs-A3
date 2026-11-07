@@ -1,0 +1,18 @@
+{
+  "timestamp": "2026-11-07T16:38:04.586263+00:00",
+  "label": "VERIFIED_REAL",
+  "api_version": "v2",
+  "authentication": "SimpleAuthManager POST /auth/token",
+  "result": {
+    "dags": [
+      {
+        "dag_id": "mlops_training",
+        "is_paused": true,
+        "is_active": null,
+        "description": "Validate \u2192 preprocess \u2192 train \u2192 evaluate/MLflow \u2192 quality gate"
+      }
+    ],
+    "total_entries": 1,
+    "next_offset": null
+  }
+}

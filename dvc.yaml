@@ -1,0 +1,58 @@
+stages:
+  validate:
+    cmd: python -m training.stage validate
+    deps:
+      - data/dataset.csv
+      - training/validate.py
+      - training/config.py
+    outs:
+      - .runtime/dvc/validation.json
+  preprocess:
+    cmd: python -m training.stage preprocess
+    deps:
+      - data/dataset.csv
+      - .runtime/dvc/validation.json
+      - training/preprocess.py
+    params:
+      - training/config.json:
+          - seed
+          - test_size
+    outs:
+      - .runtime/dvc/split.joblib
+  train:
+    cmd: python -m training.stage train
+    deps:
+      - .runtime/dvc/split.joblib
+      - training/train.py
+    params:
+      - training/config.json:
+          - seed
+          - c
+    outs:
+      - .runtime/dvc/candidate.joblib
+  evaluate:
+    cmd: python -m training.stage evaluate
+    deps:
+      - .runtime/dvc/split.joblib
+      - .runtime/dvc/candidate.joblib
+      - training/evaluate.py
+    params:
+      - training/config.json:
+          - f1_threshold
+          - experiment_name
+    always_changed: true
+    outs:
+      - .runtime/dvc/evaluated.joblib
+      - .runtime/dvc/evaluation.json:
+          cache: false
+  quality_gate:
+    cmd: python -m training.stage gate
+    deps:
+      - .runtime/dvc/evaluation.json
+      - .runtime/dvc/evaluated.joblib
+      - training/quality_gate.py
+    params:
+      - training/config.json:
+          - f1_threshold
+    outs:
+      - artifacts

@@ -1,0 +1,50 @@
+{
+  "timestamp": "2026-11-07T16:37:35.219319+00:00",
+  "label": "VERIFIED_REAL",
+  "airflow_version": "3.1.0",
+  "import_errors": {},
+  "dag_ids": [
+    "mlops_training"
+  ],
+  "tasks": [
+    {
+      "task_id": "validate_dataset",
+      "downstream": [
+        "preprocess_data"
+      ],
+      "retries": 1,
+      "retry_seconds": 5.0
+    },
+    {
+      "task_id": "preprocess_data",
+      "downstream": [
+        "evaluate_and_log",
+        "train_model"
+      ],
+      "retries": 1,
+      "retry_seconds": 5.0
+    },
+    {
+      "task_id": "train_model",
+      "downstream": [
+        "evaluate_and_log"
+      ],
+      "retries": 1,
+      "retry_seconds": 5.0
+    },
+    {
+      "task_id": "evaluate_and_log",
+      "downstream": [
+        "quality_gate"
+      ],
+      "retries": 1,
+      "retry_seconds": 5.0
+    },
+    {
+      "task_id": "quality_gate",
+      "downstream": [],
+      "retries": 1,
+      "retry_seconds": 5.0
+    }
+  ]
+}

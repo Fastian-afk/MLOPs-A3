@@ -1,0 +1,7 @@
+{
+  "seed": 42,
+  "c": 1.0,
+  "test_size": 0.25,
+  "f1_threshold": 0.8,
+  "experiment_name": "mlops-assignment-03"
+}

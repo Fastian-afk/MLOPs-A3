@@ -1,0 +1,11 @@
+{
+  "status": "VERIFIED_REAL",
+  "timestamp": "2026-11-07T16:38:21.130947+00:00",
+  "command": ".venv/bin/mlflow server --host 127.0.0.1 --port 5000 --workers 1 --backend-store-uri sqlite:////workspace/MLOPs-A3/.runtime/mlflow.db --artifacts-destination /workspace/MLOPs-A3/.runtime/mlflow-store",
+  "health_request": "GET /health",
+  "health_status": 200,
+  "health_body": "OK",
+  "exit_code": 0,
+  "duration_seconds": 0.054,
+  "pid": 3178
+}

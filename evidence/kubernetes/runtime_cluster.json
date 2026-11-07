@@ -1,0 +1,54 @@
+{
+  "status": "BLOCKED",
+  "timestamp": "2026-11-07T16:35:28.596616+00:00",
+  "scope": "real Kubernetes cluster provisioning",
+  "tools": {
+    "kind": {
+      "version": "v0.31.0",
+      "path": "/workspace/.local/bin/kind",
+      "sha256": "eb244cbafcc157dff60cf68693c14c9a75c4e6e6fedaf9cd71c58117cb93e3fa",
+      "checksum_verified": true,
+      "source": "https://github.com/kubernetes-sigs/kind/releases/download/v0.31.0/kind-linux-amd64"
+    },
+    "kubectl": {
+      "version": "v1.35.0",
+      "path": "/workspace/.local/bin/kubectl",
+      "sha256": "a2e984a18a0c063279d692533031c1eff93a262afcc0afdc517375432d060989",
+      "checksum_verified": true,
+      "source": "https://dl.k8s.io/release/v1.35.0/bin/linux/amd64/kubectl"
+    }
+  },
+  "docker": {
+    "version": "29.9.2",
+    "endpoint": "unix:///var/run/docker.sock",
+    "rootless": true,
+    "healthy": true
+  },
+  "checks": [
+    {
+      "command": "kind create cluster --name mlops-a3 --image kindest/node:v1.35.0 --kubeconfig /workspace/.local/state/mlops/kubeconfig --wait 90s",
+      "execution": "sandboxed",
+      "exit_code": 1,
+      "output": "ERROR: failed to create cluster: running kind with rootless provider requires setting systemd property \"Delegate=yes\""
+    },
+    {
+      "command": "systemd-run --scope --user -p Delegate=yes true",
+      "exit_code": 1,
+      "output": "Failed to connect to user scope bus via local transport: DBUS_SESSION_BUS_ADDRESS and XDG_RUNTIME_DIR not defined"
+    },
+    {
+      "command": "kind create cluster --name mlops-a3 --image kindest/node:v1.35.0 --kubeconfig /workspace/.local/state/mlops/kubeconfig --wait 90s",
+      "execution": "approved outside sandbox",
+      "exit_code": 1,
+      "output": "ERROR: failed to create cluster: running kind with rootless provider requires setting systemd property \"Delegate=yes\""
+    }
+  ],
+  "diagnosis": "The managed Docker daemon works, but kind rootless operation requires cgroup delegation unavailable in this runtime. The same requirement fails outside the sandbox. No cluster or deployment was created.",
+  "prerequisite": "Use a Linux host with cgroup v2 and user-service cgroup delegation or supply access to an existing Kubernetes cluster through a secure kubeconfig binding.",
+  "documentation": "https://raw.githubusercontent.com/kubernetes-sigs/kind/v0.31.0/site/content/docs/user/rootless.md",
+  "claims_not_verified": [
+    "Kubernetes deployment readiness",
+    "real Kubernetes API tool responses",
+    "real Kubernetes fault injection"
+  ]
+}

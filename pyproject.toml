@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=80,<81"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mlops-assignment-agent"
+version = "1.0.0"
+description = "Evidence-backed MLOps operations with confirmed mutations"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "fastapi==0.119.1", "uvicorn==0.38.0", "pydantic==2.12.3",
+  "pydantic-settings==2.11.0", "httpx==0.28.1", "PyYAML==6.0.3",
+  "mlflow==3.5.1", "SQLAlchemy==2.0.44", "dvc==3.63.0", "pathspec==0.12.1", "kubernetes==34.1.0",
+  "scikit-learn==1.7.2", "pandas==2.3.3", "joblib==1.5.2", "openai==2.6.1"
+]
+
+[project.optional-dependencies]
+dev = ["pytest==8.4.2", "pytest-cov==7.0.0", "ruff==0.14.2", "mypy==1.18.2", "types-PyYAML==6.0.12.20250915"]
+
+[tool.setuptools.packages.find]
+include = ["agent*", "api*", "training*", "inference*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+markers = ["integration: opt-in real services", "e2e: opt-in complete stack"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 110
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "B", "I"]
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+check_untyped_defs = true
+files = ["agent/schemas.py", "agent/permissions.py", "agent/config.py"]
