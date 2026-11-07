@@ -17,7 +17,7 @@ The repository began empty. The uploaded assignment defines the requirements; th
 
 See [architecture.md](architecture.md) for data flow, trust boundaries and the confirmation lifecycle.
 
-Recorded local verification: 106 unit tests, 3 live integration tests and 2 local API end-to-end tests passed. DVC reproduction, five-run MLflow training from committed clean operational source, five-stage Airflow execution and Docker inference have real exports. Live Kubernetes deployment is blocked by unavailable cgroup delegation; live LLM-provider calls need a credential. See `evidence/validation.json` for exact commands/outcomes.
+Recorded local verification: 109 unit tests, 3 live integration tests and 2 local API end-to-end tests passed. DVC reproduction, five-run MLflow training from committed clean operational source, five-stage Airflow execution and Docker inference have real exports. Live Kubernetes deployment is blocked by unavailable cgroup delegation; live LLM-provider calls need a credential. See `evidence/validation.json` for exact commands/outcomes.
 
 
 ## Prerequisites
@@ -57,7 +57,9 @@ Key configuration names (the agent uses the `MLOPS_` prefix):
 | Variable | Default/purpose |
 | --- | --- |
 | `MLOPS_API_TOKEN` | Required bearer authentication for chat/tool inventory; no default credential |
-| `MLOPS_PLANNER` | `offline` or `openai`; offline is deterministic routing |
+| `MLOPS_PLANNER` | `offline`, `openai` or `groq`; offline is deterministic routing |
+| `MLOPS_GROQ_API_KEY` | Separate secure Groq credential, sent only to `api.groq.com` |
+| `MLOPS_GROQ_MODEL` | Function-calling model; default `llama-3.3-70b-versatile` |
 | `MLOPS_LLM_API_KEY`, `MLOPS_LLM_MODEL` | Secure provider credential binding and model for actual structured LLM calls; standard `OPENAI_API_KEY` is also supported locally |
 | `MLOPS_MLFLOW_TRACKING_URI` | Agent tracking server, default `http://127.0.0.1:5000` |
 | `MLFLOW_TRACKING_URI` | Training/DVC tracking server; set consistently with the agent |
@@ -245,3 +247,5 @@ docker compose down
 ```
 
 Do not use `down -v` unless you intend to delete service state. Local Python processes should be stopped in their own terminals. Preserve DVC remote data and MLflow evidence needed for assessment.
+
+Groq and remaining live-cluster setup: [NEXT_STEPS.md](NEXT_STEPS.md). Provider routing is unit-tested; live Groq requires securely configured credentials and permitted access.

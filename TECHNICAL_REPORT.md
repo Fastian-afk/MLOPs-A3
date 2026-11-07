@@ -53,7 +53,7 @@ The final command/test exports under `evidence/` establish executed commands, ex
 | --- | ---: | --- | --- |
 | `.venv/bin/ruff check .` | 0 | All checks passed | Real static check |
 | `.venv/bin/mypy` | 0 | No issues in the configured 3-file schema/configuration/permissions scope | Real static check; not a claim of whole-repository type checking |
-| `.venv/bin/python -m pytest -q tests/unit` | 0 | **106 passed**, 72 dependency deprecation warnings | CI-safe local/fixture tests; external services mocked |
+| `.venv/bin/python -m pytest -q tests/unit` | 0 | **109 passed**, 72 dependency deprecation warnings | CI-safe local/fixture tests; external services mocked |
 | `.venv/bin/python scripts/verify_submission.py` | 0 | Required files present; configured secret scan had no findings | Real repository check at recorded revision |
 | `RUN_INTEGRATION=1 .venv/bin/python -m pytest -q tests/integration` | 0 | **3 passed** | Real MLflow and Airflow services |
 | `RUN_INTEGRATION=1 .venv/bin/python -m pytest -q tests/e2e` | 0 | **2 passed** | Real authenticated local agent and inference; does not prove Kubernetes health |
@@ -125,3 +125,7 @@ This is actual application-container behavior and recovery, not a real Kubernete
 The known cluster-provisioning blocker limits live Kubernetes and cluster fault evidence. Provider credentials and reachable destinations are required before claiming real LLM integration. In-memory confirmations suit the documented single-process demo; production requires an atomic shared store and identity-backed authorization. Small synthetic holdout metrics do not prove external model quality or drift. Joblib artifacts are trusted pipeline outputs, never arbitrary uploads.
 
 [README.md](README.md) supplies startup/authentication, DVC remote and cleanup instructions. [LIMITATIONS.md](LIMITATIONS.md) records prerequisites and production gaps. [RUBRIC_CHECKLIST.md](RUBRIC_CHECKLIST.md) maps all 100 rubric marks to source/tests/evidence without guaranteeing a score. A fully complete service criterion still needs its actual real-service evidence.
+
+## Groq provider extension
+
+The `groq` planner uses the fixed Groq OpenAI-compatible endpoint and its own `MLOPS_GROQ_API_KEY`. Three additional mocked tests verify endpoint/model selection, credential separation, missing-key handling and read-only integrated coverage. The current unit total is 109. Live Groq calls remain blocked until a key and applied network access are available; no provider success is claimed. See [NEXT_STEPS.md](NEXT_STEPS.md).

@@ -325,3 +325,75 @@ def test_permission_denial_is_logged(registry, caplog):
     with caplog.at_level("INFO", logger="mlops.tools"):
         chat(registry, "Delete Kubernetes pod")
     assert any(json.loads(record.message).get("error_code") == "FORBIDDEN" for record in caplog.records)
+
+
+def test_groq_uses_separate_credential_endpoint_and_structured_tools(registry, monkeypatch):
+    from unittest.mock import Mock
+
+    call = SimpleNamespace(id="g1", function=SimpleNamespace(name="mlflow__best_run", arguments="{}"))
+    first = SimpleNamespace(
+        tool_calls=[call], model_dump=lambda **kw: {"role": "assistant", "tool_calls": []}
+    )
+    done = SimpleNamespace(tool_calls=[])
+    client = SimpleNamespace(
+        chat=SimpleNamespace(
+            completions=SimpleNamespace(
+                create=AsyncMock(
+                    side_effect=[
+                        SimpleNamespace(choices=[SimpleNamespace(message=first)]),
+                        SimpleNamespace(choices=[SimpleNamespace(message=done)]),
+                    ]
+                )
+            )
+        )
+    )
+    constructor = Mock(return_value=client)
+    monkeypatch.setattr("openai.AsyncOpenAI", constructor)
+    settings = Settings(planner="groq", groq_api_key="test-groq-only", llm_api_key="test-other-provider")
+    result = asyncio.run(Orchestrator(settings, registry).chat(ChatRequest(message="Compare the best F1")))
+    assert result.planner == "groq"
+    assert result.evidence[0].tool == "mlflow.best_run"
+    assert result.evidence[0].status == "ok"
+    assert constructor.call_args.kwargs["base_url"] == "https://api.groq.com/openai/v1"
+    assert constructor.call_args.kwargs["api_key"] == "test-groq-only"
+    assert client.chat.completions.create.call_args_list[0].kwargs["model"] == "llama-3.3-70b-versatile"
+    assert "test-groq-only" not in result.model_dump_json()
+
+
+def test_missing_groq_key_never_reuses_openai_key(registry, monkeypatch):
+    from unittest.mock import Mock
+
+    constructor = Mock()
+    monkeypatch.setattr("openai.AsyncOpenAI", constructor)
+    monkeypatch.setenv("OPENAI_API_KEY", "test-other-provider")
+    result = asyncio.run(
+        Orchestrator(Settings(planner="groq", groq_api_key=None), registry).chat(
+            ChatRequest(message="Compare models")
+        )
+    )
+    constructor.assert_not_called()
+    assert result.evidence[0].tool == "planner.groq"
+    assert result.evidence[0].error_code == "LLM_UNAVAILABLE"
+
+
+def test_groq_mandatory_investigation_still_read_only(registry):
+    client = SimpleNamespace(
+        chat=SimpleNamespace(
+            completions=SimpleNamespace(
+                create=AsyncMock(
+                    return_value=SimpleNamespace(
+                        choices=[SimpleNamespace(message=SimpleNamespace(tool_calls=[]))]
+                    )
+                )
+            )
+        )
+    )
+    result = asyncio.run(
+        Orchestrator(Settings(planner="groq"), registry, llm_client=client).chat(
+            ChatRequest(message="Find the best model deployment and whether retraining is necessary")
+        )
+    )
+    assert result.planner == "groq"
+    assert {e.tool.split(".")[0] for e in result.evidence} >= {"mlflow", "dvc", "kubernetes", "airflow"}
+    assert "airflow.trigger_training" not in result.selected_tools
+    assert not result.proposed_actions

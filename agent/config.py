@@ -21,9 +21,11 @@ class Settings(BaseSettings):
     kubeconfig: str | None = None
     kube_context: str | None = None
     http_timeout: float = Field(default=10, gt=0, le=60)
-    planner: Literal["offline", "openai"] = "offline"
+    planner: Literal["offline", "openai", "groq"] = "offline"
     llm_model: str = "gpt-4.1-mini"
     llm_api_key: SecretStr | None = None
+    groq_model: str = "llama-3.3-70b-versatile"
+    groq_api_key: SecretStr | None = None
     api_token: SecretStr | None = None
     max_tool_calls: int = Field(default=12, ge=1, le=20)
     request_timeout: float = Field(default=90, gt=0, le=300)

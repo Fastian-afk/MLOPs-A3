@@ -38,4 +38,4 @@ class ChatResponse(StrictModel):
     uncertainties: list[str]
     proposed_actions: list[ProposedAction] = Field(default_factory=list)
     trace_id: str
-    planner: Literal["offline", "openai"]
+    planner: Literal["offline", "openai", "groq"]

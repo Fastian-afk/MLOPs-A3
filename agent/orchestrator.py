@@ -139,7 +139,7 @@ class Orchestrator:
                     )
                 ],
             )
-        if self.settings.planner == "openai":
+        if self.settings.planner in ("openai", "groq"):
             evidence = await self._llm_plan(request.message, trace)
             if "retrain" in text or ("best" in text and "deploy" in text):
                 evidence = await self._ensure_integrated_coverage(evidence, trace)
@@ -255,13 +255,28 @@ class Orchestrator:
             {"role": "user", "content": message},
         ]
         try:
-            key = self.settings.llm_api_key.get_secret_value() if self.settings.llm_api_key else None
-            client = self.llm_client or AsyncOpenAI(
-                api_key=key, timeout=self.settings.http_timeout, max_retries=0
-            )
+            if self.settings.planner == "groq":
+                key = self.settings.groq_api_key.get_secret_value() if self.settings.groq_api_key else None
+                if self.llm_client is None and not key:
+                    raise ValueError("Groq requires its own configured credential")
+                # Fixed provider endpoint and separate secret prevent sending an
+                # OpenAI credential to Groq or a model-controlled destination.
+                client = self.llm_client or AsyncOpenAI(
+                    api_key=key,
+                    base_url="https://api.groq.com/openai/v1",
+                    timeout=self.settings.http_timeout,
+                    max_retries=0,
+                )
+                model = self.settings.groq_model
+            else:
+                key = self.settings.llm_api_key.get_secret_value() if self.settings.llm_api_key else None
+                client = self.llm_client or AsyncOpenAI(
+                    api_key=key, timeout=self.settings.http_timeout, max_retries=0
+                )
+                model = self.settings.llm_model
             for _ in range(6):
                 response = await client.chat.completions.create(
-                    model=self.settings.llm_model,
+                    model=model,
                     messages=messages,
                     tools=self.registry.schemas(),
                     max_completion_tokens=1200,
@@ -297,7 +312,7 @@ class Orchestrator:
         except Exception:
             evidence.append(
                 ToolResult(
-                    tool="planner.openai",
+                    tool=f"planner.{self.settings.planner}",
                     status="error",
                     error_code="LLM_UNAVAILABLE",
                     uncertainty="LLM provider failed or is unconfigured; no model-generated operational claim accepted.",
@@ -306,7 +321,7 @@ class Orchestrator:
         if not evidence:
             evidence.append(
                 ToolResult(
-                    tool="planner.openai",
+                    tool=f"planner.{self.settings.planner}",
                     status="error",
                     error_code="NO_EVIDENCE",
                     uncertainty="The provider returned no tool evidence.",
