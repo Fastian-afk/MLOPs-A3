@@ -33,30 +33,50 @@ Evidence labels distinguish `VERIFIED_REAL`, `VERIFIED_MOCKED`, `BLOCKED` and `F
 | --- | --- | --- |
 | Airflow 3 DAG import | `evidence/airflow/dag_import.json` | Real Airflow 3.1.0 import, no import errors, required five tasks and bounded retries |
 | Airflow authenticated API | `evidence/airflow/api_dags.json` | Real SimpleAuthManager login and `/api/v2` DAG response; listing alone does not prove a completed run |
+| Agent container | `evidence/runtime/app_image_build.json`, `app_container_smoke.json` | Real frozen-lock image build; non-root read-only container health and authenticated 25-tool registry verified |
 | MLflow service | `evidence/mlflow/server_health.json` | Real server health record; training/run exports supply metrics separately |
 | Kubernetes provisioning | `evidence/kubernetes/runtime_cluster.json` | Real attempt blocked by host cgroup delegation; no cluster deployment claim |
-| Inference image and serving | `evidence/kubernetes/inference_container.json` | Real non-root read-only Docker image; live/ready/version/predict HTTP 200, invalid payload 422; actual model lineage returned |
+| Inference image and serving | `evidence/kubernetes/inference_container.json`, `inference_clean_source_build.json` | Real non-root read-only Docker image; live/ready/version/predict HTTP 200, invalid payload 422; actual model lineage returned |
 | DVC provenance/reproduction | `evidence/dvc/current_provenance.json`, `historical_reproduction.json`, `dirty_detection.json`, `mlflow_run_lineage.json`, `compare_changed_clone.json` | Real hash `3eacf7ec7241e7f914d7a1aca0346328`, clean→dirty→restored detection, changed-version comparison and actual run lineage; disposable clone at `a73a43ac9bc5a2adc25cd4b2ab8f8586c5480f3a` pulled and verified the dataset |
-| Actual experiment runs | `evidence/mlflow/real_runs.json` | Five actual completed candidates and a live client integration test; best recorded F1 0.92; registry available but empty |
+| Actual experiment runs | `evidence/mlflow/clean_source_runs.json`, `real_runs.json` | Five clean-source candidates plus historical setup runs and a live client integration test; best F1 0.92; registry available but empty |
 | Workflow execution | `evidence/airflow/run_success.json` | Real run `agent__73187a545f374db085252d1a314eea8b`: all five tasks succeeded, F1 0.9019607843 and promotion manifest present |
 | Conversations | `evidence/conversations/` | Per-conversation planner mode and per-tool result; mixed available/unavailable services remain visible |
 | Failure investigations | `evidence/failures/` | Each record states actual execution versus simulation and recovery outcome |
 
 The final command/test exports under `evidence/` establish executed commands, exit codes, durations and pass/fail counts. This report does not turn a planned command into verification merely by listing it.
 
+## Commands and test outcomes
+
+`evidence/validation.json` records the local CI-equivalent checks and opt-in live checks, including timestamps, durations and command exit status. The current recorded run completed:
+
+| Command | Exit | Recorded outcome | Verification |
+| --- | ---: | --- | --- |
+| `.venv/bin/ruff check .` | 0 | All checks passed | Real static check |
+| `.venv/bin/mypy` | 0 | No issues in the configured 3-file schema/configuration/permissions scope | Real static check; not a claim of whole-repository type checking |
+| `.venv/bin/python -m pytest -q tests/unit` | 0 | **106 passed**, 72 dependency deprecation warnings | CI-safe local/fixture tests; external services mocked |
+| `.venv/bin/python scripts/verify_submission.py` | 0 | Required files present; configured secret scan had no findings | Real repository check at recorded revision |
+| `RUN_INTEGRATION=1 .venv/bin/python -m pytest -q tests/integration` | 0 | **3 passed** | Real MLflow and Airflow services |
+| `RUN_INTEGRATION=1 .venv/bin/python -m pytest -q tests/e2e` | 0 | **2 passed** | Real authenticated local agent and inference; does not prove Kubernetes health |
+| `bash scripts/bootstrap.sh` | 0 | Repeated frozen sync, matching data hash, DVC cache/remote preparation | Real idempotence check, `evidence/runtime/setup.json` |
+| `docker compose config --quiet` | 0 | Syntax and variable interpolation accepted | Real configuration check only, `evidence/runtime/compose_config.json` |
+
+`tests/conftest.py` skips integration/e2e targets unless `RUN_INTEGRATION=1`; standard CI selects only `tests/unit`. Actual hosted GitHub Actions execution is separate from these local results. The Compose configuration check does not establish that the complete Compose stack was started successfully.
+
 ## Actual five-run experiment comparison
 
-`evidence/mlflow/real_runs.json` records five completed HTTP-backed MLflow runs on the same holdout:
+After committing the operational source, `evidence/mlflow/clean_source_runs.json` records five completed HTTP-backed MLflow runs against commit `5a35d39d1d0e7041ca78a5d0c416f05c9d15d5c8`. All five record `git.dirty=false`, the same verified dataset hash and fixed holdout:
 
 | Regularization C | Run ID | F1 |
 | ---: | --- | ---: |
-| 0.01 | `42136b407fd74db18ed51075635c2490` | 0.8431372549 |
-| 0.1 | `7ca895c6190342488e3784a8fec677eb` | 0.8823529412 |
-| 1.0 | `05f2560268da4a18b6d2b70d3f696268` | 0.9019607843 |
-| 10.0 | `9f37e4fc81d14f5b8d885de2746de6be` | 0.92 |
-| 100.0 | `00f3a8f527ca4c4bbee3fc421d6780cf` | 0.92 |
+| 0.01 | `7f9d279eb0fd4972bb71ac01487622af` | 0.8431372549 |
+| 0.1 | `591d770491ed49a6b3cb9a0ea893702f` | 0.8823529412 |
+| 1.0 | `163628ee0dea430d805ab965cd98e4f1` | 0.9019607843 |
+| 10.0 | `50098d1677434c79b901658b9edeb74b` | 0.92 |
+| 100.0 | `339b16bb4dc3467aa6004ff170f7f504` | 0.92 |
 
-The recorded comparison selected `00f3a8f527ca4c4bbee3fc421d6780cf` deterministically, passed the 0.8 gate and logged the real model plus metadata artifacts. The registry endpoint works but contains no registered models. These source references deliberately preserve `git.dirty=true` because the run occurred while implementation fixes were in progress; they are not a claim that the final release commit was used for those runs. The live MLflow integration check passed one test.
+The clean-source comparison selected `339b16bb4dc3467aa6004ff170f7f504` deterministically, passed the 0.8 gate and logged the real model plus metadata artifacts. Documentation/evidence added afterward do not change that recorded training-source identity. The registry endpoint works but contains no registered models. The live MLflow integration check passed one test as part of the three-test integration suite.
+
+The earlier `evidence/mlflow/real_runs.json` remains historical evidence: it records the initial commit `a73a43ac9bc5a2adc25cd4b2ab8f8586c5480f3a`, explicitly `git.dirty=true` during implementation fixes, and selected run `00f3a8f527ca4c4bbee3fc421d6780cf` with the same F1 0.92. The current container, readiness-fault and conversation exports were independently rerun against the clean-source model. Historical exports in Git history retain their original run/source references; no old result is relabeled as a new execution.
 
 ## Five demonstration conversations
 
@@ -66,7 +86,7 @@ All five were executed against the actual authenticated local API in labeled `of
 | --- | --- | --- |
 | Dataset provenance | `VERIFIED_REAL`: run lineage/hash and dirty-state query succeeded; returned historical reproduction commands are explicitly a plan, while separate DVC evidence verifies actual reproduction | `evidence/conversations/01_dataset_provenance.json` |
 | Model selection | `VERIFIED_REAL`: completed-run F1 ranking with production-readiness caveat | `evidence/conversations/02_model_selection.json` |
-| Pipeline execution | `VERIFIED_REAL`: proposal made no write; confirmed trigger produced actual run `agent__9f95e435b0ee40ed9945067e625b3ef2`, authenticated polling reached `success` | `evidence/conversations/03_pipeline_execution.json` |
+| Pipeline execution | `VERIFIED_REAL`: proposal made no write; confirmed trigger produced actual run `agent__a1056bcc558740cd859ee9eb41e5d540`, authenticated polling reached `success` | `evidence/conversations/03_pipeline_execution.json` |
 | Deployment diagnosis | `BLOCKED`: Kubernetes calls returned service unavailable; answer correctly states operational status is unknown | `evidence/conversations/04_deployment_diagnosis.json` |
 | Mandatory integrated request | `BLOCKED` for complete infrastructure verification: actual MLflow/DVC/Airflow data collected, Kubernetes unavailable, no trigger or proposed action | `evidence/conversations/05_integrated.json` |
 
@@ -84,7 +104,7 @@ The Docker daemon is functional, and kind/kubectl downloads were checksum-verifi
 
 Unconstrained DVC transitive `pathspec` 1.1.1 caused an internal `_DIR_MARK` import failure. MLflow was incompatible with SQLAlchemy 2.1 in this environment. Setup pins `pathspec==0.12.1` and `SQLAlchemy==2.0.44`, reruns the affected operations and retains the constraints in the reproducible dependency configuration. The Airflow environment separately follows official 3.1.0/Python 3.12 constraints and uses the official `mlflow-skinny` client to avoid overriding its cryptography requirement. Its idempotent install and dependency compatibility check passed for 141 installed packages (`evidence/airflow/commands.json`).
 
-A further actual MLflow run (`a967c64ac9e542f8ba83ae6a78f7ef3d`) failed during artifact upload because the SDK artifact resolver consulted the process-default file URI even though `MlflowClient` used HTTP. Evaluation and adapter initialization now call the supported `mlflow.set_tracking_uri(tracking_uri)` before artifact operations. The five completed runs above are the successful corrective rerun; the failed run remains marked failed in evidence.
+A further actual MLflow run (`a967c64ac9e542f8ba83ae6a78f7ef3d`) failed during artifact upload because the SDK artifact resolver consulted the process-default file URI even though `MlflowClient` used HTTP. Evaluation and adapter initialization now call the supported `mlflow.set_tracking_uri(tracking_uri)` before artifact operations. The five completed candidates in the historical `real_runs.json` are the successful corrective rerun; `clean_source_runs.json` records the later committed-source validation. The failed run remains marked failed in evidence.
 
 ### Deliberate fault A: Airflow quality-gate rejection (`VERIFIED_REAL`)
 
@@ -92,7 +112,7 @@ The actual DAG run `agent__9d6153721b8248038695a2561e15065b` used an injected F1
 
 ### Deliberate fault B: model readiness failure (`VERIFIED_REAL` container)
 
-`evidence/failures/inference_readiness_real.json` records a real read-only Docker container launched with `MODEL_PATH` deliberately pointing to an absent artifact. Liveness remained HTTP 200, while readiness and prediction returned HTTP 503 `MODEL_NOT_READY`; version correctly reported no loaded model. Recreating the container from the same immutable image without the bad path restored readiness/prediction to HTTP 200 and the same actual run ID `00f3a8f527ca4c4bbee3fc421d6780cf`. The image ID was `sha256:c77961675774213855fb80568d48e38baa77de806391bce19504c51a1fd2b962`, running as user `10001:10001` with a read-only filesystem and dropped capabilities. All test containers were removed.
+`evidence/failures/inference_readiness_real.json` records a real read-only Docker container launched with `MODEL_PATH` deliberately pointing to an absent artifact. Liveness remained HTTP 200, while readiness and prediction returned HTTP 503 `MODEL_NOT_READY`; version correctly reported no loaded model. Recreating the container from the same immutable image without the bad path restored readiness/prediction to HTTP 200 and the same actual run ID `339b16bb4dc3467aa6004ff170f7f504`. The image ID was `sha256:30facc2dc0323805beece7232b61bd21149be0914ff64a1a9cff38bfdc9afba2`, running as user `10001:10001` with a read-only filesystem and dropped capabilities. All test containers were removed.
 
 This is actual application-container behavior and recovery, not a real Kubernetes probe/rollout incident. That infrastructure portion remains blocked by the host prerequisite.
 

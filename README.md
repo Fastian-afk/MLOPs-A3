@@ -17,6 +17,9 @@ The repository began empty. The uploaded assignment defines the requirements; th
 
 See [architecture.md](architecture.md) for data flow, trust boundaries and the confirmation lifecycle.
 
+Recorded local verification: 106 unit tests, 3 live integration tests and 2 local API end-to-end tests passed. DVC reproduction, five-run MLflow training from committed clean operational source, five-stage Airflow execution and Docker inference have real exports. Live Kubernetes deployment is blocked by unavailable cgroup delegation; live LLM-provider calls need a credential. See `evidence/validation.json` for exact commands/outcomes.
+
+
 ## Prerequisites
 
 - Python 3.12, `uv`, Git and a POSIX shell. Linux or WSL2 is the simplest development path. On Windows, clone inside WSL2 and run these commands there; Docker Desktop must enable WSL integration for container workflows.
@@ -40,7 +43,14 @@ mypy
 pytest -q tests/unit
 ```
 
-The bootstrap uses `uv sync --frozen --extra dev` and `uv.lock`, regenerates/verifies the deterministic sample, and seeds an ignored local DVC remote. Dependency versions are declared in `pyproject.toml`. The environment also pins `pathspec==0.12.1` for DVC compatibility and `SQLAlchemy==2.0.44` for MLflow compatibility; unconstrained newer transitive versions caused import/runtime failures during setup. Ordinary CI mocks external infrastructure and does not need a cluster, Airflow or an LLM key. Real integration/e2e checks are separate, opt-in targets; their prerequisites must be running before invoking them.
+The bootstrap uses `uv sync --frozen --extra dev` and `uv.lock`, regenerates/verifies the deterministic sample, and seeds an ignored local DVC remote. Dependency versions are declared in `pyproject.toml`. The environment also pins `pathspec==0.12.1` for DVC compatibility and `SQLAlchemy==2.0.44` for MLflow compatibility; unconstrained newer transitive versions caused import/runtime failures during setup. Ordinary CI mocks external infrastructure and does not need a cluster, Airflow or an LLM key. Real integration/e2e checks are separate, opt-in targets; their prerequisites must be running before invoking them:
+
+```bash
+RUN_INTEGRATION=1 pytest -q tests/integration
+RUN_INTEGRATION=1 pytest -q tests/e2e
+```
+
+The end-to-end agent request additionally needs the securely configured `MLOPS_API_TOKEN`.
 
 Key configuration names (the agent uses the `MLOPS_` prefix):
 

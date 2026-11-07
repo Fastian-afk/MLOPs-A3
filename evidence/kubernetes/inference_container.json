@@ -1,23 +1,23 @@
 {
   "status": "VERIFIED_REAL",
-  "timestamp": "2026-11-07T16:44:59.203053+00:00",
+  "timestamp": "2026-11-07T16:52:39.576821+00:00",
   "scope": "real Docker inference container",
-  "image": "mlops-inference:run-00f3a8f527ca4c4bbee3fc421d6780cf",
-  "image_id": "sha256:c77961675774213855fb80568d48e38baa77de806391bce19504c51a1fd2b962",
+  "image": "mlops-inference:run-339b16bb4dc3467aa6004ff170f7f504",
+  "image_id": "sha256:30facc2dc0323805beece7232b61bd21149be0914ff64a1a9cff38bfdc9afba2",
   "configured_user": "10001:10001",
   "repository_digests": [],
-  "artifact_sha256": "0b2f54c66001088ecc57cc8d4d0f5e69965707301a7af3e0ac7983e6039d12a7",
+  "artifact_sha256": "4958e4b3b1765d5aca1d4e4f7f14df4b0335d8f0a8cb75dee79326223231f271",
   "artifact_metadata": {
-    "run_id": "00f3a8f527ca4c4bbee3fc421d6780cf",
-    "version": "00f3a8f527ca4c4bbee3fc421d6780cf",
+    "run_id": "339b16bb4dc3467aa6004ff170f7f504",
+    "version": "339b16bb4dc3467aa6004ff170f7f504",
     "dataset_hash": "3eacf7ec7241e7f914d7a1aca0346328",
-    "git_commit": "a73a43ac9bc5a2adc25cd4b2ab8f8586c5480f3a",
+    "git_commit": "5a35d39d1d0e7041ca78a5d0c416f05c9d15d5c8",
     "provenance": {
       "dataset.path": "data/dataset.csv",
       "dataset.hash": "3eacf7ec7241e7f914d7a1aca0346328",
-      "dataset.git_revision": "a73a43ac9bc5a2adc25cd4b2ab8f8586c5480f3a",
-      "git.dirty": "true",
-      "git.commit": "a73a43ac9bc5a2adc25cd4b2ab8f8586c5480f3a"
+      "dataset.git_revision": "5a35d39d1d0e7041ca78a5d0c416f05c9d15d5c8",
+      "git.dirty": "false",
+      "git.commit": "5a35d39d1d0e7041ca78a5d0c416f05c9d15d5c8"
     },
     "metrics": {
       "f1": 0.92,
@@ -53,8 +53,8 @@
       "body": {
         "application_version": "0.1.0",
         "ready": true,
-        "run_id": "00f3a8f527ca4c4bbee3fc421d6780cf",
-        "git_commit": "a73a43ac9bc5a2adc25cd4b2ab8f8586c5480f3a",
+        "run_id": "339b16bb4dc3467aa6004ff170f7f504",
+        "git_commit": "5a35d39d1d0e7041ca78a5d0c416f05c9d15d5c8",
         "dataset_hash": "3eacf7ec7241e7f914d7a1aca0346328",
         "feature_names": [
           "feature_0",
@@ -80,7 +80,7 @@
             0.00745205641983628
           ]
         ],
-        "run_id": "00f3a8f527ca4c4bbee3fc421d6780cf"
+        "run_id": "339b16bb4dc3467aa6004ff170f7f504"
       }
     },
     "invalid_payload": {
@@ -113,15 +113,33 @@
       "command": [
         "docker",
         "--host=unix:///var/run/docker.sock",
+        "build",
+        "--secret",
+        "id=proxy_ca,src=/etc/ssl/certs/ca-certificates.crt",
+        "-f",
+        "Dockerfile.inference",
+        "-t",
+        "mlops-inference:run-339b16bb4dc3467aa6004ff170f7f504",
+        "."
+      ],
+      "exit_code": 0,
+      "duration_seconds": 5.468,
+      "stdout": "",
+      "stderr": "#0 building with \"default\" instance using docker driver\n\n#1 [internal] load build definition from Dockerfile.inference\n#1 transferring dockerfile: 1.16kB done\n#1 DONE 0.0s\n\n#2 resolve image config for docker-image://docker.io/docker/dockerfile:1\n#2 DONE 0.3s\n\n#3 docker-image://docker.io/docker/dockerfile:1@sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e\n#3 CACHED\n\n#4 [internal] load metadata for docker.io/library/python:3.12-slim\n#4 DONE 0.0s\n\n#5 [runtime-deps 1/3] FROM docker.io/library/python:3.12-slim\n#5 DONE 0.0s\n\n#6 [internal] load build context\n#6 transferring context: 9.74kB done\n#6 DONE 0.0s\n\n#7 [runtime-deps 2/3] WORKDIR /app\n#7 CACHED\n\n#8 [runtime-deps 3/3] RUN --mount=type=secret,id=proxy_ca     if [ -f /run/secrets/proxy_ca ]; then export PIP_CERT=/run/secrets/proxy_ca; fi;     python -m pip install --no-cache-dir       fastapi==0.119.1 uvicorn==0.38.0 pydantic==2.12.3       scikit-learn==1.7.2 numpy==2.5.4 joblib==1.5.2\n#8 CACHED\n\n#9 [inference 1/2] COPY --chown=10001:10001 inference /app/inference\n#9 CACHED\n\n#10 [inference 2/2] COPY --chown=10001:10001 artifacts/model.joblib /app/artifacts/model.joblib\n#10 DONE 3.8s\n\n#11 exporting to image\n#11 exporting layers\n#11 exporting layers 0.9s done\n#11 writing image sha256:30facc2dc0323805beece7232b61bd21149be0914ff64a1a9cff38bfdc9afba2 done\n#11 naming to docker.io/library/mlops-inference:run-339b16bb4dc3467aa6004ff170f7f504 done\n#11 DONE 1.0s\n"
+    },
+    {
+      "command": [
+        "docker",
+        "--host=unix:///var/run/docker.sock",
         "image",
         "inspect",
         "--format",
         "{{.Id}}",
-        "mlops-inference:run-00f3a8f527ca4c4bbee3fc421d6780cf"
+        "mlops-inference:run-339b16bb4dc3467aa6004ff170f7f504"
       ],
       "exit_code": 0,
-      "duration_seconds": 0.034,
-      "stdout": "sha256:c77961675774213855fb80568d48e38baa77de806391bce19504c51a1fd2b962\n",
+      "duration_seconds": 0.02,
+      "stdout": "sha256:30facc2dc0323805beece7232b61bd21149be0914ff64a1a9cff38bfdc9afba2\n",
       "stderr": ""
     },
     {
@@ -132,10 +150,10 @@
         "inspect",
         "--format",
         "{{.Config.User}}",
-        "mlops-inference:run-00f3a8f527ca4c4bbee3fc421d6780cf"
+        "mlops-inference:run-339b16bb4dc3467aa6004ff170f7f504"
       ],
       "exit_code": 0,
-      "duration_seconds": 0.034,
+      "duration_seconds": 0.027,
       "stdout": "10001:10001\n",
       "stderr": ""
     },
@@ -147,10 +165,10 @@
         "inspect",
         "--format",
         "{{json .RepoDigests}}",
-        "mlops-inference:run-00f3a8f527ca4c4bbee3fc421d6780cf"
+        "mlops-inference:run-339b16bb4dc3467aa6004ff170f7f504"
       ],
       "exit_code": 0,
-      "duration_seconds": 0.032,
+      "duration_seconds": 0.017,
       "stdout": "[]\n",
       "stderr": ""
     },
@@ -163,13 +181,13 @@
         "--read-only",
         "--entrypoint",
         "python",
-        "mlops-inference:run-00f3a8f527ca4c4bbee3fc421d6780cf",
+        "mlops-inference:run-339b16bb4dc3467aa6004ff170f7f504",
         "-c",
         "import hashlib,json,joblib; from pathlib import Path; p=Path('/app/artifacts/model.joblib'); print(json.dumps({'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'metadata':joblib.load(p)['metadata']}))"
       ],
       "exit_code": 0,
-      "duration_seconds": 7.835,
-      "stdout": "{\"sha256\": \"0b2f54c66001088ecc57cc8d4d0f5e69965707301a7af3e0ac7983e6039d12a7\", \"metadata\": {\"run_id\": \"00f3a8f527ca4c4bbee3fc421d6780cf\", \"version\": \"00f3a8f527ca4c4bbee3fc421d6780cf\", \"dataset_hash\": \"3eacf7ec7241e7f914d7a1aca0346328\", \"git_commit\": \"a73a43ac9bc5a2adc25cd4b2ab8f8586c5480f3a\", \"provenance\": {\"dataset.path\": \"data/dataset.csv\", \"dataset.hash\": \"3eacf7ec7241e7f914d7a1aca0346328\", \"dataset.git_revision\": \"a73a43ac9bc5a2adc25cd4b2ab8f8586c5480f3a\", \"git.dirty\": \"true\", \"git.commit\": \"a73a43ac9bc5a2adc25cd4b2ab8f8586c5480f3a\"}, \"metrics\": {\"f1\": 0.92, \"precision\": 0.92, \"recall\": 0.92, \"accuracy\": 0.92}, \"config\": {\"seed\": 42, \"c\": 100.0, \"test_size\": 0.25, \"f1_threshold\": 0.8, \"experiment_name\": \"mlops-assignment-03\"}, \"evaluation_split\": \"stratified_holdout\"}}\n",
+      "duration_seconds": 7.977,
+      "stdout": "{\"sha256\": \"4958e4b3b1765d5aca1d4e4f7f14df4b0335d8f0a8cb75dee79326223231f271\", \"metadata\": {\"run_id\": \"339b16bb4dc3467aa6004ff170f7f504\", \"version\": \"339b16bb4dc3467aa6004ff170f7f504\", \"dataset_hash\": \"3eacf7ec7241e7f914d7a1aca0346328\", \"git_commit\": \"5a35d39d1d0e7041ca78a5d0c416f05c9d15d5c8\", \"provenance\": {\"dataset.path\": \"data/dataset.csv\", \"dataset.hash\": \"3eacf7ec7241e7f914d7a1aca0346328\", \"dataset.git_revision\": \"5a35d39d1d0e7041ca78a5d0c416f05c9d15d5c8\", \"git.dirty\": \"false\", \"git.commit\": \"5a35d39d1d0e7041ca78a5d0c416f05c9d15d5c8\"}, \"metrics\": {\"f1\": 0.92, \"precision\": 0.92, \"recall\": 0.92, \"accuracy\": 0.92}, \"config\": {\"seed\": 42, \"c\": 100.0, \"test_size\": 0.25, \"f1_threshold\": 0.8, \"experiment_name\": \"mlops-assignment-03\"}, \"evaluation_split\": \"stratified_holdout\"}}\n",
       "stderr": ""
     },
     {
@@ -179,7 +197,7 @@
         "run",
         "-d",
         "--name",
-        "mlops-inference-verify-1794069907138462524",
+        "mlops-inference-verify-1794070373085780268",
         "--read-only",
         "--tmpfs",
         "/tmp:rw,noexec,nosuid,size=16m",
@@ -189,11 +207,11 @@
         "ALL",
         "-p",
         "127.0.0.1::8001",
-        "mlops-inference:run-00f3a8f527ca4c4bbee3fc421d6780cf"
+        "mlops-inference:run-339b16bb4dc3467aa6004ff170f7f504"
       ],
       "exit_code": 0,
-      "duration_seconds": 3.564,
-      "stdout": "aa3f089cfa2191bf05f835d189afc76bece10ab856fad0e0cad6a7d9a7fdfad0\n",
+      "duration_seconds": 5.657,
+      "stdout": "24813c11b2095eac0dcab4633890d5aae87538dc4b87c61167b8ab6bbc4feba3\n",
       "stderr": ""
     },
     {
@@ -201,12 +219,12 @@
         "docker",
         "--host=unix:///var/run/docker.sock",
         "port",
-        "mlops-inference-verify-1794069907138462524",
+        "mlops-inference-verify-1794070373085780268",
         "8001/tcp"
       ],
       "exit_code": 0,
-      "duration_seconds": 0.02,
-      "stdout": "127.0.0.1:32771\n",
+      "duration_seconds": 0.022,
+      "stdout": "127.0.0.1:32775\n",
       "stderr": ""
     },
     {
@@ -215,11 +233,11 @@
         "--host=unix:///var/run/docker.sock",
         "rm",
         "-f",
-        "mlops-inference-verify-1794069907138462524"
+        "mlops-inference-verify-1794070373085780268"
       ],
       "exit_code": 0,
-      "duration_seconds": 0.388,
-      "stdout": "mlops-inference-verify-1794069907138462524\n",
+      "duration_seconds": 0.443,
+      "stdout": "mlops-inference-verify-1794070373085780268\n",
       "stderr": ""
     },
     {
@@ -229,7 +247,7 @@
         "run",
         "-d",
         "--name",
-        "mlops-inference-fault-1794069907138462524",
+        "mlops-inference-fault-1794070373085780268",
         "--read-only",
         "--tmpfs",
         "/tmp:rw,noexec,nosuid,size=16m",
@@ -241,11 +259,11 @@
         "127.0.0.1::8001",
         "-e",
         "MODEL_PATH=/app/artifacts/deliberately-missing.joblib",
-        "mlops-inference:run-00f3a8f527ca4c4bbee3fc421d6780cf"
+        "mlops-inference:run-339b16bb4dc3467aa6004ff170f7f504"
       ],
       "exit_code": 0,
-      "duration_seconds": 5.064,
-      "stdout": "8268c9c5e6ea8fc61e489c113b5db59880091cd7ac01b751325781afe36659ab\n",
+      "duration_seconds": 5.213,
+      "stdout": "f4c040dc2500cca21526f62b65e4064dc141a5c6a3287985fae8dfeca557bfc0\n",
       "stderr": ""
     },
     {
@@ -253,12 +271,12 @@
         "docker",
         "--host=unix:///var/run/docker.sock",
         "port",
-        "mlops-inference-fault-1794069907138462524",
+        "mlops-inference-fault-1794070373085780268",
         "8001/tcp"
       ],
       "exit_code": 0,
-      "duration_seconds": 0.028,
-      "stdout": "127.0.0.1:32772\n",
+      "duration_seconds": 0.02,
+      "stdout": "127.0.0.1:32776\n",
       "stderr": ""
     },
     {
@@ -266,11 +284,11 @@
         "docker",
         "--host=unix:///var/run/docker.sock",
         "logs",
-        "mlops-inference-fault-1794069907138462524"
+        "mlops-inference-fault-1794070373085780268"
       ],
       "exit_code": 0,
-      "duration_seconds": 0.023,
-      "stdout": "INFO:     172.17.0.1:42610 - \"GET /health/live HTTP/1.1\" 200 OK\nINFO:     172.17.0.1:42614 - \"GET /health/live HTTP/1.1\" 200 OK\nINFO:     172.17.0.1:42630 - \"GET /health/ready HTTP/1.1\" 503 Service Unavailable\nINFO:     172.17.0.1:42638 - \"POST /predict HTTP/1.1\" 503 Service Unavailable\nINFO:     172.17.0.1:42646 - \"GET /version HTTP/1.1\" 200 OK\n",
+      "duration_seconds": 0.028,
+      "stdout": "INFO:     172.17.0.1:48784 - \"GET /health/live HTTP/1.1\" 200 OK\nINFO:     172.17.0.1:48800 - \"GET /health/live HTTP/1.1\" 200 OK\nINFO:     172.17.0.1:48810 - \"GET /health/ready HTTP/1.1\" 503 Service Unavailable\nINFO:     172.17.0.1:48816 - \"POST /predict HTTP/1.1\" 503 Service Unavailable\nINFO:     172.17.0.1:48820 - \"GET /version HTTP/1.1\" 200 OK\n",
       "stderr": "INFO:     Started server process [1]\nINFO:     Waiting for application startup.\nModel could not be loaded; readiness remains false\nINFO:     Application startup complete.\nINFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)\n"
     },
     {
@@ -279,11 +297,11 @@
         "--host=unix:///var/run/docker.sock",
         "rm",
         "-f",
-        "mlops-inference-fault-1794069907138462524"
+        "mlops-inference-fault-1794070373085780268"
       ],
       "exit_code": 0,
-      "duration_seconds": 0.389,
-      "stdout": "mlops-inference-fault-1794069907138462524\n",
+      "duration_seconds": 0.39,
+      "stdout": "mlops-inference-fault-1794070373085780268\n",
       "stderr": ""
     },
     {
@@ -293,7 +311,7 @@
         "run",
         "-d",
         "--name",
-        "mlops-inference-recovery-1794069907138462524",
+        "mlops-inference-recovery-1794070373085780268",
         "--read-only",
         "--tmpfs",
         "/tmp:rw,noexec,nosuid,size=16m",
@@ -303,11 +321,11 @@
         "ALL",
         "-p",
         "127.0.0.1::8001",
-        "mlops-inference:run-00f3a8f527ca4c4bbee3fc421d6780cf"
+        "mlops-inference:run-339b16bb4dc3467aa6004ff170f7f504"
       ],
       "exit_code": 0,
-      "duration_seconds": 2.793,
-      "stdout": "6449ade462773b350ef7da34b17e6a37d76bc0d4a4135d166f69c473a734945f\n",
+      "duration_seconds": 4.924,
+      "stdout": "6b2bd7a8eeeb9248edf9b42ff978ffce78b460cb4c61c939b3c4d0c4e16fe8d7\n",
       "stderr": ""
     },
     {
@@ -315,12 +333,12 @@
         "docker",
         "--host=unix:///var/run/docker.sock",
         "port",
-        "mlops-inference-recovery-1794069907138462524",
+        "mlops-inference-recovery-1794070373085780268",
         "8001/tcp"
       ],
       "exit_code": 0,
-      "duration_seconds": 0.023,
-      "stdout": "127.0.0.1:32773\n",
+      "duration_seconds": 0.019,
+      "stdout": "127.0.0.1:32777\n",
       "stderr": ""
     },
     {
@@ -329,11 +347,11 @@
         "--host=unix:///var/run/docker.sock",
         "rm",
         "-f",
-        "mlops-inference-recovery-1794069907138462524"
+        "mlops-inference-recovery-1794070373085780268"
       ],
       "exit_code": 0,
-      "duration_seconds": 0.381,
-      "stdout": "mlops-inference-recovery-1794069907138462524\n",
+      "duration_seconds": 0.394,
+      "stdout": "mlops-inference-recovery-1794070373085780268\n",
       "stderr": ""
     }
   ],

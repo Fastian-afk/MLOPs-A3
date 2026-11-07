@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-11-07T16:49:34.274332+00:00",
+  "timestamp": "2026-11-07T16:54:47.257546+00:00",
   "environment": "actual local services; Kubernetes may be blocked",
   "status": "BLOCKED",
   "planner": "offline",
@@ -21,7 +21,7 @@
             "data": {},
             "error_code": "SERVICE_UNAVAILABLE",
             "uncertainty": "Adapter failed; no operational result can be established.",
-            "duration_ms": 424.791,
+            "duration_ms": 312.505,
             "source": "live_adapter"
           },
           {
@@ -30,7 +30,7 @@
             "data": {},
             "error_code": "SERVICE_UNAVAILABLE",
             "uncertainty": "Adapter failed; no operational result can be established.",
-            "duration_ms": 0.296,
+            "duration_ms": 0.371,
             "source": "live_adapter"
           },
           {
@@ -39,7 +39,7 @@
             "data": {},
             "error_code": "SERVICE_UNAVAILABLE",
             "uncertainty": "Adapter failed; no operational result can be established.",
-            "duration_ms": 0.221,
+            "duration_ms": 0.413,
             "source": "live_adapter"
           },
           {
@@ -48,7 +48,7 @@
             "data": {},
             "error_code": "SERVICE_UNAVAILABLE",
             "uncertainty": "Adapter failed; no operational result can be established.",
-            "duration_ms": 0.19,
+            "duration_ms": 0.277,
             "source": "live_adapter"
           }
         ],
@@ -59,7 +59,7 @@
           "Adapter failed; no operational result can be established."
         ],
         "proposed_actions": [],
-        "trace_id": "14f48c8a7b1749428cb4139f7b12388d",
+        "trace_id": "feded756204f4028b82186156c81487d",
         "planner": "offline"
       }
     }

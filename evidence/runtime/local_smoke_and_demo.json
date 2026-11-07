@@ -1,0 +1,24 @@
+[
+  {
+    "command": [
+      "bash",
+      "scripts/smoke_test.sh"
+    ],
+    "duration_seconds": 0.337,
+    "exit_code": 0,
+    "output": "http://127.0.0.1:8000/health 200 {'status': 'ok', 'planner': 'offline', 'authentication_configured': True}\nhttp://127.0.0.1:8001/health/live 200 {'status': 'live'}\nhttp://127.0.0.1:8001/health/ready 200 {'status': 'ready'}\nInference and real MLflow-backed agent functional requests passed\n",
+    "status": "VERIFIED_REAL"
+  },
+  {
+    "command": [
+      ".venv/bin/python",
+      "-m",
+      "scripts.demo_scenarios",
+      "--confirm-training"
+    ],
+    "duration_seconds": 16.73,
+    "exit_code": 0,
+    "output": "dataset_provenance VERIFIED_REAL\nmodel_selection VERIFIED_REAL\npipeline_execution VERIFIED_REAL\ndeployment_diagnosis BLOCKED\nintegrated BLOCKED\n",
+    "status": "VERIFIED_REAL"
+  }
+]
