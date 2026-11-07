@@ -1,0 +1,26 @@
+{
+  "status": "VERIFIED_REAL",
+  "timestamp": "2026-11-07T16:43:11.174429+00:00",
+  "image": "mlops-inference:run-00f3a8f527ca4c4bbee3fc421d6780cf",
+  "image_id": "sha256:c77961675774213855fb80568d48e38baa77de806391bce19504c51a1fd2b962",
+  "commands": [
+    {
+      "command": [
+        "docker",
+        "--host=unix:///var/run/docker.sock",
+        "build",
+        "--secret",
+        "id=proxy_ca,src=/etc/ssl/certs/ca-certificates.crt",
+        "-f",
+        "Dockerfile.inference",
+        "-t",
+        "mlops-inference:run-00f3a8f527ca4c4bbee3fc421d6780cf",
+        "."
+      ],
+      "exit_code": 0,
+      "duration_seconds": 2.022,
+      "stdout": "",
+      "stderr": "#0 building with \"default\" instance using docker driver\n\n#1 [internal] load build definition from Dockerfile.inference\n#1 transferring dockerfile: 1.16kB done\n#1 DONE 0.0s\n\n#2 resolve image config for docker-image://docker.io/docker/dockerfile:1\n#2 DONE 0.3s\n\n#3 docker-image://docker.io/docker/dockerfile:1@sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e\n#3 CACHED\n\n#4 [internal] load metadata for docker.io/library/python:3.12-slim\n#4 DONE 0.0s\n\n#5 [runtime-deps 1/3] FROM docker.io/library/python:3.12-slim\n#5 DONE 0.0s\n\n#6 [runtime-deps 2/3] WORKDIR /app\n#6 CACHED\n\n#7 [runtime-deps 3/3] RUN --mount=type=secret,id=proxy_ca     if [ -f /run/secrets/proxy_ca ]; then export PIP_CERT=/run/secrets/proxy_ca; fi;     python -m pip install --no-cache-dir       fastapi==0.119.1 uvicorn==0.38.0 pydantic==2.12.3       scikit-learn==1.7.2 numpy==2.5.4 joblib==1.5.2\n#7 CACHED\n\n#8 [internal] load build context\n#8 transferring context: 13.65kB done\n#8 DONE 0.0s\n\n#9 [inference 1/2] COPY --chown=10001:10001 inference /app/inference\n#9 DONE 0.6s\n\n#10 [inference 2/2] COPY --chown=10001:10001 artifacts/model.joblib /app/artifacts/model.joblib\n#10 DONE 0.6s\n\n#11 exporting to image\n#11 exporting layers\n#11 exporting layers 0.2s done\n#11 writing image sha256:c77961675774213855fb80568d48e38baa77de806391bce19504c51a1fd2b962 done\n#11 naming to docker.io/library/mlops-inference:run-00f3a8f527ca4c4bbee3fc421d6780cf done\n#11 DONE 0.3s\n"
+    }
+  ]
+}

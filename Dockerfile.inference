@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM python:3.12-slim
+FROM python:3.12-slim AS runtime-deps
 WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 MODEL_PATH=/app/artifacts/model.joblib
 # The optional secret preserves verification in managed HTTPS-inspection environments.
@@ -8,6 +8,7 @@ RUN --mount=type=secret,id=proxy_ca \
     python -m pip install --no-cache-dir \
       fastapi==0.119.1 uvicorn==0.38.0 pydantic==2.12.3 \
       scikit-learn==1.7.2 numpy==2.5.4 joblib==1.5.2
+FROM runtime-deps AS inference
 COPY --chown=10001:10001 inference /app/inference
 COPY --chown=10001:10001 artifacts/model.joblib /app/artifacts/model.joblib
 USER 10001:10001

@@ -38,6 +38,8 @@ class ContainerHealth(BaseModel):
     name: str
     ready: bool
     restart_count: int
+    image: str | None = None
+    image_id: str | None = None
     waiting_reason: str | None = None
     termination_reason: str | None = None
 
@@ -130,6 +132,11 @@ def _get(obj: Any, name: str, default: Any = None) -> Any:
 
 def _redact(value: str) -> str:
     value = re.sub(
+        r"(?i)(authorization\s*[:=]\s*)(?:(?:Bearer|Basic)\s+)?[^\s,;]+",
+        r"\1[REDACTED]",
+        value,
+    )
+    value = re.sub(
         r"(?i)((?:authorization|password|api[_-]?key|token|secret)\s*[:=]\s*)([^\s,;]+)",
         r"\1[REDACTED]",
         value,
@@ -213,6 +220,8 @@ class KubernetesTools:
                     name=_get(item, "name", "unknown"),
                     ready=_get(item, "ready", False),
                     restart_count=restarts,
+                    image=_get(item, "image"),
+                    image_id=_get(item, "image_id"),
                     waiting_reason=reason,
                     termination_reason=_get(terminated, "reason"),
                 )
@@ -404,7 +413,9 @@ class KubernetesTools:
             annotations=annotations,
             model_run_id=model_run_id,
             rollout_complete=complete,
-            caveats=[]
+            caveats=[
+                "Model run identity is declared by the Pod template; verify the inference /version response and running image digest before promotion"
+            ]
             if model_run_id
             else ["Deployment does not record a model run ID; candidate equality is unknown"],
         )

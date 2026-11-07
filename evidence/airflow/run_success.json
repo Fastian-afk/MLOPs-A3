@@ -1,0 +1,91 @@
+{
+  "timestamp": "2026-11-07T16:40:04.049018+00:00",
+  "label": "VERIFIED_REAL",
+  "command": "python -m scripts.verify_airflow --confirm-trigger",
+  "explicit_operator_confirmation": true,
+  "threshold": 0.8,
+  "duration_seconds": 12.303,
+  "result": {
+    "run": {
+      "dag_id": "mlops_training",
+      "dag_run_id": "agent__73187a545f374db085252d1a314eea8b",
+      "state": "success",
+      "logical_date": "2026-11-07T16:39:51.746215Z",
+      "start_date": "2026-11-07T16:39:52.698359Z",
+      "end_date": "2026-11-07T16:40:03.840144Z",
+      "conf": {
+        "c": 1.0,
+        "seed": 42,
+        "test_size": 0.25,
+        "f1_threshold": 0.8,
+        "experiment_name": "mlops-assignment-03"
+      }
+    },
+    "tasks": [
+      {
+        "task_id": "validate_dataset",
+        "state": "success",
+        "try_number": 1,
+        "start_date": "2026-11-07T16:39:52.797210Z",
+        "end_date": "2026-11-07T16:39:54.888180Z",
+        "duration": 4.091
+      },
+      {
+        "task_id": "preprocess_data",
+        "state": "success",
+        "try_number": 1,
+        "start_date": "2026-11-07T16:39:55.919090Z",
+        "end_date": "2026-11-07T16:39:57.114910Z",
+        "duration": 3.1959999999999997
+      },
+      {
+        "task_id": "train_model",
+        "state": "success",
+        "try_number": 1,
+        "start_date": "2026-11-07T16:39:58.080873Z",
+        "end_date": "2026-11-07T16:39:59.402741Z",
+        "duration": 2.322
+      },
+      {
+        "task_id": "evaluate_and_log",
+        "state": "success",
+        "try_number": 1,
+        "start_date": "2026-11-07T16:40:00.195139Z",
+        "end_date": "2026-11-07T16:40:01.505613Z",
+        "duration": 2.311
+      },
+      {
+        "task_id": "quality_gate",
+        "state": "success",
+        "try_number": 1,
+        "start_date": "2026-11-07T16:40:01.735326Z",
+        "end_date": "2026-11-07T16:40:02.909362Z",
+        "duration": 2.174
+      }
+    ],
+    "completed": true,
+    "succeeded": true
+  },
+  "diagnostics": [],
+  "promotion_manifest_present": true,
+  "expected_state": "success",
+  "evaluation": {
+    "run_id": "ea7698ccf48f452e9c28621842740540",
+    "metrics": {
+      "f1": 0.9019607843137255,
+      "precision": 0.8846153846153846,
+      "recall": 0.92,
+      "accuracy": 0.9
+    },
+    "provenance": {
+      "dataset.path": "data/dataset.csv",
+      "dataset.hash": "3eacf7ec7241e7f914d7a1aca0346328",
+      "dataset.git_revision": "a73a43ac9bc5a2adc25cd4b2ab8f8586c5480f3a",
+      "git.dirty": "false",
+      "git.commit": "a73a43ac9bc5a2adc25cd4b2ab8f8586c5480f3a"
+    },
+    "validation_passed": true,
+    "model_path": "/workspace/MLOPs-A3/.runtime/training/80c5f18e887a854add9c9bb0/evaluated.joblib",
+    "quality_gate": "passed"
+  }
+}

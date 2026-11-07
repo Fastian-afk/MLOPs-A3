@@ -1,0 +1,11 @@
+{
+  "timestamp": "2026-11-07T16:50:23.263645+00:00",
+  "command": [
+    "bash",
+    "scripts/bootstrap.sh"
+  ],
+  "duration_seconds": 1.1347098670000832,
+  "exit_code": 0,
+  "status": "VERIFIED_REAL",
+  "output": "Dataset matches committed DVC reference: 3eacf7ec7241e7f914d7a1aca0346328\nEverything is up to date.\nBase dependencies and deterministic DVC data are prepared.\nRun bash scripts/install_airflow.sh to prepare the separately constrained Airflow runtime.\nChecked 169 packages in 1ms\n"
+}

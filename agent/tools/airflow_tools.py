@@ -15,6 +15,8 @@ from uuid import uuid4
 import httpx
 from pydantic import BaseModel, ConfigDict, Field
 
+from agent.logging import redact
+
 
 class AirflowError(RuntimeError):
     """A stable, sanitized error suitable for an agent response."""
@@ -158,9 +160,7 @@ class AirflowTools:
 
     def _request(self, method: str, path: str, **kwargs: Any) -> dict[str, Any]:
         try:
-            response = self.client.request(
-                method, "api/v2/" + path, headers=self._headers(), **kwargs
-            )
+            response = self.client.request(method, "api/v2/" + path, headers=self._headers(), **kwargs)
             if response.status_code in (401, 403):
                 raise AirflowError("airflow_authentication_failed")
             if response.status_code == 404:
@@ -195,22 +195,29 @@ class AirflowTools:
         body = self._request("GET", "dags", params=args.model_dump())
         dags = [DAGSummary.model_validate(item) for item in body.get("dags", [])]
         total = int(body.get("total_entries", len(dags)))
-        return DAGsOutput(dags=dags, total_entries=total, next_offset=self._next(args.offset, len(dags), total))
+        return DAGsOutput(
+            dags=dags, total_entries=total, next_offset=self._next(args.offset, len(dags), total)
+        )
 
     def list_runs(self, args: RunsInput) -> RunsOutput:
         body = self._request(
-            "GET", self._dag(args.dag_id) + "/dagRuns",
+            "GET",
+            self._dag(args.dag_id) + "/dagRuns",
             params={"limit": args.limit, "offset": args.offset, "order_by": "-start_date"},
         )
         runs = [RunSummary.model_validate(item) for item in body.get("dag_runs", [])]
         total = int(body.get("total_entries", len(runs)))
-        return RunsOutput(dag_runs=runs, total_entries=total, next_offset=self._next(args.offset, len(runs), total))
+        return RunsOutput(
+            dag_runs=runs, total_entries=total, next_offset=self._next(args.offset, len(runs), total)
+        )
 
     def _tasks(self, args: RunInput) -> list[TaskSummary]:
         tasks: list[TaskSummary] = []
         offset = 0
         for _ in range(10):
-            body = self._request("GET", self._run_path(args) + "/taskInstances", params={"limit": 100, "offset": offset})
+            body = self._request(
+                "GET", self._run_path(args) + "/taskInstances", params={"limit": 100, "offset": offset}
+            )
             batch = body.get("task_instances", [])
             tasks.extend(TaskSummary.model_validate(item) for item in batch)
             offset += len(batch)
@@ -220,15 +227,24 @@ class AirflowTools:
 
     def run_status(self, args: RunInput) -> RunOutput:
         run = RunSummary.model_validate(self._request("GET", self._run_path(args)))
-        return RunOutput(run=run, tasks=self._tasks(args), completed=run.state in ("success", "failed"), succeeded=run.state == "success")
+        return RunOutput(
+            run=run,
+            tasks=self._tasks(args),
+            completed=run.state in ("success", "failed"),
+            succeeded=run.state == "success",
+        )
 
     def trigger_training(self, args: TriggerInput) -> RunOutput:
         path = self._dag(args.dag_id) + "/dagRuns"
-        body = self._request("POST", path, json={
-            "dag_run_id": "agent__" + uuid4().hex,
-            "logical_date": datetime.now(UTC).isoformat(),
-            "conf": args.conf.model_dump(),
-        })
+        body = self._request(
+            "POST",
+            path,
+            json={
+                "dag_run_id": "agent__" + uuid4().hex,
+                "logical_date": datetime.now(UTC).isoformat(),
+                "conf": args.conf.model_dump(),
+            },
+        )
         run = RunSummary.model_validate(body)
         run_args = RunInput(dag_id=args.dag_id, run_id=run.dag_run_id)
         deadline = time.monotonic() + args.poll_seconds
@@ -239,7 +255,11 @@ class AirflowTools:
         return result
 
     def failed_tasks(self, args: RunInput) -> FailedTasksOutput:
-        return FailedTasksOutput(dag_id=args.dag_id, run_id=args.run_id, failed_tasks=[task for task in self._tasks(args) if task.state in ("failed", "upstream_failed")])
+        return FailedTasksOutput(
+            dag_id=args.dag_id,
+            run_id=args.run_id,
+            failed_tasks=[task for task in self._tasks(args) if task.state in ("failed", "upstream_failed")],
+        )
 
     def diagnostics(self, args: DiagnosticsInput) -> DiagnosticsOutput:
         path = self._run_path(args) + "/taskInstances/" + quote(args.task_id, safe="")
@@ -249,20 +269,78 @@ class AirflowTools:
             content = logs.get("content", "")
             if not isinstance(content, str):
                 import json
+
                 content = json.dumps(content)
-            return DiagnosticsOutput(dag_id=args.dag_id, run_id=args.run_id, task=task, log=content[:16000], log_available=True, log_truncated=len(content) > 16000)
+            return DiagnosticsOutput(
+                dag_id=args.dag_id,
+                run_id=args.run_id,
+                task=task,
+                log=redact(content[:16000]),
+                log_available=True,
+                log_truncated=len(content) > 16000,
+            )
         except AirflowError as exc:
-            return DiagnosticsOutput(dag_id=args.dag_id, run_id=args.run_id, task=task, log="", log_available=False, uncertainty=exc.code)
+            return DiagnosticsOutput(
+                dag_id=args.dag_id,
+                run_id=args.run_id,
+                task=task,
+                log="",
+                log_available=False,
+                uncertainty=exc.code,
+            )
 
 
 def register(registry: Any, settings: Any) -> None:
     tools = AirflowTools(settings)
     for name, description, args, handler, output, permission in [
         ("list_dags", "List Airflow 3 DAGs with pagination.", PageInput, tools.list_dags, DAGsOutput, "read"),
-        ("list_runs", "List recent runs of the approved training DAG.", RunsInput, tools.list_runs, RunsOutput, "read"),
-        ("run_status", "Inspect actual run and task states; queued does not mean success.", RunInput, tools.run_status, RunOutput, "read"),
-        ("trigger_training", "Trigger the approved DAG only after explicit action-bound confirmation.", TriggerInput, tools.trigger_training, RunOutput, "write"),
-        ("failed_tasks", "List failed and upstream-failed tasks for an approved DAG run.", RunInput, tools.failed_tasks, FailedTasksOutput, "read"),
-        ("diagnostics", "Read task state and available bounded logs.", DiagnosticsInput, tools.diagnostics, DiagnosticsOutput, "read"),
+        (
+            "list_runs",
+            "List recent runs of the approved training DAG.",
+            RunsInput,
+            tools.list_runs,
+            RunsOutput,
+            "read",
+        ),
+        (
+            "run_status",
+            "Inspect actual run and task states; queued does not mean success.",
+            RunInput,
+            tools.run_status,
+            RunOutput,
+            "read",
+        ),
+        (
+            "trigger_training",
+            "Trigger the approved DAG only after explicit action-bound confirmation.",
+            TriggerInput,
+            tools.trigger_training,
+            RunOutput,
+            "write",
+        ),
+        (
+            "failed_tasks",
+            "List failed and upstream-failed tasks for an approved DAG run.",
+            RunInput,
+            tools.failed_tasks,
+            FailedTasksOutput,
+            "read",
+        ),
+        (
+            "diagnostics",
+            "Read task state and available bounded logs.",
+            DiagnosticsInput,
+            tools.diagnostics,
+            DiagnosticsOutput,
+            "read",
+        ),
     ]:
-        registry.add("airflow." + name, description, args, handler, output_model=output, permission=permission, timeout=30)
+        registry.add(
+            "airflow." + name,
+            description,
+            args,
+            handler,
+            output_model=output,
+            permission=permission,
+            timeout=30,
+        )

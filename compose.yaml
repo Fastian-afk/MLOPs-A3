@@ -1,0 +1,51 @@
+services:
+  mlflow:
+    build:
+      context: .
+      secrets: [proxy_ca]
+    command: [mlflow, server, --host, 0.0.0.0, --port, '5000', --workers, '1', --backend-store-uri, 'sqlite:////app/.runtime/mlflow.db', --artifacts-destination, /app/.runtime/mlflow-store, --allowed-hosts, 'mlflow:5000,localhost:5000,127.0.0.1:5000']
+    volumes: [mlflow-data:/app/.runtime]
+    ports: ['127.0.0.1:5000:5000']
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+  airflow:
+    build:
+      context: .
+      dockerfile: Dockerfile.airflow
+      secrets: [proxy_ca]
+    user: '${AIRFLOW_UID:-1000}:0'
+    environment:
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      AIRFLOW_HOME: /workspace/MLOPs-A3/.runtime/compose-airflow
+      AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://127.0.0.1:8080/execution/
+    volumes: [.:/workspace/MLOPs-A3]
+    ports: ['127.0.0.1:8080:8080']
+    depends_on:
+      mlflow: {condition: service_healthy}
+  agent:
+    build:
+      context: .
+      secrets: [proxy_ca]
+    environment:
+      MLOPS_ROOT: /workspace/MLOPs-A3
+      MLOPS_API_TOKEN: '${MLOPS_API_TOKEN:?Set MLOPS_API_TOKEN}'
+      MLOPS_MLFLOW_TRACKING_URI: http://mlflow:5000
+      MLOPS_AIRFLOW_BASE_URL: http://airflow:8080
+      MLOPS_AIRFLOW_PASSWORD: '${MLOPS_AIRFLOW_PASSWORD:-}'
+      MLOPS_AIRFLOW_TOKEN: '${MLOPS_AIRFLOW_TOKEN:-}'
+      DVC_SITE_CACHE_DIR: /workspace/MLOPs-A3/.runtime/dvc-site
+    volumes:
+      - .:/workspace/MLOPs-A3:ro
+      - ./.runtime:/workspace/MLOPs-A3/.runtime
+      - ./.dvc/tmp:/workspace/MLOPs-A3/.dvc/tmp
+    ports: ['127.0.0.1:8000:8000']
+    depends_on:
+      mlflow: {condition: service_healthy}
+volumes:
+  mlflow-data:
+secrets:
+  proxy_ca:
+    file: '${BUILD_CA_BUNDLE:-/etc/ssl/certs/ca-certificates.crt}'

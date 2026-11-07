@@ -59,3 +59,11 @@ def test_wrong_artifact_structure_is_unready(tmp_path):
     with TestClient(create_app(path)) as client:
         assert client.get("/health/live").status_code == 200
         assert client.get("/health/ready").status_code == 503
+
+
+def test_corrupt_artifact_keeps_process_live_and_unready(tmp_path):
+    path = tmp_path / "corrupt.joblib"
+    path.write_bytes(b"invalid serialized model")
+    with TestClient(create_app(path)) as client:
+        assert client.get("/health/live").status_code == 200
+        assert client.get("/health/ready").status_code == 503

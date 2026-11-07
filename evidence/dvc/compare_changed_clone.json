@@ -1,0 +1,47 @@
+{
+  "timestamp": "2026-11-07T16:42:17.173091+00:00",
+  "verification": "VERIFIED_REAL",
+  "environment": "disposable clone fixture; synthetic version never applied to main dataset",
+  "operation": "compare_differing_dataset_versions",
+  "commands": [
+    "git clone --no-hardlinks",
+    "dvc pull data/dataset.csv.dvc",
+    "append synthetic row in clone",
+    "dvc add data/dataset.csv",
+    "git commit dataset metadata",
+    "dvc.compare_versions(old_revision)"
+  ],
+  "result": {
+    "dataset": "data/dataset.csv",
+    "old": {
+      "dataset": "data/dataset.csv",
+      "git_commit": "a73a43ac9bc5a2adc25cd4b2ab8f8586c5480f3a",
+      "dvc_hash": "3eacf7ec7241e7f914d7a1aca0346328",
+      "actual_hash": null,
+      "dirty": null,
+      "metadata_dirty": false,
+      "metadata_path": "data/dataset.csv.dvc",
+      "run_id": null,
+      "lineage_match": null,
+      "remotes": [
+        "local"
+      ]
+    },
+    "new": {
+      "dataset": "data/dataset.csv",
+      "git_commit": "0a1565fac857a1dd6ae129ec8016d466dc4133f9",
+      "dvc_hash": "b7d1b51a7f638c9b3e34243e37d7fb77",
+      "actual_hash": "b7d1b51a7f638c9b3e34243e37d7fb77",
+      "dirty": false,
+      "metadata_dirty": false,
+      "metadata_path": "data/dataset.csv.dvc",
+      "run_id": null,
+      "lineage_match": null,
+      "remotes": [
+        "local"
+      ]
+    },
+    "changed": true
+  },
+  "exit_code": 0
+}

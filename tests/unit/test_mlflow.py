@@ -77,9 +77,10 @@ def test_unknown_metric_requires_explicit_direction(client):
     with pytest.raises(ValueError, match="METRIC_DIRECTION_REQUIRED"):
         adapter.select_best_run(BestRunQuery(metric="custom_score"))
     client.search_runs.return_value = [run("good", metrics={"custom_score": 2})]
-    assert adapter.select_best_run(
-        BestRunQuery(metric="custom_score", direction="maximize")
-    ).best_run.run_id == "good"
+    assert (
+        adapter.select_best_run(BestRunQuery(metric="custom_score", direction="maximize")).best_run.run_id
+        == "good"
+    )
 
 
 def test_no_experiment_does_not_invent_runs(client):
@@ -151,9 +152,7 @@ def test_registry_versions_are_returned_as_recorded(client):
         name="classifier", description="Candidate classifier", aliases={"candidate": 2}, tags={}
     )
     client.search_model_versions.return_value = [
-        SimpleNamespace(
-            name="classifier", version=2, run_id="run2", status="READY", current_stage="None"
-        )
+        SimpleNamespace(name="classifier", version=2, run_id="run2", status="READY", current_stage="None")
     ]
     result = MLflowTools(client=client).get_model_registry_info(RegistryQuery(name="classifier"))
     assert result.available is True
@@ -168,9 +167,7 @@ def test_artifact_path_rejects_traversal(path):
 
 
 def test_artifact_listing_returns_recorded_metadata(client):
-    client.list_artifacts.return_value = [
-        SimpleNamespace(path="model.joblib", is_dir=False, file_size=100)
-    ]
+    client.list_artifacts.return_value = [SimpleNamespace(path="model.joblib", is_dir=False, file_size=100)]
     result = MLflowTools(client=client).get_run_artifacts(ArtifactsQuery(run_id="run1"))
     assert result.artifacts[0].path == "model.joblib"
     assert result.artifacts[0].file_size == 100

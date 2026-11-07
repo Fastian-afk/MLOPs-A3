@@ -20,7 +20,6 @@ def apply_quality_gate(report: dict, work_dir: str | Path, threshold: float = 0.
     if source.resolve() != model_path.resolve():
         shutil.copyfile(source, temporary)
         os.replace(temporary, model_path)
-    manifest = {**report, "quality_gate": "passed", "f1_threshold": threshold,
-                "model_path": str(model_path)}
+    manifest = {**report, "quality_gate": "passed", "f1_threshold": threshold, "model_path": str(model_path)}
     (destination / "promotion.json").write_text(json.dumps(manifest, indent=2) + "\n")
     return manifest

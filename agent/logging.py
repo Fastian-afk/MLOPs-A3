@@ -22,7 +22,15 @@ def redact(value: Any) -> Any:
 
 def log_tool(request_id: str, tool: str, duration: float, status: str, error_code: str | None) -> None:
     # Never record tool arguments, operational payloads, exception text or credentials.
-    LOGGER.info(json.dumps({
-        "timestamp": datetime.now(UTC).isoformat(), "request_id": request_id,
-        "tool": tool, "duration_ms": round(duration, 3), "status": status, "error_code": error_code,
-    }))
+    LOGGER.info(
+        json.dumps(
+            {
+                "timestamp": datetime.now(UTC).isoformat(),
+                "request_id": request_id,
+                "tool": tool,
+                "duration_ms": round(duration, 3),
+                "status": status,
+                "error_code": error_code,
+            }
+        )
+    )

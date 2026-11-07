@@ -19,7 +19,7 @@ See [architecture.md](architecture.md) for data flow, trust boundaries and the c
 
 ## Prerequisites
 
-- Python 3.12, Git and a POSIX shell. Linux or WSL2 is the simplest development path. On Windows, clone inside WSL2 and run these commands there; Docker Desktop must enable WSL integration for container workflows.
+- Python 3.12, `uv`, Git and a POSIX shell. Linux or WSL2 is the simplest development path. On Windows, clone inside WSL2 and run these commands there; Docker Desktop must enable WSL integration for container workflows.
 - Sufficient disk space for Python dependencies and runtime artifacts. The training demo runs on CPU.
 - Docker Engine with a working daemon and Compose v2 for the full container stack. A Docker executable alone is insufficient.
 - For real deployment: `kubectl`, a current kubeconfig and kind/minikube or an authorized cluster. Local kind also requires a working container daemon.
@@ -32,15 +32,15 @@ Cloud tasks already have an isolated checkout. Work in the existing repository; 
 From the repository root:
 
 ```bash
-python3.12 -m venv .venv
+bash scripts/bootstrap.sh
 . .venv/bin/activate
-python -m pip install -e '.[dev]'
+export DVC_SITE_CACHE_DIR="$PWD/.runtime/dvc-site"
 ruff check .
 mypy
 pytest -q tests/unit
 ```
 
-Dependency versions are declared in `pyproject.toml`. The environment also pins `pathspec==0.12.1` for DVC compatibility and `SQLAlchemy==2.0.44` for MLflow compatibility; unconstrained newer transitive versions caused import/runtime failures during setup. Ordinary CI mocks external infrastructure and does not need a cluster, Airflow or an LLM key. Real integration/e2e checks are separate, opt-in targets; their prerequisites must be running before invoking them.
+The bootstrap uses `uv sync --frozen --extra dev` and `uv.lock`, regenerates/verifies the deterministic sample, and seeds an ignored local DVC remote. Dependency versions are declared in `pyproject.toml`. The environment also pins `pathspec==0.12.1` for DVC compatibility and `SQLAlchemy==2.0.44` for MLflow compatibility; unconstrained newer transitive versions caused import/runtime failures during setup. Ordinary CI mocks external infrastructure and does not need a cluster, Airflow or an LLM key. Real integration/e2e checks are separate, opt-in targets; their prerequisites must be running before invoking them.
 
 Key configuration names (the agent uses the `MLOPS_` prefix):
 
@@ -48,7 +48,7 @@ Key configuration names (the agent uses the `MLOPS_` prefix):
 | --- | --- |
 | `MLOPS_API_TOKEN` | Required bearer authentication for chat/tool inventory; no default credential |
 | `MLOPS_PLANNER` | `offline` or `openai`; offline is deterministic routing |
-| `OPENAI_API_KEY`, `MLOPS_LLM_MODEL` | Provider credential and model for actual structured LLM calls |
+| `MLOPS_LLM_API_KEY`, `MLOPS_LLM_MODEL` | Secure provider credential binding and model for actual structured LLM calls; standard `OPENAI_API_KEY` is also supported locally |
 | `MLOPS_MLFLOW_TRACKING_URI` | Agent tracking server, default `http://127.0.0.1:5000` |
 | `MLFLOW_TRACKING_URI` | Training/DVC tracking server; set consistently with the agent |
 | `MLOPS_AIRFLOW_BASE_URL` | Airflow origin, default `http://127.0.0.1:8080` |
@@ -61,6 +61,27 @@ Key configuration names (the agent uses the `MLOPS_` prefix):
 | `MODEL_PATH`, `APP_VERSION` | Inference artifact path and application version |
 
 Use `.env.example` as the configuration reference. A local `.env` is ignored by Git. Do not paste secrets into source, reports or issue comments. When using managed cloud bindings, inspect variable presence and permitted destinations rather than printing values.
+
+## One-command local startup
+
+After bootstrap, install the separately constrained Airflow runtime once, then use the helper:
+
+```bash
+bash scripts/install_airflow.sh
+. .venv/bin/activate
+python -m scripts.run_local
+read -r MLOPS_API_TOKEN < .runtime/agent.token
+export MLOPS_API_TOKEN
+bash scripts/smoke_test.sh
+```
+
+The helper starts or reuses real MLflow, Airflow, the agent and inference; it trains a model if the serving artifact is absent. It waits for readiness and stores development credentials only in ignored `.runtime`. The smoke test makes a real prediction and an authenticated MLflow-backed agent request. Kubernetes and LLM credentials remain separately configured. Repeating startup reuses healthy local services.
+
+```bash
+python -m scripts.run_local --stop
+```
+
+Stop terminates only helper-owned processes whose recorded process start identity still matches. Services started separately remain your terminal's responsibility. The sections below document individual components for troubleshooting and independent startup.
 
 ## Dataset and DVC
 
@@ -99,10 +120,10 @@ The agent's reproduction tool validates a Git revision, creates a disposable clo
 Start a local tracking server in one terminal, using ignored runtime state:
 
 ```bash
-mkdir -p .runtime/mlflow
+mkdir -p .runtime
 mlflow server --host 127.0.0.1 --port 5000 \
-  --backend-store-uri sqlite:///.runtime/mlflow/mlflow.db \
-  --default-artifact-root "$(pwd)/.runtime/mlflow/artifacts"
+  --workers 1 --backend-store-uri "sqlite:///$PWD/.runtime/mlflow.db" \
+  --artifacts-destination "$PWD/.runtime/mlflow-store"
 ```
 
 In another activated terminal, train five configurations and promote the highest F1 candidate only after the threshold passes:
@@ -164,10 +185,11 @@ Each stage has bounded retries. Dataset validation fails before training. A fail
 
 ## Container stack
 
-`compose.yaml` provides the repeatable service topology. Start it only after confirming a working Docker daemon:
+`compose.yaml` provides the repeatable service topology: MLflow on port 5000, Airflow on 8080 and the protected agent on 8000, each published to loopback. Set `MLOPS_API_TOKEN` before Compose interpolation. The optional `BUILD_CA_BUNDLE` points at a trusted CA bundle for verified package downloads during builds; verification stays enabled. The local Python and Compose variants use the same ports, so stop the local variants before starting containers. Airflow's generated password/token must also be supplied securely to the agent after initialization. Start it only after confirming a working Docker daemon:
 
 ```bash
 docker info
+export AIRFLOW_UID="$(id -u)"
 docker compose config
 docker compose up --build -d
 ```

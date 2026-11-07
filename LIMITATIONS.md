@@ -6,7 +6,7 @@ This project distinguishes implemented behavior from executed integrations. The 
 
 `evidence/kubernetes/runtime_cluster.json` records an actual cluster-provisioning attempt. Docker is working, and downloaded kind/kubectl checksums were verified. kind cannot create its rootless cluster because the runtime lacks the required systemd cgroup delegation (`Delegate=yes`). A user systemd scope was also unavailable; repeating the same kind attempt outside the command sandbox did not resolve this host prerequisite.
 
-Consequently, manifests and mocked Kubernetes adapter tests do not prove a real deployment, live Pod health, service routing, or a real cluster fault incident. Use an existing authorized Kubernetes cluster through secure kubeconfig, or a Linux host with kind's documented cgroup v2/rootless delegation, then run `scripts/kind_demo.sh` and retain the rollout/prediction/API evidence. Do not weaken host isolation or modify cgroup permissions to make this demo pass.
+Consequently, manifests and mocked Kubernetes adapter tests do not prove a real deployment, live Pod health, service routing, or a real cluster fault incident. Actual Docker inference, model readiness failure and recovery are verified separately in `evidence/kubernetes/inference_container.json` and `evidence/failures/inference_readiness_real.json`; container success is not cluster success. Use an existing authorized Kubernetes cluster through secure kubeconfig, or a Linux host with kind's documented cgroup v2/rootless delegation, then run `scripts/kind_demo.sh` and retain the rollout/prediction/API evidence. Do not weaken host isolation or modify cgroup permissions to make this demo pass.
 
 ## Credentials and external services
 

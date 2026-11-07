@@ -1,0 +1,23 @@
+{
+  "timestamp": "2026-11-07T16:41:17.288975+00:00",
+  "verification": "VERIFIED_REAL",
+  "operation": "list_datasets",
+  "input": {},
+  "git_commit": "a73a43ac9bc5a2adc25cd4b2ab8f8586c5480f3a",
+  "result": {
+    "datasets": [
+      {
+        "dataset": "data/dataset.csv",
+        "metadata_path": "data/dataset.csv.dvc",
+        "dvc_hash": "3eacf7ec7241e7f914d7a1aca0346328",
+        "source": "dvc_metadata"
+      }
+    ],
+    "git_commit": "a73a43ac9bc5a2adc25cd4b2ab8f8586c5480f3a",
+    "remotes": [
+      "local"
+    ]
+  },
+  "exit_code": 0,
+  "duration_seconds": 0.004
+}

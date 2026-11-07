@@ -1,0 +1,305 @@
+{
+  "timestamp": "2026-11-07T16:41:32.374411+00:00",
+  "verification": "VERIFIED_REAL",
+  "operation": "dirty_data_detection",
+  "injection": "append invalid row, inspect DVC hashes and dvc status, restore original bytes in finally",
+  "before": {
+    "datasets": [
+      {
+        "dataset": "data/dataset.csv",
+        "git_commit": "a73a43ac9bc5a2adc25cd4b2ab8f8586c5480f3a",
+        "dvc_hash": "3eacf7ec7241e7f914d7a1aca0346328",
+        "actual_hash": "3eacf7ec7241e7f914d7a1aca0346328",
+        "dirty": false,
+        "metadata_dirty": false,
+        "metadata_path": "data/dataset.csv.dvc",
+        "run_id": null,
+        "lineage_match": null,
+        "remotes": [
+          "local"
+        ]
+      }
+    ],
+    "changed": false,
+    "dvc_status": {
+      "validate": [
+        {
+          "changed deps": {
+            "data/dataset.csv": "modified",
+            "training/validate.py": "modified",
+            "training/config.py": "modified"
+          }
+        },
+        {
+          "changed outs": {
+            ".runtime/dvc/validation.json": "deleted"
+          }
+        }
+      ],
+      "preprocess": [
+        {
+          "changed deps": {
+            "data/dataset.csv": "modified",
+            ".runtime/dvc/validation.json": "deleted",
+            "training/preprocess.py": "modified",
+            "training/config.json": "new"
+          }
+        },
+        {
+          "changed outs": {
+            ".runtime/dvc/split.joblib": "deleted"
+          }
+        }
+      ],
+      "train": [
+        {
+          "changed deps": {
+            ".runtime/dvc/split.joblib": "deleted",
+            "training/train.py": "modified",
+            "training/config.json": "new"
+          }
+        },
+        {
+          "changed outs": {
+            ".runtime/dvc/candidate.joblib": "deleted"
+          }
+        }
+      ],
+      "evaluate": [
+        {
+          "changed deps": {
+            ".runtime/dvc/split.joblib": "deleted",
+            ".runtime/dvc/candidate.joblib": "deleted",
+            "training/evaluate.py": "modified",
+            "training/config.json": "new"
+          }
+        },
+        {
+          "changed outs": {
+            ".runtime/dvc/evaluated.joblib": "deleted",
+            ".runtime/dvc/evaluation.json": "deleted"
+          }
+        },
+        "always changed"
+      ],
+      "quality_gate": [
+        {
+          "changed deps": {
+            ".runtime/dvc/evaluation.json": "deleted",
+            ".runtime/dvc/evaluated.joblib": "deleted",
+            "training/quality_gate.py": "modified",
+            "training/config.json": "new"
+          }
+        },
+        {
+          "changed outs": {
+            "artifacts": "modified"
+          }
+        }
+      ]
+    }
+  },
+  "during": {
+    "datasets": [
+      {
+        "dataset": "data/dataset.csv",
+        "git_commit": "a73a43ac9bc5a2adc25cd4b2ab8f8586c5480f3a",
+        "dvc_hash": "3eacf7ec7241e7f914d7a1aca0346328",
+        "actual_hash": "b7d1b51a7f638c9b3e34243e37d7fb77",
+        "dirty": true,
+        "metadata_dirty": false,
+        "metadata_path": "data/dataset.csv.dvc",
+        "run_id": null,
+        "lineage_match": null,
+        "remotes": [
+          "local"
+        ]
+      }
+    ],
+    "changed": true,
+    "dvc_status": {
+      "validate": [
+        {
+          "changed deps": {
+            "data/dataset.csv": "modified",
+            "training/validate.py": "modified",
+            "training/config.py": "modified"
+          }
+        },
+        {
+          "changed outs": {
+            ".runtime/dvc/validation.json": "deleted"
+          }
+        }
+      ],
+      "preprocess": [
+        {
+          "changed deps": {
+            "data/dataset.csv": "modified",
+            ".runtime/dvc/validation.json": "deleted",
+            "training/preprocess.py": "modified",
+            "training/config.json": "new"
+          }
+        },
+        {
+          "changed outs": {
+            ".runtime/dvc/split.joblib": "deleted"
+          }
+        }
+      ],
+      "train": [
+        {
+          "changed deps": {
+            ".runtime/dvc/split.joblib": "deleted",
+            "training/train.py": "modified",
+            "training/config.json": "new"
+          }
+        },
+        {
+          "changed outs": {
+            ".runtime/dvc/candidate.joblib": "deleted"
+          }
+        }
+      ],
+      "evaluate": [
+        {
+          "changed deps": {
+            ".runtime/dvc/split.joblib": "deleted",
+            ".runtime/dvc/candidate.joblib": "deleted",
+            "training/evaluate.py": "modified",
+            "training/config.json": "new"
+          }
+        },
+        {
+          "changed outs": {
+            ".runtime/dvc/evaluated.joblib": "deleted",
+            ".runtime/dvc/evaluation.json": "deleted"
+          }
+        },
+        "always changed"
+      ],
+      "quality_gate": [
+        {
+          "changed deps": {
+            ".runtime/dvc/evaluation.json": "deleted",
+            ".runtime/dvc/evaluated.joblib": "deleted",
+            "training/quality_gate.py": "modified",
+            "training/config.json": "new"
+          }
+        },
+        {
+          "changed outs": {
+            "artifacts": "modified"
+          }
+        }
+      ],
+      "data/dataset.csv.dvc": [
+        {
+          "changed outs": {
+            "data/dataset.csv": "modified"
+          }
+        }
+      ]
+    }
+  },
+  "restored": {
+    "datasets": [
+      {
+        "dataset": "data/dataset.csv",
+        "git_commit": "a73a43ac9bc5a2adc25cd4b2ab8f8586c5480f3a",
+        "dvc_hash": "3eacf7ec7241e7f914d7a1aca0346328",
+        "actual_hash": "3eacf7ec7241e7f914d7a1aca0346328",
+        "dirty": false,
+        "metadata_dirty": false,
+        "metadata_path": "data/dataset.csv.dvc",
+        "run_id": null,
+        "lineage_match": null,
+        "remotes": [
+          "local"
+        ]
+      }
+    ],
+    "changed": false,
+    "dvc_status": {
+      "validate": [
+        {
+          "changed deps": {
+            "data/dataset.csv": "modified",
+            "training/validate.py": "modified",
+            "training/config.py": "modified"
+          }
+        },
+        {
+          "changed outs": {
+            ".runtime/dvc/validation.json": "deleted"
+          }
+        }
+      ],
+      "preprocess": [
+        {
+          "changed deps": {
+            "data/dataset.csv": "modified",
+            ".runtime/dvc/validation.json": "deleted",
+            "training/preprocess.py": "modified",
+            "training/config.json": "new"
+          }
+        },
+        {
+          "changed outs": {
+            ".runtime/dvc/split.joblib": "deleted"
+          }
+        }
+      ],
+      "train": [
+        {
+          "changed deps": {
+            ".runtime/dvc/split.joblib": "deleted",
+            "training/train.py": "modified",
+            "training/config.json": "new"
+          }
+        },
+        {
+          "changed outs": {
+            ".runtime/dvc/candidate.joblib": "deleted"
+          }
+        }
+      ],
+      "evaluate": [
+        {
+          "changed deps": {
+            ".runtime/dvc/split.joblib": "deleted",
+            ".runtime/dvc/candidate.joblib": "deleted",
+            "training/evaluate.py": "modified",
+            "training/config.json": "new"
+          }
+        },
+        {
+          "changed outs": {
+            ".runtime/dvc/evaluated.joblib": "deleted",
+            ".runtime/dvc/evaluation.json": "deleted"
+          }
+        },
+        "always changed"
+      ],
+      "quality_gate": [
+        {
+          "changed deps": {
+            ".runtime/dvc/evaluation.json": "deleted",
+            ".runtime/dvc/evaluated.joblib": "deleted",
+            "training/quality_gate.py": "modified",
+            "training/config.json": "new"
+          }
+        },
+        {
+          "changed outs": {
+            "artifacts": "modified"
+          }
+        }
+      ]
+    }
+  },
+  "bytes_restored": true,
+  "restored_md5": "3eacf7ec7241e7f914d7a1aca0346328",
+  "duration_seconds": 1.712,
+  "exit_code": 0
+}

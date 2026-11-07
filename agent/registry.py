@@ -28,18 +28,27 @@ class ToolRegistry:
     def add(self, name, description, input_model, handler, *, output_model, permission="read", timeout=30):
         if name in self.tools:
             raise ValueError("Duplicate tool")
-        self.tools[name] = ToolSpec(name, description, input_model, handler, output_model, permission, timeout)
+        self.tools[name] = ToolSpec(
+            name, description, input_model, handler, output_model, permission, timeout
+        )
 
     def schemas(self, *, allow_writes: bool = False) -> list[dict]:
         return [
-            {"type": "function", "function": {"name": spec.name.replace(".", "__"),
-             "description": spec.description,
-             "parameters": spec.input_model.model_json_schema()}}
-            for spec in self.tools.values() if allow_writes or spec.permission == "read"
+            {
+                "type": "function",
+                "function": {
+                    "name": spec.name.replace(".", "__"),
+                    "description": spec.description,
+                    "parameters": spec.input_model.model_json_schema(),
+                },
+            }
+            for spec in self.tools.values()
+            if allow_writes or spec.permission == "read"
         ]
 
-    async def execute(self, name: str, arguments: dict[str, Any], request_id: str,
-                      *, authorized_write: bool = False) -> ToolResult:
+    async def execute(
+        self, name: str, arguments: dict[str, Any], request_id: str, *, authorized_write: bool = False
+    ) -> ToolResult:
         start = time.monotonic()
         try:
             spec = self.tools.get(name)
@@ -59,18 +68,45 @@ class ToolRegistry:
             validated = spec.output_model.model_validate(output).model_dump(mode="json")
             result = ToolResult(tool=name, status="ok", data=redact(validated))
         except (TimeoutError, asyncio.TimeoutError):
-            result = ToolResult(tool=name, status="error", error_code="TIMEOUT",
-                                uncertainty="The service did not respond within the tool deadline.")
+            result = ToolResult(
+                tool=name,
+                status="error",
+                error_code="TIMEOUT",
+                uncertainty="The service did not respond within the tool deadline.",
+            )
         except PermissionError:
-            result = ToolResult(tool=name, status="error", error_code="FORBIDDEN",
-                                uncertainty="Operation denied by permissions or service authorization.")
+            result = ToolResult(
+                tool=name,
+                status="error",
+                error_code="FORBIDDEN",
+                uncertainty="Operation denied by permissions or service authorization.",
+            )
         except (ValueError, ValidationError, KeyError):
-            result = ToolResult(tool=name, status="error", error_code="INVALID_REQUEST",
-                                uncertainty="Invalid tool name, arguments or service response schema.")
-        except Exception:
+            result = ToolResult(
+                tool=name,
+                status="error",
+                error_code="INVALID_REQUEST",
+                uncertainty="Invalid tool name, arguments or service response schema.",
+            )
+        except Exception as exc:
             # Exception strings can contain remote URLs, tokens and service payloads.
-            result = ToolResult(tool=name, status="error", error_code="SERVICE_UNAVAILABLE",
-                                uncertainty="Adapter failed; no operational result can be established.")
+            adapter_code = getattr(exc, "code", None)
+            safe_codes = {
+                "airflow_timeout": "TIMEOUT",
+                "airflow_authentication_missing": "AUTHENTICATION_REQUIRED",
+                "airflow_authentication_failed": "AUTHENTICATION_FAILED",
+                "airflow_dag_not_approved": "FORBIDDEN",
+                "airflow_not_found": "NOT_FOUND",
+                "airflow_conflict": "CONFLICT",
+            }
+            result = ToolResult(
+                tool=name,
+                status="error",
+                error_code=safe_codes.get(adapter_code, "SERVICE_UNAVAILABLE")
+                if isinstance(adapter_code, str)
+                else "SERVICE_UNAVAILABLE",
+                uncertainty="Adapter failed; no operational result can be established.",
+            )
         result.duration_ms = round((time.monotonic() - start) * 1000, 3)
         log_tool(request_id, name, result.duration_ms, result.status, result.error_code)
         return result

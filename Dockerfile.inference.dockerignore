@@ -1,0 +1,5 @@
+**
+!inference/
+!inference/**
+!artifacts/
+!artifacts/model.joblib

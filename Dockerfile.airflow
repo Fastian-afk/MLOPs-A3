@@ -1,0 +1,11 @@
+# syntax=docker/dockerfile:1
+FROM apache/airflow:3.1.0-python3.12
+USER airflow
+RUN --mount=type=secret,id=proxy_ca \
+    if [ -f /run/secrets/proxy_ca ]; then export PIP_CERT=/run/secrets/proxy_ca; fi; \
+    pip install --no-cache-dir 'apache-airflow==3.1.0' 'mlflow-skinny==3.5.1' \
+      'scikit-learn==1.7.2' 'joblib==1.5.2' pandas \
+      --constraint https://raw.githubusercontent.com/apache/airflow/constraints-3.1.0/constraints-3.12.txt
+WORKDIR /workspace/MLOPs-A3
+ENV PYTHONPATH=/workspace/MLOPs-A3
+CMD ["bash", "scripts/start_airflow.sh"]

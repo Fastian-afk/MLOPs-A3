@@ -13,7 +13,7 @@ if [[ -n "${CODEX_PROXY_CERT:-}" ]]; then
   docker_build_args+=(--secret "id=proxy_ca,src=${CODEX_PROXY_CERT}")
 fi
 docker build "${docker_build_args[@]}" -f Dockerfile.inference -t "$image" .
-if ! kind get clusters | rg -x "$cluster" >/dev/null; then
+if ! kind get clusters | grep -Fxq -- "$cluster"; then
   kind create cluster --name "$cluster" --wait 120s
 fi
 kind load docker-image "$image" --name "$cluster"
@@ -26,4 +26,31 @@ kubectl set image --local -f kubernetes/deployment.yaml "inference=${image}" -o 
   | kubectl --context "$context" apply -f -
 kubectl --context "$context" -n mlops rollout status deployment/inference --timeout=120s
 kubectl --context "$context" -n mlops get pods,deployments,services,endpoints -o wide
-echo 'Ready. For local validation: kubectl --context '"$context"' -n mlops port-forward service/inference 8001:80'
+port="${INFERENCE_LOCAL_PORT:-8001}"
+kubectl --context "$context" -n mlops port-forward service/inference "${port}:80" >/tmp/mlops-kind-port-forward.log 2>&1 &
+forward_pid=$!
+trap 'kill "$forward_pid" 2>/dev/null || true' EXIT
+INFERENCE_LOCAL_PORT="$port" python - <<'PY'
+import csv, json, os, time, urllib.request
+base = 'http://127.0.0.1:' + os.environ['INFERENCE_LOCAL_PORT']
+for attempt in range(30):
+    try:
+        with urllib.request.urlopen(base + '/health/ready', timeout=2) as response:
+            assert response.status == 200
+        break
+    except (OSError, AssertionError):
+        if attempt == 29:
+            raise
+        time.sleep(1)
+with open('data/dataset.csv') as stream:
+    row = next(csv.DictReader(stream))
+features = [float(row[f'feature_{i}']) for i in range(8)]
+request = urllib.request.Request(base + '/predict', data=json.dumps({'instances': [features]}).encode(),
+                                 headers={'Content-Type': 'application/json'})
+with urllib.request.urlopen(request, timeout=10) as response:
+    result = json.load(response)
+assert len(result['predictions']) == 1
+assert result['run_id']
+print(json.dumps({'status': 'VERIFIED_REAL', 'prediction': result}, indent=2))
+PY
+echo 'Inference rollout and representative prediction passed.'

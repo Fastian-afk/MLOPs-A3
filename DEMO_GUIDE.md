@@ -2,6 +2,17 @@
 
 Run from the repository root in an activated Python 3.12 environment. Use [README.md](README.md) for installation and configuration. Preserve timestamps, request IDs and raw evidence; redact credentials before committing outputs.
 
+For the full local service stack after bootstrap/Airflow installation:
+
+```bash
+python -m scripts.run_local
+read -r MLOPS_API_TOKEN < .runtime/agent.token
+export MLOPS_API_TOKEN
+bash scripts/smoke_test.sh
+```
+
+`python -m scripts.run_local --stop` stops only helper-owned process groups. The helper reuses healthy separately launched services and leaves those running.
+
 ## Prepare the local data and experiments
 
 ```bash
@@ -20,12 +31,7 @@ Start the agent with `uvicorn api.main:app --host 127.0.0.1 --port 8000`. Start 
 The intended server version is Apache Airflow 3.1.0 on Python 3.12, installed in its own `.venv-airflow` using the matching official constraints. `scripts/start_airflow.sh` initializes the database, configures the repository DAG directory and starts the development standalone server. Keep the agent/training environment separate from Airflow's constrained dependencies.
 
 ```bash
-uv venv --python 3.12 .venv-airflow
-uv pip install --python .venv-airflow/bin/python apache-airflow==3.1.0 \
-  --constraint https://raw.githubusercontent.com/apache/airflow/constraints-3.1.0/constraints-3.12.txt
-uv pip install --python .venv-airflow/bin/python mlflow-skinny==3.5.1 \
-  scikit-learn==1.7.2 pandas joblib==1.5.2 \
-  --constraint https://raw.githubusercontent.com/apache/airflow/constraints-3.1.0/constraints-3.12.txt
+bash scripts/install_airflow.sh
 PATH="$PWD/.venv-airflow/bin:$PATH" MLFLOW_TRACKING_URI=http://127.0.0.1:5000 \
   bash scripts/start_airflow.sh
 ```
@@ -43,6 +49,15 @@ The server uses `MLOPS_SHARED_DIR` for durable run files and `MLOPS_DATASET_PATH
 ## Five conversations
 
 The examples use one session for clarity. Set the required `MLOPS_API_TOKEN` securely in both server and client shells; every chat request needs bearer authentication. Existing exports under `evidence/conversations/` record the modes and tool outcomes actually exercised in the implementation environment.
+
+To record all five automatically against the actual local API:
+
+```bash
+python -m scripts.demo_scenarios --confirm-training
+```
+
+The flag explicitly authorizes the demonstration's proposed Airflow trigger; the script still performs the API's proposal/confirmation flow and polls actual final state. Without the flag it records the proposal without triggering. It does not change Kubernetes state. Configure the same MLflow/Airflow settings in the client process as in the server so actual run lookup and status polling use the intended services.
+
 
 ### 1. Dataset provenance
 
@@ -98,6 +113,14 @@ kubectl -n mlops rollout status deployment/inference --timeout=120s
 kubectl -n mlops get deployment,pods,services,endpoints -o wide
 kubectl -n mlops get events --sort-by=.lastTimestamp
 kubectl -n mlops logs deployment/inference --tail=100
+kubectl -n mlops port-forward service/inference 8001:80
+```
+
+In another terminal:
+
+```bash
+curl --fail -H 'Content-Type: application/json' \
+  -d '{"instances":[[0,0,0,0,0,0,0,0]]}' http://127.0.0.1:8001/predict
 ```
 
 The helper builds/loads an immutable image that contains the promoted model. Verify two ready replicas and an actual prediction through the service; an open Pod port alone is not sufficient. The agent should use the namespaced read-only service account rather than cluster-admin credentials. Keep its kubeconfig securely outside the repository.
@@ -108,15 +131,39 @@ In the implementation cloud runtime, kind provisioning was blocked by unavailabl
 
 ### Failure A: rejected training data or quality gate
 
-Use the fault-injection script's documented mode to run an invalid-data/gate case. For a real Airflow investigation, preserve DAG run ID, failed task, retry attempts, diagnostics and downstream states. Confirm no promotion manifest/new serving artifact appeared. Restore valid input or the documented threshold, rerun the approved DAG with explicit confirmation and retain the successful final task states.
+Run the real Airflow gate failure and recovery with the explicit operator confirmation flag:
+
+```bash
+python -m scripts.verify_airflow --confirm-trigger --threshold 1 --expect-state failed \
+  --output evidence/failures/airflow_gate_failure.json
+python -m scripts.verify_airflow --confirm-trigger --threshold 0.8 --expect-state success \
+  --output evidence/failures/airflow_gate_recovery.json
+```
+
+The script uses the local generated password file securely in memory and exports sanitized evidence. Preserve DAG run ID, failed task, retry attempts, diagnostics and downstream states. Confirm no promotion manifest/new serving artifact appeared. Restore valid input or the documented threshold, rerun the approved DAG with explicit confirmation and retain the successful final task states.
 
 A directly executed validation/gate test proves the Python training safety invariant. It is not a real scheduler incident. The evidence label must identify which operation actually ran.
 
-### Failure B: readiness or service selector failure
+### Failure B: model readiness failure and cluster diagnosis
+
+A real Docker application fault can be reproduced without a cluster:
+
+```bash
+model_run_id="$(python -c 'import joblib; print(joblib.load("artifacts/model.joblib")["metadata"]["run_id"])')"
+python -m scripts.verify_inference_container --build --image "mlops-inference:run-${model_run_id}"
+```
+
+The verifier builds/runs the non-root image, checks a real prediction, injects a missing `MODEL_PATH`, confirms live=200 but ready/predict=503, then recreates the correct image and verifies recovery. It removes all containers it starts and exports `evidence/kubernetes/inference_container.json` plus `evidence/failures/inference_readiness_real.json`. The script targets the standard local Docker socket used by the recorded runtime; use a host with that authorized socket. This verifies container readiness, not Kubernetes routing.
 
 On the approved demo cluster, deliberately break only the demonstration namespace's service selector or model readiness configuration using an operator's authorized `kubectl`. Ask the agent to diagnose unavailability from current resources/events/logs. Restore the checked-in manifest, wait for ready endpoints and repeat a prediction. Record before/fault/recovery observations.
 
-The agent itself exposes no Kubernetes mutation endpoint. If no cluster is available, run the mocked diagnosis test and label it `VERIFIED_MOCKED`; do not present it as a live cluster incident.
+The agent itself exposes no Kubernetes mutation endpoint. If no cluster is available, run the reproducible mocked diagnosis:
+
+```bash
+python -m scripts.kubernetes_fault_demo
+```
+
+Its export is `evidence/failures/kubernetes_selector_mocked.json`, labeled `VERIFIED_MOCKED`; do not present it as a live cluster incident.
 
 ## Five-minute presentation
 

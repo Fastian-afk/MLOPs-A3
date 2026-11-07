@@ -1,5 +1,6 @@
 """Read real DVC metadata and reproduce snapshots in disposable clones."""
 
+import configparser
 import hashlib
 import re
 import subprocess
@@ -110,12 +111,15 @@ class DvcTools:
         self.tracking_uri = tracking_uri
 
     def command(self, argv: list[str], cwd: Path | None = None, timeout: int = 30) -> str:
-        allowed = {"git": {"rev-parse", "show", "status", "clone", "checkout"},
-                   "dvc": {"status", "pull"}}
+        allowed = {"git": {"rev-parse", "show", "status", "clone", "checkout"}, "dvc": {"status", "pull"}}
         if len(argv) < 2 or argv[0] not in allowed or argv[1] not in allowed[argv[0]]:
             raise PermissionError("command_not_allowlisted")
-        result = subprocess.run(argv, cwd=cwd or self.root, capture_output=True,
-                                text=True, timeout=timeout, check=False)
+        try:
+            result = subprocess.run(
+                argv, cwd=cwd or self.root, capture_output=True, text=True, timeout=timeout, check=False
+            )
+        except subprocess.TimeoutExpired as error:
+            raise TimeoutError("dvc_command_deadline_exceeded") from error
         if result.returncode:
             # Raw stderr can contain remote credentials; return a fixed error only.
             raise RuntimeError(f"{argv[0]}_{argv[1]}_failed")
@@ -126,10 +130,26 @@ class DvcTools:
         return self.command(["git", "rev-parse", "--verify", f"{revision}^{{commit}}"])
 
     def remotes(self) -> list[str]:
-        config = self.root / ".dvc/config"
-        if not config.exists():
-            return []
-        return re.findall(r"\[\s*'remote\s+\"([^\"]+)\"'\s*\]", config.read_text())
+        names = set()
+        for filename in ["config", "config.local"]:
+            config = self.root / ".dvc" / filename
+            if config.exists():
+                names.update(re.findall(r"\[\s*'remote\s+\"([^\"]+)\"'\s*\]", config.read_text()))
+        return sorted(names)
+
+    def local_remote_for_clone(self) -> str | None:
+        """Reuse only a configured local directory, never copy remote credentials."""
+        parser = configparser.ConfigParser()
+        parser.read([self.root / ".dvc/config", self.root / ".dvc/config.local"])
+        remote_name = parser.get("core", "remote", fallback="")
+        for section in parser.sections():
+            if section.strip("'") != f'remote "{remote_name}"':
+                continue
+            url = parser.get(section, "url", fallback="")
+            path = Path(url)
+            if url and "://" not in url and path.is_absolute() and path.is_dir():
+                return str(path.resolve())
+        return None
 
     def safe_path(self, dataset: str) -> Path:
         DatasetInput.safe_dataset(dataset)
@@ -161,17 +181,28 @@ class DvcTools:
             document = yaml.safe_load(metadata.read_text()) or {}
             for out in document.get("outs", []):
                 target = metadata.parent / out["path"]
-                records.append({"dataset": target.relative_to(self.root).as_posix(),
-                                "metadata_path": metadata.relative_to(self.root).as_posix(),
-                                "dvc_hash": out.get("md5"), "source": "dvc_metadata"})
+                records.append(
+                    {
+                        "dataset": target.relative_to(self.root).as_posix(),
+                        "metadata_path": metadata.relative_to(self.root).as_posix(),
+                        "dvc_hash": out.get("md5"),
+                        "source": "dvc_metadata",
+                    }
+                )
         lock = self.root / "dvc.lock"
         if lock.exists():
             document = yaml.safe_load(lock.read_text()) or {}
             for stage in document.get("stages", {}).values():
                 for out in stage.get("outs", []):
                     if out.get("path", "").startswith("data/"):
-                        records.append({"dataset": out["path"], "metadata_path": "dvc.lock",
-                                        "dvc_hash": out.get("md5"), "source": "dvc_lock"})
+                        records.append(
+                            {
+                                "dataset": out["path"],
+                                "metadata_path": "dvc.lock",
+                                "dvc_hash": out.get("md5"),
+                                "source": "dvc_lock",
+                            }
+                        )
         return {"datasets": records, "git_commit": self.commit(), "remotes": self.remotes()}
 
     def provenance(self, args: ProvenanceInput) -> dict:
@@ -202,38 +233,61 @@ class DvcTools:
                 actual_hash = hashlib.md5(actual_path.read_bytes(), usedforsecurity=False).hexdigest()
             dirty = actual_hash != recorded_hash
         metadata_dirty = bool(self.command(["git", "status", "--porcelain", "--", path, "dvc.lock"]))
-        return {"dataset": dataset, "git_commit": sha, "dvc_hash": recorded_hash,
-                "actual_hash": actual_hash, "dirty": dirty, "metadata_dirty": metadata_dirty,
-                "metadata_path": path, "run_id": args.run_id,
-                "lineage_match": expected_hash == recorded_hash if expected_hash else None,
-                "remotes": self.remotes()}
+        return {
+            "dataset": dataset,
+            "git_commit": sha,
+            "dvc_hash": recorded_hash,
+            "actual_hash": actual_hash,
+            "dirty": dirty,
+            "metadata_dirty": metadata_dirty,
+            "metadata_path": path,
+            "run_id": args.run_id,
+            "lineage_match": expected_hash == recorded_hash if expected_hash else None,
+            "remotes": self.remotes(),
+        }
 
     def compare_versions(self, args: CompareInput) -> dict:
         old = self.provenance(ProvenanceInput(dataset=args.dataset, revision=args.old_revision))
         new = self.provenance(ProvenanceInput(dataset=args.dataset, revision=args.new_revision))
-        return {"dataset": args.dataset, "old": old, "new": new,
-                "changed": old["dvc_hash"] != new["dvc_hash"]}
+        return {
+            "dataset": args.dataset,
+            "old": old,
+            "new": new,
+            "changed": old["dvc_hash"] != new["dvc_hash"],
+        }
 
     def detect_changes(self, _: EmptyInput) -> dict:
         listed = self.list_datasets(EmptyInput())
-        provenance = [self.provenance(ProvenanceInput(dataset=item["dataset"]))
-                      for item in listed["datasets"]]
+        provenance = [
+            self.provenance(ProvenanceInput(dataset=item["dataset"])) for item in listed["datasets"]
+        ]
         status = self.command(["dvc", "status", "--json"])
         import json
 
         parsed = json.loads(status or "{}")
-        return {"datasets": provenance, "changed": any(item["dirty"] for item in provenance),
-                "dvc_status": parsed}
+        return {
+            "datasets": provenance,
+            "changed": any(item["dirty"] for item in provenance),
+            "dvc_status": parsed,
+        }
 
     def reproduce_version(self, args: ReproduceInput) -> dict:
         provenance = self.provenance(args)
         sha = provenance["git_commit"]
-        commands = [["git", "clone", "--no-hardlinks", str(self.root), "reproduction"],
-                    ["git", "checkout", "--detach", sha],
-                    ["dvc", "pull", provenance["metadata_path"]]]
-        result = {"git_commit": sha, "dataset": provenance["dataset"],
-                  "dvc_hash": provenance["dvc_hash"], "executed": args.execute,
-                  "verified": False, "commands": commands, "limitation": None}
+        commands = [
+            ["git", "clone", "--no-hardlinks", str(self.root), "reproduction"],
+            ["git", "checkout", "--detach", sha],
+            ["dvc", "pull", provenance["metadata_path"]],
+        ]
+        result = {
+            "git_commit": sha,
+            "dataset": provenance["dataset"],
+            "dvc_hash": provenance["dvc_hash"],
+            "executed": args.execute,
+            "verified": False,
+            "commands": commands,
+            "limitation": None,
+        }
         if not args.execute:
             result["limitation"] = "Commands are a plan; no historical data was retrieved."
             return result
@@ -241,13 +295,24 @@ class DvcTools:
             clone = Path(temporary) / "reproduction"
             self.command(["git", "clone", "--no-hardlinks", str(self.root), str(clone)], timeout=30)
             self.command(["git", "checkout", "--detach", sha], cwd=clone)
+            local_remote = self.local_remote_for_clone()
+            if local_remote:
+                # Local-only config is absent from a clone. Forward an absolute
+                # directory through a private config file, without remote tokens.
+                parser = configparser.ConfigParser()
+                parser["core"] = {"remote": "reproduction-local"}
+                parser["'remote \"reproduction-local\"'"] = {"url": local_remote}
+                with (clone / ".dvc/config.local").open("w") as handle:
+                    parser.write(handle)
             try:
                 self.command(["dvc", "pull", provenance["metadata_path"]], cwd=clone, timeout=60)
-            except (RuntimeError, subprocess.TimeoutExpired):
+            except (RuntimeError, TimeoutError):
                 result["limitation"] = "Historical DVC data could not be pulled from the configured remote."
                 return result
             data = (clone / provenance["dataset"]).read_bytes()
-            result["verified"] = hashlib.md5(data, usedforsecurity=False).hexdigest() == provenance["dvc_hash"]
+            result["verified"] = (
+                hashlib.md5(data, usedforsecurity=False).hexdigest() == provenance["dvc_hash"]
+            )
             if not result["verified"]:
                 result["limitation"] = "Retrieved bytes failed the recorded MD5 comparison."
         return result
@@ -256,12 +321,49 @@ class DvcTools:
 def register(registry, settings) -> None:
     tools = DvcTools(settings.root, settings.mlflow_tracking_uri)
     definitions = [
-        ("dvc.list_datasets", "List actual DVC-tracked dataset metadata and Git commit", EmptyInput, tools.list_datasets, DatasetList),
-        ("dvc.provenance", "Read dataset hash, Git revision and optional MLflow run lineage", ProvenanceInput, tools.provenance, ProvenanceOutput),
-        ("dvc.compare_versions", "Compare dataset hashes at two validated Git revisions", CompareInput, tools.compare_versions, CompareOutput),
-        ("dvc.detect_changes", "Compare workspace data to DVC hashes and actual DVC status", EmptyInput, tools.detect_changes, ChangesOutput),
-        ("dvc.reproduce_version", "Plan or verify historical reproduction in a disposable clone", ReproduceInput, tools.reproduce_version, ReproduceOutput),
+        (
+            "dvc.list_datasets",
+            "List actual DVC-tracked dataset metadata and Git commit",
+            EmptyInput,
+            tools.list_datasets,
+            DatasetList,
+        ),
+        (
+            "dvc.provenance",
+            "Read dataset hash, Git revision and optional MLflow run lineage",
+            ProvenanceInput,
+            tools.provenance,
+            ProvenanceOutput,
+        ),
+        (
+            "dvc.compare_versions",
+            "Compare dataset hashes at two validated Git revisions",
+            CompareInput,
+            tools.compare_versions,
+            CompareOutput,
+        ),
+        (
+            "dvc.detect_changes",
+            "Compare workspace data to DVC hashes and actual DVC status",
+            EmptyInput,
+            tools.detect_changes,
+            ChangesOutput,
+        ),
+        (
+            "dvc.reproduce_version",
+            "Plan or verify historical reproduction in a disposable clone",
+            ReproduceInput,
+            tools.reproduce_version,
+            ReproduceOutput,
+        ),
     ]
     for name, description, input_model, handler, output_model in definitions:
-        registry.add(name, description, input_model, handler, output_model=output_model,
-                     permission="read", timeout=120 if name == "dvc.reproduce_version" else 30)
+        registry.add(
+            name,
+            description,
+            input_model,
+            handler,
+            output_model=output_model,
+            permission="read",
+            timeout=120 if name == "dvc.reproduce_version" else 30,
+        )

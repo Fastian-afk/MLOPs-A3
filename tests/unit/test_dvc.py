@@ -19,14 +19,16 @@ from agent.tools.dvc_tools import (
 @pytest.fixture
 def dvc_repo(tmp_path):
     def git(*args):
-        return subprocess.run(["git", *args], cwd=tmp_path, capture_output=True, text=True, check=True).stdout.strip()
+        return subprocess.run(
+            ["git", *args], cwd=tmp_path, capture_output=True, text=True, check=True
+        ).stdout.strip()
 
     git("init", "-b", "main")
     git("config", "user.name", "Test User")
     git("config", "user.email", "test@example.invalid")
     (tmp_path / "data").mkdir()
     (tmp_path / ".dvc").mkdir()
-    (tmp_path / ".dvc/config").write_text('[\'remote "local"\']\n    url = /safe/local/remote\n')
+    (tmp_path / ".dvc/config").write_text("['remote \"local\"']\n    url = /safe/local/remote\n")
     data = tmp_path / "data/dataset.csv"
     data.write_text("feature,target\n1,0\n")
     first_hash = hashlib.md5(data.read_bytes(), usedforsecurity=False).hexdigest()
@@ -75,8 +77,18 @@ def test_invalid_dataset_path_rejected(dataset):
 def test_compare_reads_two_real_git_snapshots(dvc_repo):
     tools, data, metadata, first, git = dvc_repo
     data.write_text("feature,target\n9,1\n")
-    metadata.write_text(yaml.safe_dump({"outs": [{"md5": hashlib.md5(data.read_bytes(), usedforsecurity=False).hexdigest(),
-                                                "path": "dataset.csv"}]}))
+    metadata.write_text(
+        yaml.safe_dump(
+            {
+                "outs": [
+                    {
+                        "md5": hashlib.md5(data.read_bytes(), usedforsecurity=False).hexdigest(),
+                        "path": "dataset.csv",
+                    }
+                ]
+            }
+        )
+    )
     git("add", ".")
     git("commit", "-m", "second")
     result = tools.compare_versions(CompareInput(old_revision=first))
@@ -87,8 +99,17 @@ def test_compare_reads_two_real_git_snapshots(dvc_repo):
 def test_run_lineage_reads_recorded_tags(dvc_repo):
     tools, _, _, first, _ = dvc_repo
     expected = tools.provenance(ProvenanceInput())["dvc_hash"]
-    client = SimpleNamespace(get_run=lambda run_id: SimpleNamespace(data=SimpleNamespace(tags={
-        "dataset.path": "data/dataset.csv", "dataset.hash": expected, "dataset.git_revision": first})))
+    client = SimpleNamespace(
+        get_run=lambda run_id: SimpleNamespace(
+            data=SimpleNamespace(
+                tags={
+                    "dataset.path": "data/dataset.csv",
+                    "dataset.hash": expected,
+                    "dataset.git_revision": first,
+                }
+            )
+        )
+    )
     with patch("mlflow.tracking.MlflowClient", return_value=client):
         result = tools.provenance(ProvenanceInput(run_id="a" * 32))
     assert result["lineage_match"] is True
@@ -131,3 +152,30 @@ def test_symlink_escape_rejected(dvc_repo, tmp_path):
     (tools.root / "data/escape.csv").symlink_to(outside)
     with pytest.raises(ValueError, match="escapes"):
         tools.safe_path("data/escape.csv")
+
+
+def test_local_remote_names_and_directory_are_reused_without_copying_credentials(dvc_repo):
+    tools, *_ = dvc_repo
+    remote = tools.root / "safe-local-cache"
+    remote.mkdir()
+    (tools.root / ".dvc/config").write_text("")
+    (tools.root / ".dvc/config.local").write_text(
+        "[core]\nremote = configured\n['remote \"configured\"']\nurl = " + str(remote) + "\n"
+    )
+    assert tools.remotes() == ["configured"]
+    assert tools.local_remote_for_clone() == str(remote)
+
+
+def test_network_remote_is_never_copied_into_reproduction_clone(dvc_repo):
+    tools, *_ = dvc_repo
+    (tools.root / ".dvc/config").write_text(
+        "[core]\nremote = network\n['remote \"network\"']\nurl = https://remote.example.invalid/data\n"
+    )
+    assert tools.local_remote_for_clone() is None
+
+
+def test_subprocess_timeout_is_classified_without_raw_command_details(dvc_repo):
+    tools, *_ = dvc_repo
+    with patch("agent.tools.dvc_tools.subprocess.run", side_effect=subprocess.TimeoutExpired("git", 1)):
+        with pytest.raises(TimeoutError, match="deadline_exceeded"):
+            tools.command(["git", "status", "--porcelain"])

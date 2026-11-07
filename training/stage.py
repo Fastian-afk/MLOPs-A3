@@ -30,10 +30,17 @@ def main() -> None:
     elif args.stage == "train":
         train_model(work / "split.joblib", work, config)
     elif args.stage == "evaluate":
-        evaluate_model(work / "split.joblib", work / "candidate.joblib", work, config,
-                       os.getenv("MLFLOW_TRACKING_URI", "http://127.0.0.1:5000"))
+        evaluate_model(
+            work / "split.joblib",
+            work / "candidate.joblib",
+            work,
+            config,
+            os.getenv("MLFLOW_TRACKING_URI", "http://127.0.0.1:5000"),
+        )
     else:
-        apply_quality_gate(json.loads((work / "evaluation.json").read_text()), "artifacts", config.f1_threshold)
+        apply_quality_gate(
+            json.loads((work / "evaluation.json").read_text()), "artifacts", config.f1_threshold
+        )
 
 
 if __name__ == "__main__":

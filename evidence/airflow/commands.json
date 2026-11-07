@@ -1,0 +1,45 @@
+[
+  {
+    "timestamp": "2026-11-07T16:41:58.600636+00:00",
+    "label": "VERIFIED_REAL",
+    "command": [
+      "bash",
+      "scripts/install_airflow.sh"
+    ],
+    "exit_code": 0,
+    "duration_seconds": 0.384,
+    "stdout": "",
+    "stderr": "Using Python 3.12.14 environment at: .venv-airflow\nChecked 1 package in 13ms\nUsing Python 3.12.14 environment at: .venv-airflow\nChecked 4 packages in 7ms\nUsing Python 3.12.14 environment at: .venv-airflow\nChecked 141 packages in 1ms\nAll installed packages are compatible\n"
+  },
+  {
+    "timestamp": "2026-11-07T16:41:58.609223+00:00",
+    "label": "VERIFIED_REAL",
+    "command": [
+      ".venv/bin/ruff",
+      "check",
+      "agent/tools/airflow_tools.py",
+      "dags/training_pipeline.py",
+      "tests/unit/test_airflow.py",
+      "scripts/verify_airflow.py"
+    ],
+    "exit_code": 0,
+    "duration_seconds": 0.009,
+    "stdout": "All checks passed!\n",
+    "stderr": ""
+  },
+  {
+    "timestamp": "2026-11-07T16:41:59.231485+00:00",
+    "label": "VERIFIED_MOCKED",
+    "command": [
+      ".venv/bin/python",
+      "-m",
+      "pytest",
+      "tests/unit/test_airflow.py",
+      "-q"
+    ],
+    "exit_code": 0,
+    "duration_seconds": 0.622,
+    "stdout": "..............                                                           [100%]\n14 passed in 0.14s\n",
+    "stderr": ""
+  }
+]

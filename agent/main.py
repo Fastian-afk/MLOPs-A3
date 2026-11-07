@@ -1,4 +1,5 @@
 """Command line client for the authenticated conversational API."""
+
 import argparse
 import os
 
@@ -15,9 +16,16 @@ def main():
     token = os.environ.get("MLOPS_API_TOKEN", "")
     if not token:
         parser.error("Set MLOPS_API_TOKEN securely")
-    response = httpx.post(args.url + "/agent/chat", timeout=120,
+    response = httpx.post(
+        args.url + "/agent/chat",
+        timeout=120,
         headers={"Authorization": f"Bearer {token}"},
-        json={"message": args.message, "session_id": args.session, "confirmation_token": args.confirmation_token})
+        json={
+            "message": args.message,
+            "session_id": args.session,
+            "confirmation_token": args.confirmation_token,
+        },
+    )
     response.raise_for_status()
     print(response.text)
 

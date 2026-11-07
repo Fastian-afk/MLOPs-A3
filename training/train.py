@@ -13,21 +13,34 @@ from sklearn.preprocessing import StandardScaler
 from training.config import FEATURE_NAMES, TrainingConfig
 
 
-def train_model(
-    split_path: str | Path, work_dir: str | Path, config: TrainingConfig | None = None
-) -> str:
+def train_model(split_path: str | Path, work_dir: str | Path, config: TrainingConfig | None = None) -> str:
     config = config or TrainingConfig()
     split = joblib.load(split_path)
-    model = Pipeline([("scale", StandardScaler()), ("classifier", LogisticRegression(
-        C=config.c, random_state=config.seed, max_iter=1000,
-    ))])
+    model = Pipeline(
+        [
+            ("scale", StandardScaler()),
+            (
+                "classifier",
+                LogisticRegression(
+                    C=config.c,
+                    random_state=config.seed,
+                    max_iter=1000,
+                ),
+            ),
+        ]
+    )
     model.fit(split["x_train"], split["y_train"])
     output = Path(work_dir)
     output.mkdir(parents=True, exist_ok=True)
     path = output / "candidate.joblib"
-    joblib.dump({"model": model, "feature_names": FEATURE_NAMES,
-                 "metadata": {"config": config.model_dump(),
-                              "dataset_hash": split["validation"]["dataset_hash"]}}, path)
+    joblib.dump(
+        {
+            "model": model,
+            "feature_names": FEATURE_NAMES,
+            "metadata": {"config": config.model_dump(), "dataset_hash": split["validation"]["dataset_hash"]},
+        },
+        path,
+    )
     return str(path)
 
 
@@ -45,7 +58,7 @@ def main() -> None:
     parser.add_argument("--threshold", type=float, default=0.8)
     args = parser.parse_args()
     reports = []
-    for index, c in enumerate([0.01, 0.1, 1.0, 10.0, 100.0][:args.runs]):
+    for index, c in enumerate([0.01, 0.1, 1.0, 10.0, 100.0][: args.runs]):
         config = TrainingConfig(c=c, f1_threshold=args.threshold)
         run_dir = args.work_dir / f"candidate-{index}"
         split = preprocess_dataset(args.dataset, run_dir, config)

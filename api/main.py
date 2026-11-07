@@ -36,7 +36,11 @@ def create_app(settings: Settings | None = None, registry: ToolRegistry | None =
 
     @app.get("/health")
     def health():
-        return {"status": "ok", "planner": settings.planner, "authentication_configured": bool(settings.api_token)}
+        return {
+            "status": "ok",
+            "planner": settings.planner,
+            "authentication_configured": bool(settings.api_token),
+        }
 
     @app.post("/agent/chat", response_model=ChatResponse)
     async def chat(request: ChatRequest, user_id: Annotated[str, Depends(authenticate)]):
@@ -44,9 +48,17 @@ def create_app(settings: Settings | None = None, registry: ToolRegistry | None =
 
     @app.get("/agent/tools")
     def tools(user_id: Annotated[str, Depends(authenticate)]):
-        return [{"name": s.name, "purpose": s.description, "permission": s.permission, "timeout": s.timeout,
-                 "input_schema": s.input_model.model_json_schema(), "output_schema": s.output_model.model_json_schema()}
-                for s in app.state.orchestrator.registry.tools.values()]
+        return [
+            {
+                "name": s.name,
+                "purpose": s.description,
+                "permission": s.permission,
+                "timeout": s.timeout,
+                "input_schema": s.input_model.model_json_schema(),
+                "output_schema": s.output_model.model_json_schema(),
+            }
+            for s in app.state.orchestrator.registry.tools.values()
+        ]
 
     return app
 

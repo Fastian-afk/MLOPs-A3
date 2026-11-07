@@ -1,0 +1,21 @@
+{
+  "timestamp": "2026-11-07T16:41:34.834205+00:00",
+  "verification": "VERIFIED_REAL",
+  "operation": "mlflow_run_dataset_lineage",
+  "run_id": "00f3a8f527ca4c4bbee3fc421d6780cf",
+  "result": {
+    "dataset": "data/dataset.csv",
+    "git_commit": "a73a43ac9bc5a2adc25cd4b2ab8f8586c5480f3a",
+    "dvc_hash": "3eacf7ec7241e7f914d7a1aca0346328",
+    "actual_hash": null,
+    "dirty": null,
+    "metadata_dirty": false,
+    "metadata_path": "data/dataset.csv.dvc",
+    "run_id": "00f3a8f527ca4c4bbee3fc421d6780cf",
+    "lineage_match": true,
+    "remotes": [
+      "local"
+    ]
+  },
+  "exit_code": 0
+}

@@ -1,0 +1,86 @@
+{
+  "status": "VERIFIED_REAL",
+  "timestamp": "2026-11-07T16:44:59.203053+00:00",
+  "scope": "real Docker container; NOT a Kubernetes incident",
+  "injected_fault": "MODEL_PATH points to an absent artifact in a real read-only Docker container",
+  "failed_checks": {
+    "live": {
+      "http_status": 200,
+      "body": {
+        "status": "live"
+      }
+    },
+    "ready": {
+      "http_status": 503,
+      "body": {
+        "detail": "MODEL_NOT_READY"
+      }
+    },
+    "predict": {
+      "http_status": 503,
+      "body": {
+        "detail": "MODEL_NOT_READY"
+      }
+    },
+    "version": {
+      "http_status": 200,
+      "body": {
+        "application_version": "0.1.0",
+        "ready": false,
+        "run_id": null,
+        "git_commit": null,
+        "dataset_hash": null,
+        "feature_names": []
+      }
+    }
+  },
+  "logs": "INFO:     172.17.0.1:42610 - \"GET /health/live HTTP/1.1\" 200 OK\nINFO:     172.17.0.1:42614 - \"GET /health/live HTTP/1.1\" 200 OK\nINFO:     172.17.0.1:42630 - \"GET /health/ready HTTP/1.1\" 503 Service Unavailable\nINFO:     172.17.0.1:42638 - \"POST /predict HTTP/1.1\" 503 Service Unavailable\nINFO:     172.17.0.1:42646 - \"GET /version HTTP/1.1\" 200 OK\nINFO:     Started server process [1]\nINFO:     Waiting for application startup.\nModel could not be loaded; readiness remains false\nINFO:     Application startup complete.\nINFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)\n",
+  "diagnosis": "The process remains live, but the model artifact cannot be loaded. Readiness and prediction return MODEL_NOT_READY instead of serving invalid predictions.",
+  "corrective_action": "Recreate the container from the same immutable image without overriding the bundled valid model path",
+  "recovery_checks": {
+    "ready": {
+      "http_status": 200,
+      "body": {
+        "status": "ready"
+      }
+    },
+    "predict": {
+      "http_status": 200,
+      "body": {
+        "predictions": [
+          0
+        ],
+        "probabilities": [
+          [
+            0.9925479435801637,
+            0.00745205641983628
+          ]
+        ],
+        "run_id": "00f3a8f527ca4c4bbee3fc421d6780cf"
+      }
+    },
+    "version": {
+      "http_status": 200,
+      "body": {
+        "application_version": "0.1.0",
+        "ready": true,
+        "run_id": "00f3a8f527ca4c4bbee3fc421d6780cf",
+        "git_commit": "a73a43ac9bc5a2adc25cd4b2ab8f8586c5480f3a",
+        "dataset_hash": "3eacf7ec7241e7f914d7a1aca0346328",
+        "feature_names": [
+          "feature_0",
+          "feature_1",
+          "feature_2",
+          "feature_3",
+          "feature_4",
+          "feature_5",
+          "feature_6",
+          "feature_7"
+        ]
+      }
+    }
+  },
+  "image": "mlops-inference:run-00f3a8f527ca4c4bbee3fc421d6780cf",
+  "image_id": "sha256:c77961675774213855fb80568d48e38baa77de806391bce19504c51a1fd2b962",
+  "containers_cleaned": true
+}

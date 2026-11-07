@@ -1,0 +1,28 @@
+{
+  "timestamp": "2026-11-07T16:41:17.292833+00:00",
+  "verification": "VERIFIED_REAL",
+  "operation": "current_provenance",
+  "input": {
+    "dataset": "data/dataset.csv",
+    "revision": "HEAD",
+    "run_id": null,
+    "expected_hash": null
+  },
+  "git_commit": "a73a43ac9bc5a2adc25cd4b2ab8f8586c5480f3a",
+  "result": {
+    "dataset": "data/dataset.csv",
+    "git_commit": "a73a43ac9bc5a2adc25cd4b2ab8f8586c5480f3a",
+    "dvc_hash": "3eacf7ec7241e7f914d7a1aca0346328",
+    "actual_hash": "3eacf7ec7241e7f914d7a1aca0346328",
+    "dirty": false,
+    "metadata_dirty": false,
+    "metadata_path": "data/dataset.csv.dvc",
+    "run_id": null,
+    "lineage_match": null,
+    "remotes": [
+      "local"
+    ]
+  },
+  "exit_code": 0,
+  "duration_seconds": 0.006
+}

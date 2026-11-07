@@ -100,11 +100,14 @@ def test_kubernetes_auth_error_is_sanitized(clients):
 
 def test_pod_logs_are_bounded_and_redacted(clients):
     core, _, tools = clients
-    core.read_namespaced_pod_log.return_value = "startup token=supersecret password=hunter2\nready"
+    core.read_namespaced_pod_log.return_value = (
+        "startup token=supersecret password=hunter2\nAuthorization: Bearer confidential-token\nready"
+    )
     result = tools.pod_logs(LogInput(pod="inference-abc", tail_lines=20))
     assert result.redacted
     assert "supersecret" not in result.logs
     assert "hunter2" not in result.logs
+    assert "confidential-token" not in result.logs
     assert core.read_namespaced_pod_log.call_args.kwargs["limit_bytes"] == 30000
 
 

@@ -10,8 +10,9 @@ from training.config import FEATURE_NAMES
 
 
 def prepare(path: Path) -> None:
-    x, y = make_classification(n_samples=400, n_features=8, n_informative=6,
-                              n_redundant=0, random_state=42, class_sep=1.5)
+    x, y = make_classification(
+        n_samples=400, n_features=8, n_informative=6, n_redundant=0, random_state=42, class_sep=1.5
+    )
     frame = pd.DataFrame(x, columns=FEATURE_NAMES)
     frame["target"] = y
     path.parent.mkdir(parents=True, exist_ok=True)

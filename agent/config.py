@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     http_timeout: float = Field(default=10, gt=0, le=60)
     planner: Literal["offline", "openai"] = "offline"
     llm_model: str = "gpt-4.1-mini"
+    llm_api_key: SecretStr | None = None
     api_token: SecretStr | None = None
     max_tool_calls: int = Field(default=12, ge=1, le=20)
     request_timeout: float = Field(default=90, gt=0, le=300)

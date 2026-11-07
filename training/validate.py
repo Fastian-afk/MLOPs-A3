@@ -26,5 +26,10 @@ def validate_dataset(path: str | Path) -> dict:
         raise ValueError("dataset_target_must_contain_two_binary_classes")
     if frame["target"].value_counts().min() < 10:
         raise ValueError("dataset_insufficient_class_samples")
-    return {"validated": True, "rows": len(frame), "features": FEATURE_NAMES,
-            "dataset_path": str(path), "dataset_hash": dataset_hash(path)}
+    return {
+        "validated": True,
+        "rows": len(frame),
+        "features": FEATURE_NAMES,
+        "dataset_path": str(path),
+        "dataset_hash": dataset_hash(path),
+    }

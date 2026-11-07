@@ -62,7 +62,7 @@ def create_app(model_path: str | Path | None = None) -> FastAPI:
             ):
                 raise ValueError("Invalid inference artifact")
             application.state.artifact = artifact
-        except (OSError, ValueError, TypeError, KeyError):
+        except Exception:
             logger.error("Model could not be loaded; readiness remains false")
         yield
 

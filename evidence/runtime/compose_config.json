@@ -1,0 +1,16 @@
+{
+  "status": "VERIFIED_REAL",
+  "scope": "Compose syntax and variable interpolation only; services not started",
+  "timestamp": "2026-11-07T16:50:07.723782+00:00",
+  "command": [
+    "docker",
+    "--host=unix:///var/run/docker.sock",
+    "compose",
+    "config",
+    "--quiet"
+  ],
+  "exit_code": 0,
+  "duration_seconds": 0.124,
+  "stdout": "",
+  "stderr": ""
+}

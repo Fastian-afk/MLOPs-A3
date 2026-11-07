@@ -1,0 +1,108 @@
+{
+  "timestamp": "2026-11-07T16:40:28.096683+00:00",
+  "label": "VERIFIED_REAL",
+  "command": "python -m scripts.verify_airflow --confirm-trigger",
+  "explicit_operator_confirmation": true,
+  "threshold": 1.0,
+  "duration_seconds": 18.481,
+  "result": {
+    "run": {
+      "dag_id": "mlops_training",
+      "dag_run_id": "agent__9d6153721b8248038695a2561e15065b",
+      "state": "failed",
+      "logical_date": "2026-11-07T16:40:09.615945Z",
+      "start_date": "2026-11-07T16:40:10.702017Z",
+      "end_date": "2026-11-07T16:40:27.966123Z",
+      "conf": {
+        "c": 1.0,
+        "seed": 42,
+        "test_size": 0.25,
+        "f1_threshold": 1.0,
+        "experiment_name": "mlops-assignment-03"
+      }
+    },
+    "tasks": [
+      {
+        "task_id": "validate_dataset",
+        "state": "success",
+        "try_number": 1,
+        "start_date": "2026-11-07T16:40:10.754549Z",
+        "end_date": "2026-11-07T16:40:11.968094Z",
+        "duration": 2.213
+      },
+      {
+        "task_id": "preprocess_data",
+        "state": "success",
+        "try_number": 1,
+        "start_date": "2026-11-07T16:40:12.860506Z",
+        "end_date": "2026-11-07T16:40:14.095920Z",
+        "duration": 3.2350000000000003
+      },
+      {
+        "task_id": "train_model",
+        "state": "success",
+        "try_number": 1,
+        "start_date": "2026-11-07T16:40:14.938914Z",
+        "end_date": "2026-11-07T16:40:16.159350Z",
+        "duration": 3.2199999999999998
+      },
+      {
+        "task_id": "evaluate_and_log",
+        "state": "success",
+        "try_number": 1,
+        "start_date": "2026-11-07T16:40:17.023806Z",
+        "end_date": "2026-11-07T16:40:18.415200Z",
+        "duration": 2.391
+      },
+      {
+        "task_id": "quality_gate",
+        "state": "failed",
+        "try_number": 2,
+        "start_date": "2026-11-07T16:40:25.895328Z",
+        "end_date": "2026-11-07T16:40:27.059131Z",
+        "duration": 3.1639999999999997
+      }
+    ],
+    "completed": true,
+    "succeeded": false
+  },
+  "diagnostics": [
+    {
+      "dag_id": "mlops_training",
+      "run_id": "agent__9d6153721b8248038695a2561e15065b",
+      "task": {
+        "task_id": "quality_gate",
+        "state": "failed",
+        "try_number": 2,
+        "start_date": "2026-11-07T16:40:25.895328Z",
+        "end_date": "2026-11-07T16:40:27.059131Z",
+        "duration": 3.1639999999999997
+      },
+      "log": "[{\"event\": \"::group::Log message source details\", \"sources\": [\"/workspace/MLOPs-A3/.runtime/airflow/logs/dag_id=mlops_training/run_id=agent__9d6153721b8248038695a2561e15065b/task_id=quality_gate/attempt=2.log\"]}, {\"event\": \"::endgroup::\"}, {\"timestamp\": \"2026-11-07T16:40:25.917847Z\", \"event\": \"DAG bundles loaded: dags-folder\", \"level\": \"info\", \"logger\": \"airflow.dag_processing.bundles.manager.DagBundlesManager\", \"filename\": \"manager.py\", \"lineno\": 179}, {\"timestamp\": \"2026-11-07T16:40:25.918606Z\", \"event\": \"Filling up the DagBag from /workspace/MLOPs-A3/dags/training_pipeline.py\", \"level\": \"info\", \"logger\": \"airflow.models.dagbag.DagBag\", \"filename\": \"dagbag.py\", \"lineno\": 593}, {\"timestamp\": \"2026-11-07T16:40:27.047854Z\", \"event\": \"Checking quality gate; failure never creates a promotion manifest\", \"level\": \"info\", \"logger\": \"unusual_prefix_1ff9e41725e9f351be35abba4e01738c9f2fb4c7_training_pipeline\", \"filename\": \"training_pipeline.py\", \"lineno\": 79}, {\"timestamp\": \"2026-11-07T16:40:27.048077Z\", \"event\": \"Task failed with exception\", \"level\": \"error\", \"logger\": \"task\", \"filename\": \"task_runner.py\", \"lineno\": 994, \"error_detail\": [{\"exc_type\": \"ValueError\", \"exc_value\": \"quality_gate_failed: promotion blocked\", \"exc_notes\": [], \"syntax_error\": null, \"is_cause\": false, \"frames\": [{\"filename\": \"/workspace/MLOPs-A3/.venv-airflow/lib/python3.12/site-packages/airflow/sdk/execution_time/task_runner.py\", \"lineno\": 920, \"name\": \"run\"}, {\"filename\": \"/workspace/MLOPs-A3/.venv-airflow/lib/python3.12/site-packages/airflow/sdk/execution_time/task_runner.py\", \"lineno\": 1307, \"name\": \"_execute_task\"}, {\"filename\": \"/workspace/MLOPs-A3/.venv-airflow/lib/python3.12/site-packages/airflow/sdk/bases/operator.py\", \"lineno\": 416, \"name\": \"wrapper\"}, {\"filename\": \"/workspace/MLOPs-A3/.venv-airflow/lib/python3.12/site-packages/airflow/sdk/bases/decorator.py\", \"lineno\": 252, \"name\": \"execute\"}, {\"filename\": \"/workspace/MLOPs-A3/.venv-airflow/lib/python3.12/site-packages/airflow/sdk/bases/operator.py\", \"lineno\": 416, \"name\": \"wrapper\"}, {\"filename\": \"/workspace/MLOPs-A3/.venv-airflow/lib/python3.12/site-packages/airflow/providers/standard/operators/python.py\", \"lineno\": 216, \"name\": \"execute\"}, {\"filename\": \"/workspace/MLOPs-A3/.venv-airflow/lib/python3.12/site-packages/airflow/providers/standard/operators/python.py\", \"lineno\": 239, \"name\": \"execute_callable\"}, {\"filename\": \"/workspace/MLOPs-A3/.venv-airflow/lib/python3.12/site-packages/airflow/sdk/execution_time/callback_runner.py\", \"lineno\": 82, \"name\": \"run\"}, {\"filename\": \"/workspace/MLOPs-A3/dags/training_pipeline.py\", \"lineno\": 80, \"name\": \"gate\"}, {\"filename\": \"/workspace/MLOPs-A3/training/quality_gate.py\", \"lineno\": 14, \"name\": \"apply_quality_gate\"}], \"is_group\": false, \"exceptions\": []}]}]",
+      "log_available": true,
+      "log_truncated": false,
+      "uncertainty": null
+    }
+  ],
+  "promotion_manifest_present": false,
+  "expected_state": "failed",
+  "evaluation": {
+    "run_id": "1344c7c1188049bd9f136cc00691ec54",
+    "metrics": {
+      "f1": 0.9019607843137255,
+      "precision": 0.8846153846153846,
+      "recall": 0.92,
+      "accuracy": 0.9
+    },
+    "provenance": {
+      "dataset.path": "data/dataset.csv",
+      "dataset.hash": "3eacf7ec7241e7f914d7a1aca0346328",
+      "dataset.git_revision": "a73a43ac9bc5a2adc25cd4b2ab8f8586c5480f3a",
+      "git.dirty": "false",
+      "git.commit": "a73a43ac9bc5a2adc25cd4b2ab8f8586c5480f3a"
+    },
+    "validation_passed": true,
+    "model_path": "/workspace/MLOPs-A3/.runtime/training/8367c31a18bb3ae91f79f2a5/evaluated.joblib",
+    "quality_gate": "failed"
+  }
+}

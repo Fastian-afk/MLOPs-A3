@@ -11,7 +11,7 @@ import math
 from pathlib import PurePosixPath
 from typing import Any, Literal
 
-from mlflow import MlflowClient
+from mlflow import MlflowClient, set_tracking_uri
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
@@ -30,9 +30,7 @@ class RunsQuery(InputModel):
     @field_validator("experiment_ids")
     @classmethod
     def validate_experiment_ids(cls, value: list[str] | None) -> list[str] | None:
-        if value is not None and (
-            not value or any(not item or len(item) > 128 for item in value)
-        ):
+        if value is not None and (not value or any(not item or len(item) > 128 for item in value)):
             raise ValueError("Provide one to ten nonempty experiment identifiers")
         return value
 
@@ -197,9 +195,7 @@ def _direction(metric: str, direction: str | None) -> Literal["maximize", "minim
 def _run_record(run: Any) -> RunRecord:
     # Drop non-finite metrics: JSON cannot represent NaN/Infinity reliably.
     metrics = {
-        str(name): float(value)
-        for name, value in run.data.metrics.items()
-        if math.isfinite(float(value))
+        str(name): float(value) for name, value in run.data.metrics.items() if math.isfinite(float(value))
     }
     return RunRecord(
         run_id=run.info.run_id,
@@ -219,13 +215,18 @@ class MLflowTools:
     def __init__(
         self,
         tracking_uri: str | None = None,
-        experiment_name: str = "mlops-assignment",
+        experiment_name: str = "mlops-assignment-03",
         *,
         client: Any = None,
     ) -> None:
         self._client = client
         self.tracking_uri = tracking_uri
         self.experiment_name = experiment_name
+        if tracking_uri is not None and client is None:
+            # MLflow 3.5's artifact resolver consults the process tracking URI even
+            # for an explicitly configured MlflowClient. This application has one
+            # configured tracking backend, so configure that supported SDK route.
+            set_tracking_uri(tracking_uri)
 
     @property
     def client(self) -> Any:
@@ -364,7 +365,9 @@ class MLflowTools:
                 available=False,
                 models=[],
                 versions=[],
-                caveats=["Registry is unavailable or the requested model was not found; no deployment is inferred."],
+                caveats=[
+                    "Registry is unavailable or the requested model was not found; no deployment is inferred."
+                ],
             )
         return RegistryOutput(
             available=True,
@@ -372,7 +375,9 @@ class MLflowTools:
                 RegisteredModel(
                     name=model.name,
                     description=model.description,
-                    aliases={str(key): str(value) for key, value in (getattr(model, "aliases", {}) or {}).items()},
+                    aliases={
+                        str(key): str(value) for key, value in (getattr(model, "aliases", {}) or {}).items()
+                    },
                     tags=dict(getattr(model, "tags", {}) or {}),
                 )
                 for model in models
@@ -394,13 +399,49 @@ class MLflowTools:
 def register(registry: Any, settings: Any) -> None:
     adapter = MLflowTools(settings.mlflow_tracking_uri, settings.experiment_name)
     definitions = [
-        ("mlflow.list_experiments", "List recorded MLflow experiments", ExperimentQuery, adapter.list_experiments, ExperimentsOutput),
+        (
+            "mlflow.list_experiments",
+            "List recorded MLflow experiments",
+            ExperimentQuery,
+            adapter.list_experiments,
+            ExperimentsOutput,
+        ),
         ("mlflow.list_runs", "List the most recent recorded runs", RunsQuery, adapter.list_runs, RunsOutput),
-        ("mlflow.run_details", "Retrieve one run's metrics, parameters and lineage tags", RunQuery, adapter.get_run_details, RunDetailsOutput),
-        ("mlflow.artifacts", "List artifact metadata without downloading or executing artifacts", ArtifactsQuery, adapter.get_run_artifacts, ArtifactsOutput),
-        ("mlflow.best_run", "Rank recent completed runs by a metric and explicit direction", BestRunQuery, adapter.select_best_run, BestRunOutput),
-        ("mlflow.compare_runs", "Compare specific completed runs across experiments", CompareRunsQuery, adapter.compare_runs, BestRunOutput),
-        ("mlflow.registry_info", "Read registered-model metadata where supported", RegistryQuery, adapter.get_model_registry_info, RegistryOutput),
+        (
+            "mlflow.run_details",
+            "Retrieve one run's metrics, parameters and lineage tags",
+            RunQuery,
+            adapter.get_run_details,
+            RunDetailsOutput,
+        ),
+        (
+            "mlflow.artifacts",
+            "List artifact metadata without downloading or executing artifacts",
+            ArtifactsQuery,
+            adapter.get_run_artifacts,
+            ArtifactsOutput,
+        ),
+        (
+            "mlflow.best_run",
+            "Rank recent completed runs by a metric and explicit direction",
+            BestRunQuery,
+            adapter.select_best_run,
+            BestRunOutput,
+        ),
+        (
+            "mlflow.compare_runs",
+            "Compare specific completed runs across experiments",
+            CompareRunsQuery,
+            adapter.compare_runs,
+            BestRunOutput,
+        ),
+        (
+            "mlflow.registry_info",
+            "Read registered-model metadata where supported",
+            RegistryQuery,
+            adapter.get_model_registry_info,
+            RegistryOutput,
+        ),
     ]
     for name, description, input_model, handler, output_model in definitions:
         registry.add(

@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-11-07T16:43:44.346381+00:00",
+  "verification": "VERIFIED_REAL",
+  "environment": "disposable clone; local filesystem DVC remote; real HTTP MLflow; separate mlops-dvc-verification experiment",
+  "git_commit": "a73a43ac9bc5a2adc25cd4b2ab8f8586c5480f3a",
+  "commands": [
+    "git clone --no-hardlinks",
+    "dvc pull data/dataset.csv.dvc",
+    "MLFLOW_TRACKING_URI=http://127.0.0.1:5000 dvc repro"
+  ],
+  "exit_code": 0,
+  "duration_seconds": 9.799,
+  "stdout": "'data/dataset.csv.dvc' didn't change, skipping\nRunning stage 'validate':\n> python -m training.stage validate\nGenerating lock file 'dvc.lock'\nUpdating lock file 'dvc.lock'\n\nRunning stage 'preprocess':\n> python -m training.stage preprocess\nUpdating lock file 'dvc.lock'\n\nRunning stage 'train':\n> python -m training.stage train\nUpdating lock file 'dvc.lock'\n\nRunning stage 'evaluate':\n> python -m training.stage evaluate\n\ud83c\udfc3 View run masked-crab-533 at: http://127.0.0.1:5000/#/experiments/2/runs/5cdd6189460a4b16bfae8faad4c67c29\n\ud83e\uddea View experiment at: http://127.0.0.1:5000/#/experiments/2\nUpdating lock file 'dvc.lock'\n\nRunning stage 'quality_gate':\n> python -m training.stage gate\nUpdating lock file 'dvc.lock'\n\nTo track the changes with git, run:\n\n\tgit add dvc.lock\n\nTo enable auto staging, run:\n\n\tdvc config core.autostage true\nUse `dvc push` to send your updates to remote storage.\n",
+  "stderr": "",
+  "dvc_lock": "schema: '2.0'\nstages:\n  validate:\n    cmd: python -m training.stage validate\n    deps:\n    - path: data/dataset.csv\n      hash: md5\n      md5: 3eacf7ec7241e7f914d7a1aca0346328\n      size: 44193\n    - path: training/config.py\n      hash: md5\n      md5: 08910647c0c62aae265cf10554ec64f8\n      size: 460\n    - path: training/validate.py\n      hash: md5\n      md5: 277c50ee0b79ed4cfb5e420d329d0a34\n      size: 1156\n    outs:\n    - path: .runtime/dvc/validation.json\n      hash: md5\n      md5: 6bd312e737c72b8df2442b8748d23009\n      size: 287\n  preprocess:\n    cmd: python -m training.stage preprocess\n    deps:\n    - path: .runtime/dvc/validation.json\n      hash: md5\n      md5: 6bd312e737c72b8df2442b8748d23009\n      size: 287\n    - path: data/dataset.csv\n      hash: md5\n      md5: 3eacf7ec7241e7f914d7a1aca0346328\n      size: 44193\n    - path: training/preprocess.py\n      hash: md5\n      md5: d9f01111588ee7a6a314e9cbcb191ec1\n      size: 1061\n    params:\n      training/config.json:\n        seed: 42\n        test_size: 0.25\n    outs:\n    - path: .runtime/dvc/split.joblib\n      hash: md5\n      md5: 07062652a3b2af18a9bf2277192fdd4f\n      size: 44000\n  train:\n    cmd: python -m training.stage train\n    deps:\n    - path: .runtime/dvc/split.joblib\n      hash: md5\n      md5: 07062652a3b2af18a9bf2277192fdd4f\n      size: 44000\n    - path: training/train.py\n      hash: md5\n      md5: 2291f18a164ab7489ab355b10b3f1a2f\n      size: 2585\n    params:\n      training/config.json:\n        c: 1.0\n        seed: 42\n    outs:\n    - path: .runtime/dvc/candidate.joblib\n      hash: md5\n      md5: d25aff0fc1bbf92cd2d126be8ae1f610\n      size: 2322\n  evaluate:\n    cmd: python -m training.stage evaluate\n    deps:\n    - path: .runtime/dvc/candidate.joblib\n      hash: md5\n      md5: d25aff0fc1bbf92cd2d126be8ae1f610\n      size: 2322\n    - path: .runtime/dvc/split.joblib\n      hash: md5\n      md5: 07062652a3b2af18a9bf2277192fdd4f\n      size: 44000\n    - path: training/evaluate.py\n      hash: md5\n      md5: 04a5cbc745cb153ad8a43adf5ac4928b\n      size: 4874\n    params:\n      training/config.json:\n        experiment_name: mlops-dvc-verification\n        f1_threshold: 0.8\n    outs:\n    - path: .runtime/dvc/evaluated.joblib\n      hash: md5\n      md5: 99072a12031bffd119b365788be0cc3d\n      size: 2688\n    - path: .runtime/dvc/evaluation.json\n      hash: md5\n      md5: 709dc61a706b21eac815483d7f5a7207\n      size: 561\n  quality_gate:\n    cmd: python -m training.stage gate\n    deps:\n    - path: .runtime/dvc/evaluated.joblib\n      hash: md5\n      md5: 99072a12031bffd119b365788be0cc3d\n      size: 2688\n    - path: .runtime/dvc/evaluation.json\n      hash: md5\n      md5: 709dc61a706b21eac815483d7f5a7207\n      size: 561\n    - path: training/quality_gate.py\n      hash: md5\n      md5: 0be84bc820f2a86493d5b3b63494e43f\n      size: 1088\n    params:\n      training/config.json:\n        f1_threshold: 0.8\n    outs:\n    - path: artifacts\n      hash: md5\n      md5: 7faea24539fcf39b7f27d615fbe19e80.dir\n      size: 3265\n      nfiles: 2\n",
+  "promotion": {
+    "run_id": "5cdd6189460a4b16bfae8faad4c67c29",
+    "metrics": {
+      "f1": 0.9019607843137255,
+      "precision": 0.8846153846153846,
+      "recall": 0.92,
+      "accuracy": 0.9
+    },
+    "provenance": {
+      "dataset.path": "data/dataset.csv",
+      "dataset.hash": "3eacf7ec7241e7f914d7a1aca0346328",
+      "dataset.git_revision": "a73a43ac9bc5a2adc25cd4b2ab8f8586c5480f3a",
+      "git.dirty": "true",
+      "git.commit": "a73a43ac9bc5a2adc25cd4b2ab8f8586c5480f3a"
+    },
+    "validation_passed": true,
+    "model_path": "artifacts/model.joblib",
+    "quality_gate": "passed",
+    "f1_threshold": 0.8
+  }
+}

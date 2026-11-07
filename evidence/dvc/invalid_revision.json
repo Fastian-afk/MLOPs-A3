@@ -1,0 +1,8 @@
+{
+  "timestamp": "2026-11-07T16:41:17.821222+00:00",
+  "verification": "VERIFIED_REAL",
+  "operation": "invalid_revision_rejected",
+  "input": "HEAD;echo injected",
+  "rejected": true,
+  "subprocess_executed": false
+}
