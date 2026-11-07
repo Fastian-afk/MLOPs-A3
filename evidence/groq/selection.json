@@ -1,0 +1,273 @@
+{
+  "timestamp": "2026-11-07T18:40:25.497370+00:00",
+  "scope": "actual Groq provider with actual adapters",
+  "status": "VERIFIED_REAL",
+  "duration_seconds": 2.627,
+  "question": "Compare the latest five runs by F1 and recommend the best candidate.",
+  "provider_success": true,
+  "functional_success": true,
+  "all_adapters_success": true,
+  "response": {
+    "answer": "Observed evidence:\nmlflow.best_run: {\"best_run\": {\"end_time\": 1794070324353, \"experiment_id\": \"1\", \"metrics\": {\"accuracy\": 0.92, \"f1\": 0.92, \"precision\": 0.92, \"recall\": 0.92}, \"params\": {\"c\": \"100.0\", \"experiment_name\": \"mlops-assignment-03\", \"f1_threshold\": \"0.8\", \"seed\": \"42\", \"test_size\": \"0.25\"}, \"run_id\": \"339b16bb4dc3467aa6004ff170f7f504\", \"start_time\": 1794070324274, \"status\": \"FINISHED\", \"tags\": {\"dataset.git_revision\": \"5a35d39d1d0e7041ca78a5d0c416f05c9d15d5c8\", \"dataset.hash\": \"3eacf7ec7241e7f914d7a1aca0346328\", \"dataset.path\": \"data/dataset.csv\", \"dataset.validation\": \"passed\", \"evaluation.split\": \"stratified_holdout\", \"git.commit\": \"5a35d39d1d0e7041ca78a5d0c416f05c9d15d5c8\", \"git.dirty\": \"false\", \"mlflow.runName\": \"unequaled-snake-14\", \"model.version\": \"339b16bb4dc3467aa6004ff170f7f504\", \"quality_gate.status\": \"passed\"}}, \"candidates\": [{\"end_time\": 1794070324353, \"experiment_id\": \"1\", \"metrics\": {\"accuracy\": 0.92, \"f1\": 0.92, \"precision\": 0.92, \"recall\": 0.92}, \"params\": {\"c\": \"100.0\", \"experiment_name\": \"mlops-assignment-03\", \"f1_threshold\": \"0.8\", \"seed\": \"42\", \"test_size\": \"0.25\"}, \"run_id\": \"339b16bb4dc3467aa6004ff170f7f504\", \"start_time\": 1794070324274, \"status\": \"FINISHED\", \"tags\": {\"dataset.git_revision\": \"5a35d39d1d0e7041ca78a5d0c416f05c9d15d5c8\", \"dataset.hash\": \"3eacf7ec7241e7f914d7a1aca0346328\", \"dataset.path\": \"data/dataset.csv\", \"dataset.validation\": \"passed\", \"evaluation.split\": \"stratified_holdout\", \"git.commit\": \"5a35d39d1d0e7041ca78a5d0c416f05c9d15d5c8\", \"git.dirty\": \"false\", \"mlflow.runName\": \"unequaled-snake-14\", \"model.version\": \"339b16bb4dc3467aa6004ff170f7f504\", \"quality_gate.status\": \"passed\"}}, {\"end_time\": 1794070324229, \"experiment_id\": \"1\", \"metrics\": {\"accuracy\": 0.92, \"f1\": 0.92, \"precision\": 0.92, \"recall\": 0.92}, \"params\": {\"c\": \"10.0\", \"experiment_name\": \"mlops-assignment-03\", \"f1_threshold\": \"0.8\", \"seed\": \"42\", \"test_size\": \"0.25\"}, \"run_id\": \"50098d1677434c79b901658b9edeb74b\", \"start_time\": 1794070324130, \"status\": \"FINISHED\", \"tags\": {\"dataset.git_revision\": \"5a35d39d1d0e7041ca78a5d0c416f05c9d15d5c8\", \"dataset.hash\": \"3eacf7ec7241e7f914d7a1aca0346328\", \"dataset.path\": \"data/dataset.csv\", \"dataset.validation\": \"passed\", \"evaluation.split\": \"stratified_holdout\", \"git.commit\": \"5a35d39d1d0e7041ca78a5d0c416f05c9d15d5c8\", \"git.dirty\": \"false\", \"mlflow.runName\": \"peaceful-cod-619\", \"model.version\": \"50098d1677434c79b901658b9edeb74b\", \"quality_gate.status\": \"passed\"}}, {\"end_time\": 1794076368233, \"experiment_id\": \"1\", \"metrics\": {\"accuracy\": 0.9, \"f1\": 0.9019607843137255, \"precision\": 0.8846153846153846, \"recall\": 0.92}, \"params\": {\"c\": \"1.0\", \"experiment_name\": \"mlops-assignment-03\", \"f1_threshold\": \"0.8\", \"seed\": \"42\", \"test_size\": \"0.25\"}, \"run_id\": \"51fda3cc2a4649919cb4fb6c753b10e3\", \"start_time\": 1794076368152, \"status\": \"FINISHED\", \"tags\": {\"dataset.git_revision\": \"f5baa78eb26168040107f18f38b383ee59f0ed9e\", \"dataset.hash\": \"3eacf7ec7241e7f914d7a1aca0346328\", \"dataset.path\": \"data/dataset.csv\", \"dataset.validation\": \"passed\", \"evaluation.split\": \"stratified_holdout\", \"git.commit\": \"f5baa78eb26168040107f18f38b383ee59f0ed9e\", \"git.dirty\": \"false\", \"mlflow.runName\": \"learned-sloth-871\", \"model.version\": \"51fda3cc2a4649919cb4fb6c753b10e3\", \"quality_gate.status\": \"passed\"}}, {\"end_time\": 1794070481872, \"experiment_id\": \"1\", \"metrics\": {\"accuracy\": 0.9, \"f1\": 0.9019607843137255, \"precision\": 0.8846153846153846, \"recall\": 0.92}, \"params\": {\"c\": \"1.0\", \"experiment_name\": \"mlops-assignment-03\", \"f1_threshold\": \"0.85\", \"seed\": \"42\", \"test_size\": \"0.25\"}, \"run_id\": \"5c7f48e49ed14624825dadb85e41be8d\", \"start_time\": 1794070481775, \"status\": \"FINISHED\", \"tags\": {\"dataset.git_revision\": \"5a35d39d1d0e7041ca78a5d0c416f05c9d15d5c8\", \"dataset.hash\": \"3eacf7ec7241e7f914d7a1aca0346328\", \"dataset.path\": \"data/dataset.csv\", \"dataset.validation\": \"passed\", \"evaluation.split\": \"stratified_holdout\", \"git.commit\": \"5a35d39d1d0e7041ca78a5d0c416f05c9d15d5c8\", \"git.dirty\": \"false\", \"mlflow.runName\": \"clean-squid-746\", \"model.version\": \"5c7f48e49ed14624825dadb85e41be8d\", \"quality_gate.status\": \"passed\"}}, {\"end_time\": 1794070324049, \"experiment_id\": \"1\", \"metrics\": {\"accuracy\": 0.9, \"f1\": 0.9019607843137255, \"precision\": 0.8846153846153846, \"recall\": 0.92}, \"params\": {\"c\": \"1.0\", \"experiment_name\": \"mlops-assignment-03\", \"f1_threshold\": \"0.8\", \"seed\": \"42\", \"test_size\": \"0.25\"}, \"run_id\": \"163628ee0dea430d805ab965cd98e4f1\", \"start_time\": 1794070324008, \"status\": \"FINISHED\", \"tags\": {\"dataset.git_revision\": \"5a35d39d1d0e7041ca78a5d0c416f05c9d15d5c8\", \"dataset.hash\": \"3eacf7ec7241e7f914d7a1aca0346328\", \"dataset.path\": \"data/dataset.csv\", \"dataset.validation\": \"passed\", \"evaluation.split\": \"stratified_holdout\", \"git.commit\": \"5a35d39d1d0e7041ca78a5d0c416f05c9d15d5c8\", \"git.dirty\": \"false\", \"mlflow.runName\": \"adventurous-seal-530\", \"model.version\": \"163628ee0dea430d805ab965cd98e4f1\", \"quality_gate.status\": \"passed\"}}], \"caveats\": [\"An experimental metric alone does not establish production readiness: verify dataset provenance, validation, quality gate, deployment health and freshness policy.\"], \"direction\": \"maximize\", \"evaluation_split\": \"stratified_holdout\", \"excluded_run_ids\": [], \"metric\": \"f1\", \"production_ready\": false}\nNo retraining was triggered. No measured degradation or configured freshness evidence establishes a need to retrain.",
+    "selected_tools": [
+      "mlflow.best_run"
+    ],
+    "evidence": [
+      {
+        "tool": "mlflow.best_run",
+        "status": "ok",
+        "data": {
+          "best_run": {
+            "run_id": "339b16bb4dc3467aa6004ff170f7f504",
+            "experiment_id": "1",
+            "status": "FINISHED",
+            "start_time": 1794070324274,
+            "end_time": 1794070324353,
+            "metrics": {
+              "f1": 0.92,
+              "precision": 0.92,
+              "recall": 0.92,
+              "accuracy": 0.92
+            },
+            "params": {
+              "seed": "42",
+              "c": "100.0",
+              "test_size": "0.25",
+              "f1_threshold": "0.8",
+              "experiment_name": "mlops-assignment-03"
+            },
+            "tags": {
+              "dataset.path": "data/dataset.csv",
+              "dataset.hash": "3eacf7ec7241e7f914d7a1aca0346328",
+              "dataset.git_revision": "5a35d39d1d0e7041ca78a5d0c416f05c9d15d5c8",
+              "git.dirty": "false",
+              "git.commit": "5a35d39d1d0e7041ca78a5d0c416f05c9d15d5c8",
+              "evaluation.split": "stratified_holdout",
+              "quality_gate.status": "passed",
+              "dataset.validation": "passed",
+              "mlflow.runName": "unequaled-snake-14",
+              "model.version": "339b16bb4dc3467aa6004ff170f7f504"
+            }
+          },
+          "candidates": [
+            {
+              "run_id": "339b16bb4dc3467aa6004ff170f7f504",
+              "experiment_id": "1",
+              "status": "FINISHED",
+              "start_time": 1794070324274,
+              "end_time": 1794070324353,
+              "metrics": {
+                "f1": 0.92,
+                "precision": 0.92,
+                "recall": 0.92,
+                "accuracy": 0.92
+              },
+              "params": {
+                "seed": "42",
+                "c": "100.0",
+                "test_size": "0.25",
+                "f1_threshold": "0.8",
+                "experiment_name": "mlops-assignment-03"
+              },
+              "tags": {
+                "dataset.path": "data/dataset.csv",
+                "dataset.hash": "3eacf7ec7241e7f914d7a1aca0346328",
+                "dataset.git_revision": "5a35d39d1d0e7041ca78a5d0c416f05c9d15d5c8",
+                "git.dirty": "false",
+                "git.commit": "5a35d39d1d0e7041ca78a5d0c416f05c9d15d5c8",
+                "evaluation.split": "stratified_holdout",
+                "quality_gate.status": "passed",
+                "dataset.validation": "passed",
+                "mlflow.runName": "unequaled-snake-14",
+                "model.version": "339b16bb4dc3467aa6004ff170f7f504"
+              }
+            },
+            {
+              "run_id": "50098d1677434c79b901658b9edeb74b",
+              "experiment_id": "1",
+              "status": "FINISHED",
+              "start_time": 1794070324130,
+              "end_time": 1794070324229,
+              "metrics": {
+                "f1": 0.92,
+                "precision": 0.92,
+                "recall": 0.92,
+                "accuracy": 0.92
+              },
+              "params": {
+                "seed": "42",
+                "c": "10.0",
+                "test_size": "0.25",
+                "f1_threshold": "0.8",
+                "experiment_name": "mlops-assignment-03"
+              },
+              "tags": {
+                "dataset.path": "data/dataset.csv",
+                "dataset.hash": "3eacf7ec7241e7f914d7a1aca0346328",
+                "dataset.git_revision": "5a35d39d1d0e7041ca78a5d0c416f05c9d15d5c8",
+                "git.dirty": "false",
+                "git.commit": "5a35d39d1d0e7041ca78a5d0c416f05c9d15d5c8",
+                "evaluation.split": "stratified_holdout",
+                "quality_gate.status": "passed",
+                "dataset.validation": "passed",
+                "mlflow.runName": "peaceful-cod-619",
+                "model.version": "50098d1677434c79b901658b9edeb74b"
+              }
+            },
+            {
+              "run_id": "51fda3cc2a4649919cb4fb6c753b10e3",
+              "experiment_id": "1",
+              "status": "FINISHED",
+              "start_time": 1794076368152,
+              "end_time": 1794076368233,
+              "metrics": {
+                "f1": 0.9019607843137255,
+                "precision": 0.8846153846153846,
+                "recall": 0.92,
+                "accuracy": 0.9
+              },
+              "params": {
+                "seed": "42",
+                "c": "1.0",
+                "test_size": "0.25",
+                "f1_threshold": "0.8",
+                "experiment_name": "mlops-assignment-03"
+              },
+              "tags": {
+                "dataset.path": "data/dataset.csv",
+                "dataset.hash": "3eacf7ec7241e7f914d7a1aca0346328",
+                "dataset.git_revision": "f5baa78eb26168040107f18f38b383ee59f0ed9e",
+                "git.dirty": "false",
+                "git.commit": "f5baa78eb26168040107f18f38b383ee59f0ed9e",
+                "evaluation.split": "stratified_holdout",
+                "quality_gate.status": "passed",
+                "dataset.validation": "passed",
+                "mlflow.runName": "learned-sloth-871",
+                "model.version": "51fda3cc2a4649919cb4fb6c753b10e3"
+              }
+            },
+            {
+              "run_id": "5c7f48e49ed14624825dadb85e41be8d",
+              "experiment_id": "1",
+              "status": "FINISHED",
+              "start_time": 1794070481775,
+              "end_time": 1794070481872,
+              "metrics": {
+                "f1": 0.9019607843137255,
+                "precision": 0.8846153846153846,
+                "recall": 0.92,
+                "accuracy": 0.9
+              },
+              "params": {
+                "seed": "42",
+                "c": "1.0",
+                "test_size": "0.25",
+                "f1_threshold": "0.85",
+                "experiment_name": "mlops-assignment-03"
+              },
+              "tags": {
+                "dataset.path": "data/dataset.csv",
+                "dataset.hash": "3eacf7ec7241e7f914d7a1aca0346328",
+                "dataset.git_revision": "5a35d39d1d0e7041ca78a5d0c416f05c9d15d5c8",
+                "git.dirty": "false",
+                "git.commit": "5a35d39d1d0e7041ca78a5d0c416f05c9d15d5c8",
+                "evaluation.split": "stratified_holdout",
+                "quality_gate.status": "passed",
+                "dataset.validation": "passed",
+                "mlflow.runName": "clean-squid-746",
+                "model.version": "5c7f48e49ed14624825dadb85e41be8d"
+              }
+            },
+            {
+              "run_id": "163628ee0dea430d805ab965cd98e4f1",
+              "experiment_id": "1",
+              "status": "FINISHED",
+              "start_time": 1794070324008,
+              "end_time": 1794070324049,
+              "metrics": {
+                "f1": 0.9019607843137255,
+                "precision": 0.8846153846153846,
+                "recall": 0.92,
+                "accuracy": 0.9
+              },
+              "params": {
+                "seed": "42",
+                "c": "1.0",
+                "test_size": "0.25",
+                "f1_threshold": "0.8",
+                "experiment_name": "mlops-assignment-03"
+              },
+              "tags": {
+                "dataset.path": "data/dataset.csv",
+                "dataset.hash": "3eacf7ec7241e7f914d7a1aca0346328",
+                "dataset.git_revision": "5a35d39d1d0e7041ca78a5d0c416f05c9d15d5c8",
+                "git.dirty": "false",
+                "git.commit": "5a35d39d1d0e7041ca78a5d0c416f05c9d15d5c8",
+                "evaluation.split": "stratified_holdout",
+                "quality_gate.status": "passed",
+                "dataset.validation": "passed",
+                "mlflow.runName": "adventurous-seal-530",
+                "model.version": "163628ee0dea430d805ab965cd98e4f1"
+              }
+            }
+          ],
+          "metric": "f1",
+          "direction": "maximize",
+          "excluded_run_ids": [],
+          "evaluation_split": "stratified_holdout",
+          "production_ready": false,
+          "caveats": [
+            "An experimental metric alone does not establish production readiness: verify dataset provenance, validation, quality gate, deployment health and freshness policy."
+          ]
+        },
+        "error_code": null,
+        "uncertainty": null,
+        "duration_ms": 76.212,
+        "source": "live_adapter"
+      }
+    ],
+    "uncertainties": [
+      "Highest experimental F1 alone does not establish production readiness; verify gate, validation and deployment lineage."
+    ],
+    "proposed_actions": [],
+    "trace_id": "02b1ea86b262484e8bf0385408ccf3c6",
+    "planner": "groq",
+    "provider_trace": {
+      "provider": "groq",
+      "model": "openai/gpt-oss-20b",
+      "strategy": "bounded_read_plan",
+      "request_ids": [
+        "req_01m6vmzn8ceettxfm8gcqjzf7w"
+      ],
+      "completion_ids": [
+        "chatcmpl-781f9998-625c-4a5b-9f4e-acc0cc302dde"
+      ],
+      "usage": {
+        "prompt_tokens": 1354,
+        "completion_tokens": 58,
+        "total_tokens": 1412
+      },
+      "planned_steps": [
+        {
+          "tool": "mlflow.best_run",
+          "arguments": {
+            "limit": 5,
+            "metric": "f1"
+          }
+        }
+      ],
+      "executed_steps": [
+        {
+          "tool": "mlflow.best_run",
+          "arguments": {
+            "limit": 5,
+            "metric": "f1"
+          }
+        }
+      ],
+      "coverage_guard_tools": [],
+      "error_code": null,
+      "retry_after_seconds": null
+    }
+  }
+}

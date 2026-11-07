@@ -1,0 +1,23 @@
+{
+  "timestamp": "2026-11-07T18:34:40.063609+00:00",
+  "scope": "Actual remote namespaced Kubernetes reads through verified HTTPS",
+  "status": "BLOCKED",
+  "api_host": "supplies-rangers-packets-territories.trycloudflare.com",
+  "namespace": "mlops",
+  "mutations_performed": false,
+  "read_access_verified": false,
+  "deployment_verified": false,
+  "checks": [],
+  "preflight": {
+    "authenticated": true,
+    "method": "GET",
+    "path": "/api/v1/namespaces/mlops/pods",
+    "http_status": 403,
+    "server": "envoy",
+    "content_type": "text/plain",
+    "duration_seconds": 0.234,
+    "error_code": "KUBERNETES_NETWORK_POLICY_DENIED",
+    "sanitized_message": "Your request was blocked."
+  },
+  "limitation": "An upstream HTTP policy denial prevented a Kubernetes response; token [REDACTED] resource state and deployment readiness remain unknown."
+}

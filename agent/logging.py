@@ -10,7 +10,15 @@ SENSITIVE = re.compile(r"(?i)(token|password|secret|api.?key|authorization|crede
 
 def redact(value: Any) -> Any:
     if isinstance(value, dict):
-        return {str(k): "[REDACTED]" if SENSITIVE.search(str(k)) else redact(v) for k, v in value.items()}
+        counts = {"prompt_tokens", "completion_tokens", "total_tokens"}
+        return {
+            str(k): v
+            if k in counts and type(v) is int and v >= 0
+            else "[REDACTED]"
+            if SENSITIVE.search(str(k))
+            else redact(v)
+            for k, v in value.items()
+        }
     if isinstance(value, list):
         return [redact(v) for v in value]
     if isinstance(value, str):

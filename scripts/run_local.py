@@ -30,6 +30,12 @@ def alive(pid: int, started: str) -> bool:
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--stop", action="store_true")
+    parser.add_argument(
+        "--planner", choices=["offline", "openai", "groq"], help="Override the API planner for this launch"
+    )
+    parser.add_argument(
+        "--groq-model", help="Override the Groq model for this launch without editing secrets"
+    )
     args = parser.parse_args()
     os.chdir(ROOT)
     RUNTIME.mkdir(exist_ok=True)
@@ -46,6 +52,10 @@ def main():
     if not python.exists():
         raise SystemExit("Run bash scripts/bootstrap.sh first")
     environment = os.environ.copy()
+    if args.planner:
+        environment["MLOPS_PLANNER"] = args.planner
+    if args.groq_model:
+        environment["MLOPS_GROQ_MODEL"] = args.groq_model
     environment["PATH"] = str(ROOT / ".venv/bin") + os.pathsep + environment.get("PATH", "")
     environment["DVC_SITE_CACHE_DIR"] = str(RUNTIME / "dvc-site")
     environment["DVC_NO_ANALYTICS"] = "1"
@@ -159,7 +169,7 @@ def main():
         "Local services ready. Load MLOPS_API_TOKEN securely from .runtime/agent.token for smoke/demo commands."
     )
     print(
-        "Kubernetes remains separately configured; this helper does not create a cluster or use an LLM key."
+        "Kubernetes remains separately configured. The API uses the selected planner and securely inherited credentials."
     )
 
 

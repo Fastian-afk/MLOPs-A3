@@ -5,9 +5,9 @@
       "check",
       "."
     ],
-    "timestamp": "2026-11-07T17:48:21.300565+00:00",
+    "timestamp": "2026-11-07T18:47:30.842640+00:00",
     "exit_code": 0,
-    "duration_seconds": 0.01,
+    "duration_seconds": 0.023,
     "output": "All checks passed!\n",
     "status": "VERIFIED_REAL"
   },
@@ -15,9 +15,9 @@
     "command": [
       ".venv/bin/mypy"
     ],
-    "timestamp": "2026-11-07T17:48:21.472854+00:00",
+    "timestamp": "2026-11-07T18:47:31.100936+00:00",
     "exit_code": 0,
-    "duration_seconds": 0.172,
+    "duration_seconds": 0.258,
     "output": "Success: no issues found in 3 source files\n",
     "status": "VERIFIED_REAL"
   },
@@ -29,10 +29,10 @@
       "-q",
       "tests/unit"
     ],
-    "timestamp": "2026-11-07T17:48:25.579813+00:00",
+    "timestamp": "2026-11-07T18:47:36.866607+00:00",
     "exit_code": 0,
-    "duration_seconds": 4.107,
-    "output": "........................................................................ [ 58%]\n....................................................                     [100%]\n=============================== warnings summary ===============================\n.venv/lib/python3.12/site-packages/starlette/testclient.py:51\n  /workspace/MLOPs-A3/.venv/lib/python3.12/site-packages/starlette/testclient.py:51: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.\n    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]\n\ntests/unit/test_inference.py: 28 warnings\ntests/unit/test_training.py: 43 warnings\n  /workspace/MLOPs-A3/.venv/lib/python3.12/site-packages/joblib/numpy_pickle.py:207: DeprecationWarning: Setting the shape on a NumPy array has been deprecated in NumPy 2.5.\n  As an alternative, you can create a new view using np.reshape (with copy=False if needed).\n    array.shape = self.shape\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n124 passed, 72 warnings in 3.11s\n",
+    "duration_seconds": 5.766,
+    "output": "........................................................................ [ 54%]\n............................................................             [100%]\n=============================== warnings summary ===============================\n.venv/lib/python3.12/site-packages/starlette/testclient.py:51\n  /workspace/MLOPs-A3/.venv/lib/python3.12/site-packages/starlette/testclient.py:51: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.\n    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]\n\ntests/unit/test_demo_artifact.py: 7 warnings\ntests/unit/test_inference.py: 28 warnings\ntests/unit/test_training.py: 43 warnings\n  /workspace/MLOPs-A3/.venv/lib/python3.12/site-packages/joblib/numpy_pickle.py:207: DeprecationWarning: Setting the shape on a NumPy array has been deprecated in NumPy 2.5.\n  As an alternative, you can create a new view using np.reshape (with copy=False if needed).\n    array.shape = self.shape\n\ntests/unit/test_demo_artifact.py::test_committed_demo_fixture_integrity_and_actual_serving_lineage\ntests/unit/test_demo_artifact.py::test_committed_demo_fixture_integrity_and_actual_serving_lineage\n  /workspace/MLOPs-A3/.venv/lib/python3.12/site-packages/sklearn/utils/validation.py:2749: UserWarning: X does not have valid feature names, but StandardScaler was fitted with feature names\n    warnings.warn(\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n132 passed, 81 warnings in 4.37s\n",
     "status": "VERIFIED_MOCKED"
   },
   {
@@ -40,10 +40,10 @@
       ".venv/bin/python",
       "scripts/verify_submission.py"
     ],
-    "timestamp": "2026-11-07T17:48:25.623719+00:00",
+    "timestamp": "2026-11-07T18:47:36.918124+00:00",
     "exit_code": 0,
-    "duration_seconds": 0.044,
-    "output": "{\n  \"missing_files\": [],\n  \"secret_scan_findings\": [],\n  \"tracked_file_count\": 121\n}\n",
+    "duration_seconds": 0.051,
+    "output": "{\n  \"missing_files\": [],\n  \"secret_scan_findings\": [],\n  \"tracked_file_count\": 122\n}\n",
     "status": "VERIFIED_REAL"
   },
   {
@@ -54,10 +54,10 @@
       "-q",
       "tests/integration"
     ],
-    "timestamp": "2026-11-07T17:48:27.655460+00:00",
+    "timestamp": "2026-11-07T18:47:39.895432+00:00",
     "exit_code": 0,
-    "duration_seconds": 2.032,
-    "output": "...                                                                      [100%]\n3 passed in 1.28s\n",
+    "duration_seconds": 2.977,
+    "output": "..s.                                                                     [100%]\n=========================== short test summary info ============================\nSKIPPED [1] tests/integration/test_kubernetes_remote_live.py:20: Set RUN_INTEGRATION=1 and RUN_REMOTE_KUBERNETES=1 for the real configured remote cluster\n3 passed, 1 skipped in 2.10s\n",
     "status": "VERIFIED_REAL"
   },
   {
@@ -68,10 +68,10 @@
       "-q",
       "tests/e2e"
     ],
-    "timestamp": "2026-11-07T17:48:28.696350+00:00",
+    "timestamp": "2026-11-07T18:47:41.922829+00:00",
     "exit_code": 0,
-    "duration_seconds": 1.041,
-    "output": "..                                                                       [100%]\n2 passed in 0.45s\n",
+    "duration_seconds": 2.027,
+    "output": "..                                                                       [100%]\n2 passed in 1.38s\n",
     "status": "VERIFIED_REAL"
   }
 ]

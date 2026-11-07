@@ -330,7 +330,13 @@ def test_permission_denial_is_logged(registry, caplog):
 def test_groq_uses_separate_credential_endpoint_and_structured_tools(registry, monkeypatch):
     from unittest.mock import Mock
 
-    call = SimpleNamespace(id="g1", function=SimpleNamespace(name="mlflow__best_run", arguments="{}"))
+    call = SimpleNamespace(
+        id="g1",
+        function=SimpleNamespace(
+            name="plan_read_tools",
+            arguments=json.dumps({"steps": [{"tool": "mlflow.best_run", "arguments": {}}]}),
+        ),
+    )
     first = SimpleNamespace(
         tool_calls=[call], model_dump=lambda **kw: {"role": "assistant", "tool_calls": []}
     )
@@ -356,7 +362,10 @@ def test_groq_uses_separate_credential_endpoint_and_structured_tools(registry, m
     assert result.evidence[0].status == "ok"
     assert constructor.call_args.kwargs["base_url"] == "https://api.groq.com/openai/v1"
     assert constructor.call_args.kwargs["api_key"] == "test-groq-only"
-    assert client.chat.completions.create.call_args_list[0].kwargs["model"] == "llama-3.3-70b-versatile"
+    assert client.chat.completions.create.call_args_list[0].kwargs["model"] == settings.groq_model
+    assert client.chat.completions.create.await_count == 1
+    assert result.provider_trace.strategy == "bounded_read_plan"
+    assert result.provider_trace.planned_steps[0].tool == "mlflow.best_run"
     assert "test-groq-only" not in result.model_dump_json()
 
 
@@ -397,3 +406,95 @@ def test_groq_mandatory_investigation_still_read_only(registry):
     assert {e.tool.split(".")[0] for e in result.evidence} >= {"mlflow", "dvc", "kubernetes", "airflow"}
     assert "airflow.trigger_training" not in result.selected_tools
     assert not result.proposed_actions
+    assert result.provider_trace.coverage_guard_tools
+
+
+def groq_client_for_plan(steps):
+    call = SimpleNamespace(
+        id="g", function=SimpleNamespace(name="plan_read_tools", arguments=json.dumps({"steps": steps}))
+    )
+    response = SimpleNamespace(
+        choices=[SimpleNamespace(message=SimpleNamespace(tool_calls=[call]))],
+        id="completion-test",
+        _request_id="request-test",
+        usage=SimpleNamespace(prompt_tokens=100, completion_tokens=25, total_tokens=125),
+    )
+    return SimpleNamespace(
+        chat=SimpleNamespace(completions=SimpleNamespace(create=AsyncMock(return_value=response)))
+    )
+
+
+def test_groq_plan_resolves_only_recorded_best_run_dependency(registry):
+    seen = []
+    registry.tools["dvc.provenance"].handler = lambda args: seen.append(args.run_id) or {}
+    client = groq_client_for_plan(
+        [
+            {"tool": "mlflow.best_run", "arguments": {"metric": "f1", "limit": 5}},
+            {"tool": "dvc.provenance", "arguments": {"run_id": "$best_run.run_id"}},
+        ]
+    )
+    result = asyncio.run(
+        Orchestrator(Settings(planner="groq"), registry, llm_client=client).chat(
+            ChatRequest(message="Find the best model and its dataset provenance")
+        )
+    )
+    assert seen == ["a" * 32]
+    assert result.provider_trace.executed_steps[1].arguments["run_id"] == "a" * 32
+    assert result.provider_trace.request_ids == ["request-test"]
+    assert result.provider_trace.usage["total_tokens"] == 125
+
+
+def test_groq_plan_rejects_write_before_any_tool_executes(registry):
+    registry.tools["mlflow.best_run"].handler = lambda args: pytest.fail("plan must be validated first")
+    client = groq_client_for_plan(
+        [
+            {"tool": "mlflow.best_run", "arguments": {}},
+            {"tool": "airflow.trigger_training", "arguments": {}},
+        ]
+    )
+    result = asyncio.run(
+        Orchestrator(Settings(planner="groq"), registry, llm_client=client).chat(
+            ChatRequest(message="Compare models")
+        )
+    )
+    assert result.evidence[0].error_code == "FORBIDDEN"
+    assert not result.provider_trace.executed_steps
+
+
+def test_groq_plan_unknown_reference_is_not_evaluated(registry):
+    registry.tools["dvc.provenance"].handler = lambda args: pytest.fail("invalid reference executed")
+    client = groq_client_for_plan(
+        [{"tool": "dvc.provenance", "arguments": {"run_id": "$__import__('os').system('x')"}}]
+    )
+    result = asyncio.run(
+        Orchestrator(Settings(planner="groq"), registry, llm_client=client).chat(
+            ChatRequest(message="Inspect dataset provenance")
+        )
+    )
+    assert result.evidence[0].error_code == "REFERENCE_UNAVAILABLE"
+
+
+def test_groq_rate_limit_is_explicit_and_retry_after_recorded(registry):
+    import httpx
+    from openai import RateLimitError
+
+    error = RateLimitError(
+        "sensitive provider body is not logged",
+        response=httpx.Response(
+            429,
+            headers={"retry-after": "17", "x-request-id": "rate-test"},
+            request=httpx.Request("POST", "https://api.groq.com/openai/v1/chat/completions"),
+        ),
+        body={},
+    )
+    client = SimpleNamespace(
+        chat=SimpleNamespace(completions=SimpleNamespace(create=AsyncMock(side_effect=error)))
+    )
+    result = asyncio.run(
+        Orchestrator(Settings(planner="groq"), registry, llm_client=client).chat(
+            ChatRequest(message="Compare models")
+        )
+    )
+    assert result.evidence[0].error_code == "LLM_RATE_LIMITED"
+    assert result.provider_trace.retry_after_seconds == 17
+    assert "sensitive provider body" not in result.model_dump_json()

@@ -60,7 +60,7 @@ class Settings(BaseSettings):
     planner: Literal["offline", "openai", "groq"] = "offline"
     llm_model: str = "gpt-4.1-mini"
     llm_api_key: SecretStr | None = None
-    groq_model: str = "llama-3.3-70b-versatile"
+    groq_model: str = "openai/gpt-oss-20b"
     groq_api_key: SecretStr | None = None
     api_token: SecretStr | None = None
     max_tool_calls: int = Field(default=12, ge=1, le=20)

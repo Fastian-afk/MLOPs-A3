@@ -1,0 +1,17 @@
+{
+  "timestamp": "2026-11-07T18:45:17.625582+00:00",
+  "command": [
+    ".venv/bin/python",
+    "-m",
+    "scripts.demo_scenarios",
+    "--confirm-training",
+    "--output-dir",
+    "evidence/conversations/groq",
+    "--provider-interval-seconds",
+    "30"
+  ],
+  "exit_code": 0,
+  "duration_seconds": 96.895,
+  "output": "dataset_provenance VERIFIED_REAL\nmodel_selection VERIFIED_REAL\npipeline_execution VERIFIED_REAL\ndeployment_diagnosis BLOCKED\nintegrated BLOCKED\n",
+  "scope": "Actual Groq-backed HTTP agent conversations; Kubernetes access may be blocked"
+}

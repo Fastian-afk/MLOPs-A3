@@ -1,130 +1,129 @@
-# Finish live Kubernetes and Groq verification
+# Run the remaining local demonstration
 
-## Groq provider
+## What is already verified
 
-Groq's OpenAI-compatible structured tool-calling endpoint is supported directly.
-The agent keeps its credential separate from the OpenAI credential and fixes the
-endpoint to `https://api.groq.com/openai/v1`.
+The repository contains real DVC reproduction, five clean-source MLflow candidates,
+Airflow five-stage execution and quality-gate failure/recovery, Docker inference
+and readiness failure/recovery, authenticated API checks, and Groq model discovery
+plus four real informational planning calls. The current test counts and per-conversation planner
+results are recorded in `evidence/validation.json`, `evidence/groq/` and
+`evidence/conversations/groq/` (with earlier offline exports retained separately). Hosted Actions has also passed at the source commit
+linked in `evidence/runtime/github_actions.json`.
 
-In the cloud environment settings, securely supply **MLOPS_GROQ_API_KEY**, limited
-to HTTPS destination **api.groq.com**. Do not paste the key in a conversation,
-commit it, or put it in a command argument. The saved requirement declares a
-credential name/destination, not an actual key. Review/save the settings and
-publish the updated environment as required by the product.
+The cluster portion is still incomplete. Cloud kind cannot start because its
+rootless host lacks cgroup delegation. The configured Windows cluster tunnel was
+allowlisted and had a published credential, but actual requests returned upstream
+Envoy/plain-text HTTP 403 before Kubernetes responded. That does not establish a
+bad token, an empty cluster or application health. See
+`evidence/kubernetes/remote_live.json` and `current_runtime_cluster.json`.
 
-Configure these non-secret variables for live provider testing:
+## 1. Native PowerShell: real local inference and Kubernetes
 
-```text
-MLOPS_PLANNER=groq
-MLOPS_GROQ_MODEL=llama-3.3-70b-versatile
+Use your existing Docker Desktop Linux-container engine and local
+`mlops-assignment` kind cluster. Have Git, kind and kubectl available. This path
+needs no Windows Python, registry account, cloud tunnel or Groq key.
+
+From a reviewed local checkout, run:
+
+```powershell
+Set-Location "$env:USERPROFILE\MLOPs-A3"
+git pull --ff-only
+.\scripts\windows_deploy.ps1 -ConfirmDeploy -InjectSelectorFailure
 ```
 
-The selected model must be available to the account and support function calling.
-Availability, quotas and rate limits must be verified with the actual account.
-Live Groq execution remains **BLOCKED** until the credential and network settings
-are available in the running environment. Provider routing and tool-call safety
-have mocked unit tests; these do not establish live provider success. No OpenAI
-key is needed when Groq is selected. The `offline` mode remains available without
-a provider key.
+If the repository has not been cloned, first run `git clone
+https://github.com/Fastian-afk/MLOPs-A3.git "$env:USERPROFILE\MLOPs-A3"`. If local
+changes prevent a fast-forward, preserve them rather than resetting the checkout.
+If the local PowerShell execution policy blocks the reviewed script, an approved
+process-scoped invocation is:
 
-After configuring the key, restart the helper-owned API so it loads the variables:
-
-```bash
-source .venv/bin/activate
-python -m scripts.run_local --stop
-python -m scripts.run_local
-read -r MLOPS_API_TOKEN < .runtime/agent.token
-export MLOPS_API_TOKEN
-python -m scripts.demo_scenarios --confirm-training
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy RemoteSigned -File .\scripts\windows_deploy.ps1 -ConfirmDeploy -InjectSelectorFailure
 ```
 
-The confirmation flag explicitly authorizes the one demonstration training run.
-Each conversation records its actual planner and tool status; unavailable
-Kubernetes remains unavailable even when Groq works. Use a separate evidence copy
-if retaining the earlier offline transcripts. Groq supplies reasoning/tool
-selection; it does not supply a Kubernetes cluster or infrastructure credentials.
+This does not change the saved user/machine execution policy and does not bypass
+an organization-enforced policy. Do not use `Bypass` or disable verification.
 
-## Option A: local kind on Docker Desktop/WSL2
+The deployment flag authorizes changes only to namespace `mlops`; the extra fault
+flag authorizes the temporary Service selector mismatch. The helper:
 
-This is the simplest route if you do not already have a cluster. On Windows,
-install Docker Desktop with its WSL2 engine and enable WSL integration for your
-Ubuntu distribution. Use Linux containers and work inside WSL. The Docker Desktop
-Kubernetes toggle is not required: the script creates a kind cluster itself.
-Have roughly 4 CPUs and 8 GB RAM available for the combined demonstration stack.
+1. Checks the SHA256 of the tiny trusted fixture in `demo_artifacts/` and preserves
+   any different existing serving artifact.
+2. Builds an image tagged with the actual checkout commit and loads it into kind.
+3. Applies the two-replica inference Deployment, ClusterIP Service, ConfigMap,
+   probes, resource limits and read-only agent RBAC.
+4. Requires two desired/Ready/available replicas, then runs a probe Pod inside the
+   cluster to verify ClusterIP/DNS health, version and a real prediction.
+5. With the fault flag, records the selector failure and failed Service routing,
+   restores the manifest, and verifies prediction recovery.
+6. Captures deployment, Pods, Service, endpoints, events, logs and probe results in
+   `evidence/kubernetes/windows-<UTC timestamp>/verification.json`, restores any
+   temporary Service change and removes its own probe Pods.
 
-Install Git, Python 3.12, uv, kind and kubectl from their official distributions.
-Verify downloaded kind/kubectl checksums. Confirm `docker info` works inside the
-same shell where the repository will run.
+The fixture is the exact 2,686-byte artifact from recorded real run
+`339b16bb4dc3467aa6004ff170f7f504`, with training source
+`5a35d39d1d0e7041ca78a5d0c416f05c9d15d5c8` and F1 0.92. Its original model lineage
+is separate from the current image/service source commit. This small example
+artifact makes the demonstration self-contained; it is not a retraining claim or
+a large model store.
 
-From a fresh checkout:
+The PowerShell helper has been reviewed and parser/control-flow checked in the
+cloud. Real Windows cluster execution is still required. A script-supplied fault
+diagnosis is an operator observation; to demonstrate the AI diagnosis criterion,
+run the local conversational agent against the same cluster and retain its actual
+Kubernetes tool responses as well.
+
+## 2. Linux/WSL2: the full conversational stack
+
+Airflow and the complete Python service stack use Linux/WSL2. From that shell:
 
 ```bash
-git clone https://github.com/Fastian-afk/MLOPs-A3.git
-cd MLOPs-A3
 bash scripts/bootstrap.sh
 bash scripts/install_airflow.sh
 source .venv/bin/activate
-export MLOPS_KUBECONFIG="$HOME/.kube/config"
-export MLOPS_KUBE_CONTEXT=kind-mlops-assignment
-python -m scripts.run_local
-INFERENCE_LOCAL_PORT=18001 bash scripts/kind_demo.sh
-kubectl --context kind-mlops-assignment -n mlops get deployments,pods,services,endpoints -o wide
+python -m scripts.run_local --planner offline
+read -r MLOPS_API_TOKEN < .runtime/agent.token
+export MLOPS_API_TOKEN
+bash scripts/smoke_test.sh
 ```
 
-The startup helper trains the artifact if missing. The kind script builds the
-inference image, loads it into its cluster, applies manifests, waits for rollout,
-and verifies readiness and a real prediction. Port 18001 avoids conflicting with
-the helper's standalone inference server on 8001. The script's temporary
-port-forward stops when it exits. The supplied agent RBAC is namespaced and
-read-only; the operator running deployment setup needs separate create/update
-permissions. All writes must remain explicit operator actions in this demo
-namespace.
+For local Kubernetes agent reads, securely select a kubeconfig/context and confirm
+`kubectl` can reach the intended API from the same shell as the agent. A Windows
+or laptop `127.0.0.1` API address is not automatically reachable from another
+container, WSL network or cloud machine. The reader needs only the namespaced
+permissions in `kubernetes/rbac.yaml`. Keep administrator credentials separate.
 
-Run the agent on this same local machine to query the kind API. A laptop kind
-kubeconfig normally points at `127.0.0.1`; copying it into Codex Cloud does not make
-the laptop's API reachable from the cloud. Supply only redacted exports if sharing
-the local verification results through chat. Never share the kubeconfig, tokens,
-client private keys or the complete shell environment.
+## 3. Live Groq planning
 
-## Option B: an existing cluster reachable from the cloud
+The previously configured `llama-3.3-70b-versatile` was absent from the account's
+actual model list. `openai/gpt-oss-20b` returned a real structured tool call with
+HTTP 200; request IDs and usage are in `evidence/groq/provider_probe.json`.
+Supply `MLOPS_GROQ_API_KEY` securely for HTTPS destination `api.groq.com`, then:
 
-To let the cloud agent perform reads directly, configure an authorized cluster
-whose API is reachable from this execution environment. Provide its kubeconfig
-through an approved secure file/credential mechanism, set `MLOPS_KUBECONFIG` to
-that file and `MLOPS_KUBE_CONTEXT` to the intended context, and configure required
-API network/VPN access and TLS trust. A path variable alone does not supply the
-credential or connectivity. Do not send kubeconfig contents in chat or Git.
+```bash
+python -m scripts.run_local --stop
+python -m scripts.run_local --planner groq --groq-model openai/gpt-oss-20b
+read -r MLOPS_API_TOKEN < .runtime/agent.token
+export MLOPS_API_TOKEN
+python -m scripts.demo_scenarios --confirm-training --output-dir evidence/conversations/local-groq --provider-interval-seconds 30
+```
 
-The deployment operator applies `kubernetes/` in namespace `mlops` and installs an
-immutable inference image in a registry accessible to the cluster nodes. The
-local `kind load docker-image` command is not a remote-cluster image distribution
-method. The agent needs only the get/list permissions declared in
-`kubernetes/rbac.yaml`, including Pod logs/events, Services/endpoints and
-Deployments. Namespace creation and deployment changes remain operator actions.
+The command options select non-secret provider/model values for the launched API;
+they do not print or modify the key. No OpenAI key is needed for Groq. The
+confirmation flag explicitly authorizes one demonstration Airflow trigger. The
+informational integrated question must remain read-only.
 
-The managed runtime currently cannot create kind because the rootless Docker host
-lacks cgroup delegation. A Groq key cannot fix that host prerequisite; use one of
-the two routes above instead of weakening host isolation.
+Use actual provider traces to distinguish live planning from offline routing and
+from deterministic coverage guards. Quotas/model availability are account-specific;
+record rate limits or provider failures as uncertainty, not fabricated tool success.
+A Groq key does not provide Kubernetes connectivity. Even a successful provider
+conversation can remain partly blocked by the cloud route policy.
 
-## Checks still required with a real cluster
+## 4. Retain real evidence before updating assessment status
 
-1. Confirm the Deployment has **2 ready/available replicas**, expected image,
-   ConfigMap, resource requests/limits and readiness/liveness probes.
-2. Export actual Pod state, restart counts, logs, events, Service selector and
-   ready endpoints. Verify live/ready/version and a prediction through the Service;
-   separately test ClusterIP routing from a cluster client when validating the
-   service data path, since port-forward traffic alone does not prove that path.
-3. Rerun deployment diagnosis and the mandatory four-system conversation with
-   live Kubernetes responses. Confirm the informational request makes no write.
-4. Explicitly inject a temporary Service selector mismatch in the **demo namespace**,
-   collect the agent's diagnosis of zero matching Pods/endpoints, restore
-   `kubernetes/service.yaml`, and verify endpoints and prediction recovery. A
-   missing-model Docker fault is not a substitute for this real cluster incident.
-5. Save redacted, timestamped API/CLI exports and conversations under
-   `evidence/kubernetes/`, `evidence/failures/` and `evidence/conversations/`;
-   rerun applicable live tests and update verification statuses only after success.
-
-All earlier DVC, MLflow and Airflow real checks remain recorded. The provider and
-cluster checks above are separate prerequisites. Hosted GitHub Actions results
-and a complete Compose-stack launch also require their own verification; local
-CI-equivalent checks and Compose configuration validation are already recorded.
+After the local cluster checks succeed, retain its timestamped exports and actual
+agent conversations. Run applicable opt-in tests with the services/configuration
+available. Preserve passed, failed, skipped and blocked results separately. Update
+the report and rubric only for checks that actually ran. The whole Compose stack
+has not been launched here; its configuration and individual image/container
+checks are separate evidence.

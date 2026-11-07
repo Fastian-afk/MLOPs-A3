@@ -31,6 +31,25 @@ class ProposedAction(StrictModel):
     expires_in_seconds: int = 120
 
 
+class PlannedRead(StrictModel):
+    tool: str = Field(min_length=1, max_length=80, pattern=r"^[a-z][a-z0-9_.]+$")
+    arguments: dict[str, Any] = Field(default_factory=dict, max_length=30)
+
+
+class ProviderTrace(StrictModel):
+    provider: Literal["openai", "groq"]
+    model: str
+    strategy: Literal["iterative_tools", "bounded_read_plan"]
+    request_ids: list[str] = Field(default_factory=list)
+    completion_ids: list[str] = Field(default_factory=list)
+    usage: dict[str, int] = Field(default_factory=dict)
+    planned_steps: list[PlannedRead] = Field(default_factory=list)
+    executed_steps: list[PlannedRead] = Field(default_factory=list)
+    coverage_guard_tools: list[str] = Field(default_factory=list)
+    error_code: str | None = None
+    retry_after_seconds: float | None = None
+
+
 class ChatResponse(StrictModel):
     answer: str
     selected_tools: list[str]
@@ -39,3 +58,4 @@ class ChatResponse(StrictModel):
     proposed_actions: list[ProposedAction] = Field(default_factory=list)
     trace_id: str
     planner: Literal["offline", "openai", "groq"]
+    provider_trace: ProviderTrace | None = None

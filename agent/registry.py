@@ -98,14 +98,22 @@ class ToolRegistry:
                 "airflow_dag_not_approved": "FORBIDDEN",
                 "airflow_not_found": "NOT_FOUND",
                 "airflow_conflict": "CONFLICT",
+                "kubernetes_network_policy_denied": "NETWORK_POLICY_DENIED",
             }
+            error_code = (
+                safe_codes.get(adapter_code, "SERVICE_UNAVAILABLE")
+                if isinstance(adapter_code, str)
+                else "SERVICE_UNAVAILABLE"
+            )
             result = ToolResult(
                 tool=name,
                 status="error",
-                error_code=safe_codes.get(adapter_code, "SERVICE_UNAVAILABLE")
-                if isinstance(adapter_code, str)
-                else "SERVICE_UNAVAILABLE",
-                uncertainty="Adapter failed; no operational result can be established.",
+                error_code=error_code,
+                uncertainty=(
+                    "An upstream network policy denied access; Kubernetes state remains unknown."
+                    if error_code == "NETWORK_POLICY_DENIED"
+                    else "Adapter failed; no operational result can be established."
+                ),
             )
         result.duration_ms = round((time.monotonic() - start) * 1000, 3)
         log_tool(request_id, name, result.duration_ms, result.status, result.error_code)

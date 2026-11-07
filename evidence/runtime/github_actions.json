@@ -1,0 +1,19 @@
+{
+  "timestamp": "2026-11-07T18:34:26.695411+00:00",
+  "source": "https://github.com/Fastian-afk/MLOPs-A3/actions/workflows/ci.yml/badge.svg?branch=main",
+  "scope": "Observed branch-main badge; not a guarantee for later commits",
+  "status": "VERIFIED_REAL",
+  "badge_title": [
+    "lint-and-tests - passing"
+  ],
+  "run_ids": [
+    "42398167839",
+    "42397063077",
+    "42393774552",
+    "42393434487"
+  ],
+  "workflow_run_url": "https://github.com/Fastian-afk/MLOPs-A3/actions/runs/42398167839",
+  "verified_source_commit": "f5baa78eb26168040107f18f38b383ee59f0ed9e",
+  "completed_successfully": true,
+  "run_title": "Prepare verified remote Kubernetes access and Windows connection inst\u2026 \u00b7 Fastian-afk/MLOPs-A3@f5baa78 \u00b7 GitHub"
+}

@@ -1,0 +1,26 @@
+{
+  "status": "BLOCKED",
+  "verification": "VERIFIED_REAL_ATTEMPT",
+  "timestamp": "2026-11-07T18:31:31.035100+00:00",
+  "scope": "current cloud executor kind provisioning",
+  "marker_verified": true,
+  "managed_docker": {
+    "server_version": "29.9.2",
+    "rootless": true,
+    "cgroup_driver": "none"
+  },
+  "command": [
+    "/workspace/.local/bin/kind",
+    "create",
+    "cluster",
+    "--name",
+    "mlops-final-verification",
+    "--wait",
+    "90s"
+  ],
+  "exit_code": 1,
+  "output": "ERROR: failed to create cluster: running kind with rootless provider requires setting systemd property \"Delegate=yes\", see https://kind.sigs.k8s.io/docs/user/rootless/",
+  "cluster_created": false,
+  "diagnosis": "Current managed Docker host lacks required rootless cgroup delegation; a healthy Docker daemon does not supply a usable Kubernetes node runtime.",
+  "next_step": "Use the actual Windows cluster through its authorized read-only HTTPS connection; deployment requires a separately authorized operator on that cluster. No host isolation settings were changed."
+}

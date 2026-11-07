@@ -1,0 +1,59 @@
+{
+  "timestamp": "2026-11-07T18:29:46.253286+00:00",
+  "status": "VERIFIED_REAL",
+  "models_http_status": 200,
+  "models_request_id": "req_01m6vmc5jpex2884c09es370n4",
+  "available_models": [
+    "meta-llama/llama-prompt-guard-2-86m",
+    "canopylabs/orpheus-arabic-saudi",
+    "openai/gpt-oss-120b",
+    "whisper-large-v3-turbo",
+    "whisper-large-v3",
+    "openai/gpt-oss-20b",
+    "canopylabs/orpheus-v1-english",
+    "openai/gpt-oss-safeguard-20b",
+    "meta-llama/llama-prompt-guard-2-22m",
+    "qwen/qwen3.8-27b",
+    "allam-2-7b"
+  ],
+  "duration_seconds": 0.359,
+  "configured_model": "llama-3.3-70b-versatile",
+  "configured_model_available": false,
+  "structured_call": {
+    "http_status": 200,
+    "request_id": "req_01m6vmc5pveqj8pxtawhf68ymx",
+    "completion_id": "chatcmpl-1d1af902-f6dc-4d18-937d-3693ad77c36a",
+    "model": "openai/gpt-oss-20b",
+    "usage": {
+      "queue_time": 0.24187895,
+      "prompt_tokens": 160,
+      "prompt_time": 0.007939629,
+      "completion_tokens": 49,
+      "completion_time": 0.051010784,
+      "total_tokens": 209,
+      "total_time": 0.058950413,
+      "completion_tokens_details": {
+        "reasoning_tokens": 23
+      }
+    },
+    "tool_calls": [
+      {
+        "id": "fc_82506ac1-6ebb-4ad9-8f4b-e073b4eb55a7",
+        "type": "function",
+        "function": {
+          "name": "mlflow__list_runs",
+          "arguments": "{\"limit\":5}"
+        }
+      }
+    ],
+    "duration_seconds": 0.406,
+    "rate_headers": {
+      "x-ratelimit-limit-requests": "1000",
+      "x-ratelimit-limit-tokens": "8000",
+      "x-ratelimit-remaining-requests": "999",
+      "x-ratelimit-remaining-tokens": "7540",
+      "x-ratelimit-reset-requests": "1m26.4s",
+      "x-ratelimit-reset-tokens": "3.45s"
+    }
+  }
+}

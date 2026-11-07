@@ -148,6 +148,15 @@ def _redact(value: str) -> str:
     return re.sub(r"\b(?:AKIA|ASIA)[A-Z0-9]{16}\b", "[REDACTED]", value)
 
 
+class KubernetesNetworkPolicyError(RuntimeError):
+    """An upstream denial is not evidence that Kubernetes rejected the token."""
+
+    code = "kubernetes_network_policy_denied"
+
+    def __init__(self):
+        super().__init__("KUBERNETES_NETWORK_POLICY_DENIED: no Kubernetes response was available")
+
+
 class KubernetesTools:
     """Only reads are exposed; an injected client makes ordinary CI fully offline."""
 
@@ -236,6 +245,18 @@ class KubernetesTools:
             return getattr(api, method)(*args, _request_timeout=self.http_timeout, **kwargs)
         except Exception as exc:
             status = getattr(exc, "status", None)
+            headers = getattr(exc, "headers", None) or {}
+            content_type = str(headers.get("Content-Type", headers.get("content-type", "")))
+            server = str(headers.get("Server", headers.get("server", "")))
+            body = getattr(exc, "body", "")
+            if (
+                status == 403
+                and content_type.startswith("text/plain")
+                and server.lower() == "envoy"
+                and isinstance(body, str)
+                and body.strip() == "Your request was blocked."
+            ):
+                raise KubernetesNetworkPolicyError() from exc
             code = {401: "AUTHENTICATION_FAILED", 403: "FORBIDDEN", 404: "NOT_FOUND"}.get(
                 status, "KUBERNETES_UNAVAILABLE"
             )

@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "artifact": "model.joblib",
+  "sha256": "4958e4b3b1765d5aca1d4e4f7f14df4b0335d8f0a8cb75dee79326223231f271",
+  "size_bytes": 2686,
+  "run_id": "339b16bb4dc3467aa6004ff170f7f504",
+  "training_git_commit": "5a35d39d1d0e7041ca78a5d0c416f05c9d15d5c8",
+  "dataset_hash": "3eacf7ec7241e7f914d7a1aca0346328",
+  "feature_names": [
+    "feature_0",
+    "feature_1",
+    "feature_2",
+    "feature_3",
+    "feature_4",
+    "feature_5",
+    "feature_6",
+    "feature_7"
+  ],
+  "metrics": {
+    "f1": 0.92,
+    "precision": 0.92,
+    "recall": 0.92,
+    "accuracy": 0.92
+  },
+  "quality_gate": {
+    "threshold": 0.8,
+    "passed": true
+  },
+  "provenance": {
+    "dataset.path": "data/dataset.csv",
+    "dataset.hash": "3eacf7ec7241e7f914d7a1aca0346328",
+    "dataset.git_revision": "5a35d39d1d0e7041ca78a5d0c416f05c9d15d5c8",
+    "git.dirty": "false",
+    "git.commit": "5a35d39d1d0e7041ca78a5d0c416f05c9d15d5c8"
+  },
+  "source": "Exact trusted artifacts/model.joblib produced by the recorded real training run"
+}

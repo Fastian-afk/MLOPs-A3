@@ -17,7 +17,7 @@ The repository began empty. The uploaded assignment defines the requirements; th
 
 See [architecture.md](architecture.md) for data flow, trust boundaries and the confirmation lifecycle.
 
-Recorded local verification: 124 unit tests, 3 live integration tests and 2 local API end-to-end tests passed. DVC reproduction, five-run MLflow training from committed clean operational source, five-stage Airflow execution and Docker inference have real exports. Live Kubernetes deployment is blocked by unavailable cgroup delegation; live LLM-provider calls need a credential. See `evidence/validation.json` for exact commands/outcomes.
+DVC historical reproduction, five clean-source MLflow candidates, five-stage Airflow execution and Docker inference have real exports. Groq authentication and four informational API conversations are verified with `openai/gpt-oss-20b` (provider success remains separate from blocked Kubernetes reads); the previously configured Llama model was no longer available. Kubernetes remains unverified: cloud kind requires unavailable cgroup delegation, and the configured remote tunnel returns an upstream HTTP 403 before Kubernetes responds. See `evidence/validation.json` for current test counts and [TECHNICAL_REPORT.md](TECHNICAL_REPORT.md) for exact evidence and limits.
 
 
 ## Prerequisites
@@ -50,7 +50,7 @@ RUN_INTEGRATION=1 pytest -q tests/integration
 RUN_INTEGRATION=1 pytest -q tests/e2e
 ```
 
-The end-to-end agent request additionally needs the securely configured `MLOPS_API_TOKEN`.
+The end-to-end agent request additionally needs the securely configured `MLOPS_API_TOKEN`. The latest recorded suite has 132 unit passes, 3 live integration passes plus 1 remote target skipped by default, and 2 live API passes. The remote workload test was also explicitly run with `RUN_REMOTE_KUBERNETES=1` and failed on the diagnosed upstream policy denial; it is recorded as `BLOCKED`, not counted as a passing cluster check.
 
 Key configuration names (the agent uses the `MLOPS_` prefix):
 
@@ -59,7 +59,7 @@ Key configuration names (the agent uses the `MLOPS_` prefix):
 | `MLOPS_API_TOKEN` | Required bearer authentication for chat/tool inventory; no default credential |
 | `MLOPS_PLANNER` | `offline`, `openai` or `groq`; offline is deterministic routing |
 | `MLOPS_GROQ_API_KEY` | Separate secure Groq credential, sent only to `api.groq.com` |
-| `MLOPS_GROQ_MODEL` | Function-calling model; default `llama-3.3-70b-versatile` |
+| `MLOPS_GROQ_MODEL` | Function-calling model; default `openai/gpt-oss-20b` |
 | `MLOPS_LLM_API_KEY`, `MLOPS_LLM_MODEL` | Secure provider credential binding and model for actual structured LLM calls; standard `OPENAI_API_KEY` is also supported locally |
 | `MLOPS_MLFLOW_TRACKING_URI` | Agent tracking server, default `http://127.0.0.1:5000` |
 | `MLFLOW_TRACKING_URI` | Training/DVC tracking server; set consistently with the agent |
@@ -69,6 +69,8 @@ Key configuration names (the agent uses the `MLOPS_` prefix):
 | `MLOPS_APPROVED_DAG_ID` | Allowlisted DAG, default `mlops_training` |
 | `MLOPS_NAMESPACE` | Approved namespace, default `mlops` |
 | `MLOPS_KUBECONFIG`, `MLOPS_KUBE_CONTEXT` | Optional secure Kubernetes configuration selectors |
+| `MLOPS_KUBE_API_URL`, `MLOPS_KUBE_API_TOKEN` | Optional HTTPS API origin and separate namespaced read-only bearer credential |
+| `MLOPS_KUBE_CA_CERT` | Optional trusted CA bundle for the remote API; TLS verification stays enabled |
 | `MLOPS_FRESHNESS_DAYS` | Optional explicit retraining freshness policy; absent by default |
 | `MODEL_PATH`, `APP_VERSION` | Inference artifact path and application version |
 
@@ -86,6 +88,8 @@ read -r MLOPS_API_TOKEN < .runtime/agent.token
 export MLOPS_API_TOKEN
 bash scripts/smoke_test.sh
 ```
+
+For live Groq planning, supply `MLOPS_GROQ_API_KEY` securely and launch with `python -m scripts.run_local --planner groq --groq-model openai/gpt-oss-20b`. These non-secret command options override a stale saved model selection for that process. They do not print, copy or modify the key. Stop helper-owned API processes first if changing planner configuration.
 
 The helper starts or reuses real MLflow, Airflow, the agent and inference; it trains a model if the serving artifact is absent. It waits for readiness and stores development credentials only in ignored `.runtime`. The smoke test makes a real prediction and an authenticated MLflow-backed agent request. Kubernetes and LLM credentials remain separately configured. Repeating startup reuses healthy local services.
 
@@ -144,7 +148,7 @@ In another activated terminal, train five configurations and promote the highest
 python -m training.train --tracking-uri http://127.0.0.1:5000 --runs 5 --threshold 0.8
 ```
 
-The deterministic held-out split is shared across configurations. Reports contain accuracy, precision, recall and F1 plus the run ID, parameters, dataset hash and source commit. Artifacts and databases are ignored by Git. Model selection maximizes F1, while loss metrics use minimization; missing/incomplete runs are excluded and ties are deterministic. A winning experimental score does not certify deployment health or production readiness.
+The deterministic held-out split is shared across configurations. Reports contain accuracy, precision, recall and F1 plus the run ID, parameters, dataset hash and source commit. Runtime artifacts and databases are ignored by Git; the explicit tiny trusted fixture in `demo_artifacts/` is the documented exception for self-contained inference. Model selection maximizes F1, while loss metrics use minimization; missing/incomplete runs are excluded and ties are deterministic. A winning experimental score does not certify deployment health or production readiness.
 
 ## Agent API and conversations
 
@@ -167,7 +171,7 @@ curl --fail -H "Authorization: Bearer $MLOPS_API_TOKEN" -H 'Content-Type: applic
   http://127.0.0.1:8000/agent/chat
 ```
 
-The typed response identifies planner mode, selected tools, evidence, uncertainties, proposed actions and a trace ID. The registry validates tool arguments and output models, applies timeouts and enforces read/write permissions. Tool failures remain visible.
+The typed response identifies planner mode, selected tools, evidence, uncertainties, proposed actions and a trace ID. Live provider traces distinguish model-selected reads from any deterministic coverage guard; provider errors/rate limits are uncertainty rather than invented operational facts. The registry validates tool arguments and output models, applies timeouts and enforces read/write permissions. Tool failures remain visible.
 
 For the mandatory read-only scenario:
 
@@ -185,7 +189,7 @@ A training request first proposes an action. Resubmit the same action in the sam
 
 Airflow has its own virtual environment because its constrained dependency set differs from the agent environment. Use the tested version and installation/startup commands in [DEMO_GUIDE.md](DEMO_GUIDE.md) and `scripts/start_airflow.sh`. The DAG uses `airflow.sdk` and the adapter uses `/api/v2`, not Airflow 2's `/api/v1`.
 
-The development script initializes the metadata database and starts Airflow with SimpleAuthManager. Passwords are generated into the ignored Airflow home directory. Configure `AIRFLOW_TOKEN`, or the matching username/password for `/auth/token`, through environment variables. Do not commit the password file. This development auth scheme is not a production identity system.
+The development script initializes the metadata database and starts Airflow with SimpleAuthManager. Passwords are generated into the ignored Airflow home directory. Configure `MLOPS_AIRFLOW_TOKEN`, or the matching username/password for `/auth/token`, through environment variables. Do not commit the password file. This development auth scheme is not a production identity system.
 
 The DAG stages are:
 
@@ -225,6 +229,18 @@ Build/load the immutable image and apply namespaced resources using `scripts/kin
 
 A deployment is verified only after rollout succeeds and a representative prediction passes through the service. See [DEMO_GUIDE.md](DEMO_GUIDE.md) for the real cluster diagnosis and recovery sequence.
 
+### Native Windows inference/cluster test
+
+The full Python/Airflow service stack runs on Linux or WSL2. A separate native PowerShell helper needs only a reviewed checkout, Docker Desktop Linux containers, Git, kind and kubectl; it does not require Windows Python or an LLM key:
+
+```powershell
+.\scripts\windows_deploy.ps1 -ConfirmDeploy -InjectSelectorFailure
+```
+
+Run it on the existing local `mlops-assignment` kind cluster. `-ConfirmDeploy` explicitly authorizes namespaced deployment; `-InjectSelectorFailure` additionally authorizes a temporary selector fault and recovery. The helper verifies two Ready replicas and performs predictions from inside the cluster through ClusterIP/DNS, then captures resources, events, logs and before/fault/recovery evidence. It restores the Service and deletes its own probe Pods. The PowerShell helper is source/parse checked in the cloud; successful Windows execution must be recorded on that host before claiming live Kubernetes verification.
+
+The tiny `demo_artifacts/model.joblib` is the exact 2,686-byte quality-gated artifact from real run `339b16bb4dc3467aa6004ff170f7f504`, not a newly invented model. Its SHA256, dataset hash and training commit are recorded in `demo_artifacts/metadata.json`. This intentionally small trusted fixture makes the inference demonstration self-contained; large models, caches and databases remain excluded. The helper checks its checksum and preserves any different existing serving artifact. Never load untrusted joblib/pickle files.
+
 ## Evidence, demonstration and troubleshooting
 
 [DEMO_GUIDE.md](DEMO_GUIDE.md) covers the five conversations, two fault investigations, a five-minute presentation and engineering defense questions. Evidence is exported as timestamped JSON/CLI output under `evidence/`; screenshots are not fabricated when a GUI is unavailable.
@@ -236,7 +252,7 @@ A deployment is verified only after rollout succeeds and a representative predic
 | Airflow 401/403 | Auth manager, token expiry and account | Refresh supported authentication; never disable auth to make a check pass |
 | Airflow queued indefinitely | Scheduler, DAG parsing and shared paths | Inspect actual run/task states; trigger acceptance alone is insufficient |
 | Inference live but unready | Artifact path, model compatibility and logs | Train/pass gate and mount the artifact before expecting predictions |
-| Kubernetes unavailable | kubeconfig context, namespace and RBAC | Report access failure separately from application health |
+| Kubernetes unavailable | API origin, transport, kubeconfig context, namespace and RBAC | An upstream plain-text policy denial is not a Kubernetes auth or application-health result |
 | Service has no endpoints | Service selectors, Pod labels and readiness | Match selectors and recover ready replicas, then repeat the prediction |
 | Docker daemon unavailable | `docker info` | Use an authorized host/daemon; manifests alone do not establish deployment |
 
@@ -248,6 +264,6 @@ docker compose down
 
 Do not use `down -v` unless you intend to delete service state. Local Python processes should be stopped in their own terminals. Preserve DVC remote data and MLflow evidence needed for assessment.
 
-Groq and remaining live-cluster setup: [NEXT_STEPS.md](NEXT_STEPS.md). Provider routing is unit-tested; live Groq requires securely configured credentials and permitted access.
+Groq and local verification steps: [NEXT_STEPS.md](NEXT_STEPS.md). Live provider authentication/tool calling has real evidence in `evidence/groq/`; quotas and model availability remain account-specific.
 
-Windows-to-cloud Kubernetes connection: [WINDOWS_KUBERNETES.md](WINDOWS_KUBERNETES.md). The HTTPS reader supports a separately scoped bearer token and inherited proxy/CA trust. Live connectivity is unverified until a real endpoint/token is configured.
+Windows-to-cloud connection instructions remain in [WINDOWS_KUBERNETES.md](WINDOWS_KUBERNETES.md). A credential and exact tunnel hostname were configured, but actual requests received an upstream Envoy 403 (`evidence/kubernetes/remote_live.json`). Local Windows verification avoids that cloud route; the cloud agent does not bypass its egress policy. Hosted lint/tests have also passed at the source commit linked in `evidence/runtime/github_actions.json`; later commits need their own Actions result.

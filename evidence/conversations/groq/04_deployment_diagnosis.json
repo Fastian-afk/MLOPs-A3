@@ -1,0 +1,103 @@
+{
+  "timestamp": "2026-11-07T18:44:46.049330+00:00",
+  "environment": "actual local services; Kubernetes may be blocked",
+  "status": "BLOCKED",
+  "planner": "groq",
+  "provider_verified": true,
+  "rate_limited_attempts": [],
+  "turns": [
+    {
+      "user": "Why is my prediction API unavailable?",
+      "agent": {
+        "answer": "No successful tool evidence is available. Operational status is unknown.",
+        "selected_tools": [
+          "kubernetes.list_pods",
+          "kubernetes.inspect_service",
+          "kubernetes.pod_health"
+        ],
+        "evidence": [
+          {
+            "tool": "kubernetes.list_pods",
+            "status": "error",
+            "data": {},
+            "error_code": "NETWORK_POLICY_DENIED",
+            "uncertainty": "An upstream network policy denied access; Kubernetes state remains unknown.",
+            "duration_ms": 762.769,
+            "source": "live_adapter"
+          },
+          {
+            "tool": "kubernetes.inspect_service",
+            "status": "error",
+            "data": {},
+            "error_code": "NETWORK_POLICY_DENIED",
+            "uncertainty": "An upstream network policy denied access; Kubernetes state remains unknown.",
+            "duration_ms": 58.268,
+            "source": "live_adapter"
+          },
+          {
+            "tool": "kubernetes.pod_health",
+            "status": "error",
+            "data": {},
+            "error_code": "REFERENCE_UNAVAILABLE",
+            "uncertainty": "A planned dependency did not provide the required recorded value.",
+            "duration_ms": 0.0,
+            "source": "live_adapter"
+          }
+        ],
+        "uncertainties": [
+          "An upstream network policy denied access; Kubernetes state remains unknown.",
+          "An upstream network policy denied access; Kubernetes state remains unknown.",
+          "A planned dependency did not provide the required recorded value."
+        ],
+        "proposed_actions": [],
+        "trace_id": "5a5b957502f24b609afd0470376b8bc6",
+        "planner": "groq",
+        "provider_trace": {
+          "provider": "groq",
+          "model": "openai/gpt-oss-20b",
+          "strategy": "bounded_read_plan",
+          "request_ids": [
+            "req_01m6vn7jtyedhsafkzbh26b6a6"
+          ],
+          "completion_ids": [
+            "chatcmpl-2b1d2f5d-2101-44ef-8ccb-aec0d2f9acac"
+          ],
+          "usage": {
+            "prompt_tokens": 1631,
+            "completion_tokens": 116,
+            "total_tokens": 1747
+          },
+          "planned_steps": [
+            {
+              "tool": "kubernetes.list_pods",
+              "arguments": {}
+            },
+            {
+              "tool": "kubernetes.inspect_service",
+              "arguments": {}
+            },
+            {
+              "tool": "kubernetes.pod_health",
+              "arguments": {
+                "pod": "$first_pod.name"
+              }
+            }
+          ],
+          "executed_steps": [
+            {
+              "tool": "kubernetes.list_pods",
+              "arguments": {}
+            },
+            {
+              "tool": "kubernetes.inspect_service",
+              "arguments": {}
+            }
+          ],
+          "coverage_guard_tools": [],
+          "error_code": null,
+          "retry_after_seconds": null
+        }
+      }
+    }
+  ]
+}

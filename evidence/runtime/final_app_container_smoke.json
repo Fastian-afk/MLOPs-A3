@@ -1,0 +1,3720 @@
+{
+  "timestamp": "2026-11-07T18:46:23.626265+00:00",
+  "status": "VERIFIED_REAL",
+  "scope": "real Docker agent startup/authentication/tool-registration smoke; external services unconfigured",
+  "image": "mlops-agent:source-f541ca4ddc0a618a",
+  "image_id": "sha256:02c81f95f93658acb60e91fd6ef9767d34c0ed6641f9841cec62552b70d11497",
+  "configured_user": "1000:1000",
+  "health": {
+    "http_status": 200,
+    "body": {
+      "status": "ok",
+      "planner": "offline",
+      "authentication_configured": true
+    }
+  },
+  "unauthenticated_tools": {
+    "http_status": 401,
+    "body": {
+      "detail": "Valid bearer authentication required"
+    }
+  },
+  "registered_tool_count": 25,
+  "registered_tools": [
+    {
+      "name": "dvc.list_datasets",
+      "purpose": "List actual DVC-tracked dataset metadata and Git commit",
+      "permission": "read",
+      "timeout": 30,
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {},
+        "title": "EmptyInput",
+        "type": "object"
+      },
+      "output_schema": {
+        "$defs": {
+          "DatasetRecord": {
+            "properties": {
+              "dataset": {
+                "title": "Dataset",
+                "type": "string"
+              },
+              "metadata_path": {
+                "title": "Metadata Path",
+                "type": "string"
+              },
+              "dvc_hash": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Dvc Hash"
+              },
+              "source": {
+                "title": "Source",
+                "type": "string"
+              }
+            },
+            "required": [
+              "dataset",
+              "metadata_path",
+              "source"
+            ],
+            "title": "DatasetRecord",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "datasets": {
+            "items": {
+              "$ref": "#/$defs/DatasetRecord"
+            },
+            "title": "Datasets",
+            "type": "array"
+          },
+          "git_commit": {
+            "title": "Git Commit",
+            "type": "string"
+          },
+          "remotes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Remotes",
+            "type": "array"
+          }
+        },
+        "required": [
+          "datasets",
+          "git_commit",
+          "remotes"
+        ],
+        "title": "DatasetList",
+        "type": "object"
+      }
+    },
+    {
+      "name": "dvc.provenance",
+      "purpose": "Read dataset hash, Git revision and optional MLflow run lineage",
+      "permission": "read",
+      "timeout": 30,
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "dataset": {
+            "default": "data/dataset.csv",
+            "title": "Dataset",
+            "type": "string"
+          },
+          "revision": {
+            "default": "HEAD",
+            "title": "Revision",
+            "type": "string"
+          },
+          "run_id": {
+            "anyOf": [
+              {
+                "pattern": "^[a-fA-F0-9]{32}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Run Id"
+          },
+          "expected_hash": {
+            "anyOf": [
+              {
+                "pattern": "^[a-fA-F0-9]{32}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Expected Hash"
+          }
+        },
+        "title": "ProvenanceInput",
+        "type": "object"
+      },
+      "output_schema": {
+        "properties": {
+          "dataset": {
+            "title": "Dataset",
+            "type": "string"
+          },
+          "git_commit": {
+            "title": "Git Commit",
+            "type": "string"
+          },
+          "dvc_hash": {
+            "title": "Dvc Hash",
+            "type": "string"
+          },
+          "actual_hash": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual Hash"
+          },
+          "dirty": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dirty"
+          },
+          "metadata_dirty": {
+            "title": "Metadata Dirty",
+            "type": "boolean"
+          },
+          "metadata_path": {
+            "title": "Metadata Path",
+            "type": "string"
+          },
+          "run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run Id"
+          },
+          "lineage_match": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lineage Match"
+          },
+          "remotes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Remotes",
+            "type": "array"
+          }
+        },
+        "required": [
+          "dataset",
+          "git_commit",
+          "dvc_hash",
+          "actual_hash",
+          "dirty",
+          "metadata_dirty",
+          "metadata_path",
+          "run_id",
+          "lineage_match",
+          "remotes"
+        ],
+        "title": "ProvenanceOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "dvc.compare_versions",
+      "purpose": "Compare dataset hashes at two validated Git revisions",
+      "permission": "read",
+      "timeout": 30,
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "dataset": {
+            "default": "data/dataset.csv",
+            "title": "Dataset",
+            "type": "string"
+          },
+          "old_revision": {
+            "title": "Old Revision",
+            "type": "string"
+          },
+          "new_revision": {
+            "default": "HEAD",
+            "title": "New Revision",
+            "type": "string"
+          }
+        },
+        "required": [
+          "old_revision"
+        ],
+        "title": "CompareInput",
+        "type": "object"
+      },
+      "output_schema": {
+        "$defs": {
+          "ProvenanceOutput": {
+            "properties": {
+              "dataset": {
+                "title": "Dataset",
+                "type": "string"
+              },
+              "git_commit": {
+                "title": "Git Commit",
+                "type": "string"
+              },
+              "dvc_hash": {
+                "title": "Dvc Hash",
+                "type": "string"
+              },
+              "actual_hash": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Actual Hash"
+              },
+              "dirty": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Dirty"
+              },
+              "metadata_dirty": {
+                "title": "Metadata Dirty",
+                "type": "boolean"
+              },
+              "metadata_path": {
+                "title": "Metadata Path",
+                "type": "string"
+              },
+              "run_id": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Run Id"
+              },
+              "lineage_match": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Lineage Match"
+              },
+              "remotes": {
+                "items": {
+                  "type": "string"
+                },
+                "title": "Remotes",
+                "type": "array"
+              }
+            },
+            "required": [
+              "dataset",
+              "git_commit",
+              "dvc_hash",
+              "actual_hash",
+              "dirty",
+              "metadata_dirty",
+              "metadata_path",
+              "run_id",
+              "lineage_match",
+              "remotes"
+            ],
+            "title": "ProvenanceOutput",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "dataset": {
+            "title": "Dataset",
+            "type": "string"
+          },
+          "old": {
+            "$ref": "#/$defs/ProvenanceOutput"
+          },
+          "new": {
+            "$ref": "#/$defs/ProvenanceOutput"
+          },
+          "changed": {
+            "title": "Changed",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "dataset",
+          "old",
+          "new",
+          "changed"
+        ],
+        "title": "CompareOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "dvc.detect_changes",
+      "purpose": "Compare workspace data to DVC hashes and actual DVC status",
+      "permission": "read",
+      "timeout": 30,
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {},
+        "title": "EmptyInput",
+        "type": "object"
+      },
+      "output_schema": {
+        "$defs": {
+          "ProvenanceOutput": {
+            "properties": {
+              "dataset": {
+                "title": "Dataset",
+                "type": "string"
+              },
+              "git_commit": {
+                "title": "Git Commit",
+                "type": "string"
+              },
+              "dvc_hash": {
+                "title": "Dvc Hash",
+                "type": "string"
+              },
+              "actual_hash": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Actual Hash"
+              },
+              "dirty": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Dirty"
+              },
+              "metadata_dirty": {
+                "title": "Metadata Dirty",
+                "type": "boolean"
+              },
+              "metadata_path": {
+                "title": "Metadata Path",
+                "type": "string"
+              },
+              "run_id": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Run Id"
+              },
+              "lineage_match": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Lineage Match"
+              },
+              "remotes": {
+                "items": {
+                  "type": "string"
+                },
+                "title": "Remotes",
+                "type": "array"
+              }
+            },
+            "required": [
+              "dataset",
+              "git_commit",
+              "dvc_hash",
+              "actual_hash",
+              "dirty",
+              "metadata_dirty",
+              "metadata_path",
+              "run_id",
+              "lineage_match",
+              "remotes"
+            ],
+            "title": "ProvenanceOutput",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "datasets": {
+            "items": {
+              "$ref": "#/$defs/ProvenanceOutput"
+            },
+            "title": "Datasets",
+            "type": "array"
+          },
+          "changed": {
+            "title": "Changed",
+            "type": "boolean"
+          },
+          "dvc_status": {
+            "additionalProperties": true,
+            "title": "Dvc Status",
+            "type": "object"
+          }
+        },
+        "required": [
+          "datasets",
+          "changed",
+          "dvc_status"
+        ],
+        "title": "ChangesOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "dvc.reproduce_version",
+      "purpose": "Plan or verify historical reproduction in a disposable clone",
+      "permission": "read",
+      "timeout": 120,
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "dataset": {
+            "default": "data/dataset.csv",
+            "title": "Dataset",
+            "type": "string"
+          },
+          "revision": {
+            "default": "HEAD",
+            "title": "Revision",
+            "type": "string"
+          },
+          "run_id": {
+            "anyOf": [
+              {
+                "pattern": "^[a-fA-F0-9]{32}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Run Id"
+          },
+          "expected_hash": {
+            "anyOf": [
+              {
+                "pattern": "^[a-fA-F0-9]{32}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Expected Hash"
+          },
+          "execute": {
+            "default": false,
+            "title": "Execute",
+            "type": "boolean"
+          }
+        },
+        "title": "ReproduceInput",
+        "type": "object"
+      },
+      "output_schema": {
+        "properties": {
+          "git_commit": {
+            "title": "Git Commit",
+            "type": "string"
+          },
+          "dataset": {
+            "title": "Dataset",
+            "type": "string"
+          },
+          "dvc_hash": {
+            "title": "Dvc Hash",
+            "type": "string"
+          },
+          "executed": {
+            "title": "Executed",
+            "type": "boolean"
+          },
+          "verified": {
+            "title": "Verified",
+            "type": "boolean"
+          },
+          "commands": {
+            "items": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "title": "Commands",
+            "type": "array"
+          },
+          "limitation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Limitation"
+          }
+        },
+        "required": [
+          "git_commit",
+          "dataset",
+          "dvc_hash",
+          "executed",
+          "verified",
+          "commands"
+        ],
+        "title": "ReproduceOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "mlflow.list_experiments",
+      "purpose": "List recorded MLflow experiments",
+      "permission": "read",
+      "timeout": 30,
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "limit": {
+            "default": 100,
+            "maximum": 100,
+            "minimum": 1,
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "title": "ExperimentQuery",
+        "type": "object"
+      },
+      "output_schema": {
+        "$defs": {
+          "ExperimentRecord": {
+            "properties": {
+              "experiment_id": {
+                "title": "Experiment Id",
+                "type": "string"
+              },
+              "name": {
+                "title": "Name",
+                "type": "string"
+              },
+              "lifecycle_stage": {
+                "title": "Lifecycle Stage",
+                "type": "string"
+              },
+              "tags": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "title": "Tags",
+                "type": "object"
+              }
+            },
+            "required": [
+              "experiment_id",
+              "name",
+              "lifecycle_stage"
+            ],
+            "title": "ExperimentRecord",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "experiments": {
+            "items": {
+              "$ref": "#/$defs/ExperimentRecord"
+            },
+            "title": "Experiments",
+            "type": "array"
+          },
+          "next_page_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Next Page Token"
+          },
+          "caveats": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Caveats",
+            "type": "array"
+          }
+        },
+        "required": [
+          "experiments"
+        ],
+        "title": "ExperimentsOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "mlflow.list_runs",
+      "purpose": "List the most recent recorded runs",
+      "permission": "read",
+      "timeout": 30,
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "experiment_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 10,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Experiment Ids"
+          },
+          "limit": {
+            "default": 5,
+            "maximum": 100,
+            "minimum": 1,
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "title": "RunsQuery",
+        "type": "object"
+      },
+      "output_schema": {
+        "$defs": {
+          "RunRecord": {
+            "properties": {
+              "run_id": {
+                "title": "Run Id",
+                "type": "string"
+              },
+              "experiment_id": {
+                "title": "Experiment Id",
+                "type": "string"
+              },
+              "status": {
+                "title": "Status",
+                "type": "string"
+              },
+              "start_time": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Start Time"
+              },
+              "end_time": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "End Time"
+              },
+              "metrics": {
+                "additionalProperties": {
+                  "type": "number"
+                },
+                "title": "Metrics",
+                "type": "object"
+              },
+              "params": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "title": "Params",
+                "type": "object"
+              },
+              "tags": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "title": "Tags",
+                "type": "object"
+              }
+            },
+            "required": [
+              "run_id",
+              "experiment_id",
+              "status"
+            ],
+            "title": "RunRecord",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "runs": {
+            "items": {
+              "$ref": "#/$defs/RunRecord"
+            },
+            "title": "Runs",
+            "type": "array"
+          },
+          "next_page_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Next Page Token"
+          },
+          "caveats": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Caveats",
+            "type": "array"
+          }
+        },
+        "required": [
+          "runs"
+        ],
+        "title": "RunsOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "mlflow.run_details",
+      "purpose": "Retrieve one run's metrics, parameters and lineage tags",
+      "permission": "read",
+      "timeout": 30,
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "run_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_-]+$",
+            "title": "Run Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "run_id"
+        ],
+        "title": "RunQuery",
+        "type": "object"
+      },
+      "output_schema": {
+        "$defs": {
+          "RunRecord": {
+            "properties": {
+              "run_id": {
+                "title": "Run Id",
+                "type": "string"
+              },
+              "experiment_id": {
+                "title": "Experiment Id",
+                "type": "string"
+              },
+              "status": {
+                "title": "Status",
+                "type": "string"
+              },
+              "start_time": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Start Time"
+              },
+              "end_time": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "End Time"
+              },
+              "metrics": {
+                "additionalProperties": {
+                  "type": "number"
+                },
+                "title": "Metrics",
+                "type": "object"
+              },
+              "params": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "title": "Params",
+                "type": "object"
+              },
+              "tags": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "title": "Tags",
+                "type": "object"
+              }
+            },
+            "required": [
+              "run_id",
+              "experiment_id",
+              "status"
+            ],
+            "title": "RunRecord",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "run": {
+            "$ref": "#/$defs/RunRecord"
+          },
+          "production_ready": {
+            "default": false,
+            "title": "Production Ready",
+            "type": "boolean"
+          },
+          "caveats": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Caveats",
+            "type": "array"
+          }
+        },
+        "required": [
+          "run",
+          "caveats"
+        ],
+        "title": "RunDetailsOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "mlflow.artifacts",
+      "purpose": "List artifact metadata without downloading or executing artifacts",
+      "permission": "read",
+      "timeout": 30,
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "run_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_-]+$",
+            "title": "Run Id",
+            "type": "string"
+          },
+          "path": {
+            "default": "",
+            "maxLength": 256,
+            "title": "Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "run_id"
+        ],
+        "title": "ArtifactsQuery",
+        "type": "object"
+      },
+      "output_schema": {
+        "$defs": {
+          "ArtifactRecord": {
+            "properties": {
+              "path": {
+                "title": "Path",
+                "type": "string"
+              },
+              "is_dir": {
+                "title": "Is Dir",
+                "type": "boolean"
+              },
+              "file_size": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "File Size"
+              }
+            },
+            "required": [
+              "path",
+              "is_dir"
+            ],
+            "title": "ArtifactRecord",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "run_id": {
+            "title": "Run Id",
+            "type": "string"
+          },
+          "path": {
+            "title": "Path",
+            "type": "string"
+          },
+          "artifacts": {
+            "items": {
+              "$ref": "#/$defs/ArtifactRecord"
+            },
+            "title": "Artifacts",
+            "type": "array"
+          }
+        },
+        "required": [
+          "run_id",
+          "path",
+          "artifacts"
+        ],
+        "title": "ArtifactsOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "mlflow.best_run",
+      "purpose": "Rank recent completed runs by a metric and explicit direction",
+      "permission": "read",
+      "timeout": 30,
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "experiment_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 10,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Experiment Ids"
+          },
+          "limit": {
+            "default": 5,
+            "maximum": 100,
+            "minimum": 1,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "metric": {
+            "default": "f1",
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[\\w./:-]+$",
+            "title": "Metric",
+            "type": "string"
+          },
+          "direction": {
+            "anyOf": [
+              {
+                "enum": [
+                  "maximize",
+                  "minimize"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Direction"
+          }
+        },
+        "title": "BestRunQuery",
+        "type": "object"
+      },
+      "output_schema": {
+        "$defs": {
+          "RunRecord": {
+            "properties": {
+              "run_id": {
+                "title": "Run Id",
+                "type": "string"
+              },
+              "experiment_id": {
+                "title": "Experiment Id",
+                "type": "string"
+              },
+              "status": {
+                "title": "Status",
+                "type": "string"
+              },
+              "start_time": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Start Time"
+              },
+              "end_time": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "End Time"
+              },
+              "metrics": {
+                "additionalProperties": {
+                  "type": "number"
+                },
+                "title": "Metrics",
+                "type": "object"
+              },
+              "params": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "title": "Params",
+                "type": "object"
+              },
+              "tags": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "title": "Tags",
+                "type": "object"
+              }
+            },
+            "required": [
+              "run_id",
+              "experiment_id",
+              "status"
+            ],
+            "title": "RunRecord",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "best_run": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/RunRecord"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "candidates": {
+            "items": {
+              "$ref": "#/$defs/RunRecord"
+            },
+            "title": "Candidates",
+            "type": "array"
+          },
+          "metric": {
+            "title": "Metric",
+            "type": "string"
+          },
+          "direction": {
+            "enum": [
+              "maximize",
+              "minimize"
+            ],
+            "title": "Direction",
+            "type": "string"
+          },
+          "excluded_run_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Excluded Run Ids",
+            "type": "array"
+          },
+          "evaluation_split": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Evaluation Split"
+          },
+          "production_ready": {
+            "default": false,
+            "title": "Production Ready",
+            "type": "boolean"
+          },
+          "caveats": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Caveats",
+            "type": "array"
+          }
+        },
+        "required": [
+          "best_run",
+          "candidates",
+          "metric",
+          "direction",
+          "excluded_run_ids",
+          "caveats"
+        ],
+        "title": "BestRunOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "mlflow.compare_runs",
+      "purpose": "Compare specific completed runs across experiments",
+      "permission": "read",
+      "timeout": 30,
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "run_ids": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 20,
+            "minItems": 2,
+            "title": "Run Ids",
+            "type": "array"
+          },
+          "metric": {
+            "default": "f1",
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[\\w./:-]+$",
+            "title": "Metric",
+            "type": "string"
+          },
+          "direction": {
+            "anyOf": [
+              {
+                "enum": [
+                  "maximize",
+                  "minimize"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Direction"
+          }
+        },
+        "required": [
+          "run_ids"
+        ],
+        "title": "CompareRunsQuery",
+        "type": "object"
+      },
+      "output_schema": {
+        "$defs": {
+          "RunRecord": {
+            "properties": {
+              "run_id": {
+                "title": "Run Id",
+                "type": "string"
+              },
+              "experiment_id": {
+                "title": "Experiment Id",
+                "type": "string"
+              },
+              "status": {
+                "title": "Status",
+                "type": "string"
+              },
+              "start_time": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Start Time"
+              },
+              "end_time": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "End Time"
+              },
+              "metrics": {
+                "additionalProperties": {
+                  "type": "number"
+                },
+                "title": "Metrics",
+                "type": "object"
+              },
+              "params": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "title": "Params",
+                "type": "object"
+              },
+              "tags": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "title": "Tags",
+                "type": "object"
+              }
+            },
+            "required": [
+              "run_id",
+              "experiment_id",
+              "status"
+            ],
+            "title": "RunRecord",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "best_run": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/RunRecord"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "candidates": {
+            "items": {
+              "$ref": "#/$defs/RunRecord"
+            },
+            "title": "Candidates",
+            "type": "array"
+          },
+          "metric": {
+            "title": "Metric",
+            "type": "string"
+          },
+          "direction": {
+            "enum": [
+              "maximize",
+              "minimize"
+            ],
+            "title": "Direction",
+            "type": "string"
+          },
+          "excluded_run_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Excluded Run Ids",
+            "type": "array"
+          },
+          "evaluation_split": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Evaluation Split"
+          },
+          "production_ready": {
+            "default": false,
+            "title": "Production Ready",
+            "type": "boolean"
+          },
+          "caveats": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Caveats",
+            "type": "array"
+          }
+        },
+        "required": [
+          "best_run",
+          "candidates",
+          "metric",
+          "direction",
+          "excluded_run_ids",
+          "caveats"
+        ],
+        "title": "BestRunOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "mlflow.registry_info",
+      "purpose": "Read registered-model metadata where supported",
+      "permission": "read",
+      "timeout": 30,
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "pattern": "^[A-Za-z0-9_.-]+$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Name"
+          },
+          "limit": {
+            "default": 20,
+            "maximum": 100,
+            "minimum": 1,
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "title": "RegistryQuery",
+        "type": "object"
+      },
+      "output_schema": {
+        "$defs": {
+          "RegisteredModel": {
+            "properties": {
+              "name": {
+                "title": "Name",
+                "type": "string"
+              },
+              "description": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Description"
+              },
+              "aliases": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "title": "Aliases",
+                "type": "object"
+              },
+              "tags": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "title": "Tags",
+                "type": "object"
+              }
+            },
+            "required": [
+              "name"
+            ],
+            "title": "RegisteredModel",
+            "type": "object"
+          },
+          "RegistryVersion": {
+            "properties": {
+              "name": {
+                "title": "Name",
+                "type": "string"
+              },
+              "version": {
+                "title": "Version",
+                "type": "string"
+              },
+              "run_id": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Run Id"
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Status"
+              },
+              "current_stage": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Current Stage"
+              }
+            },
+            "required": [
+              "name",
+              "version"
+            ],
+            "title": "RegistryVersion",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "available": {
+            "title": "Available",
+            "type": "boolean"
+          },
+          "models": {
+            "items": {
+              "$ref": "#/$defs/RegisteredModel"
+            },
+            "title": "Models",
+            "type": "array"
+          },
+          "versions": {
+            "items": {
+              "$ref": "#/$defs/RegistryVersion"
+            },
+            "title": "Versions",
+            "type": "array"
+          },
+          "caveats": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Caveats",
+            "type": "array"
+          }
+        },
+        "required": [
+          "available",
+          "models",
+          "versions",
+          "caveats"
+        ],
+        "title": "RegistryOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "airflow.list_dags",
+      "purpose": "List Airflow 3 DAGs with pagination.",
+      "permission": "read",
+      "timeout": 30,
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "limit": {
+            "default": 20,
+            "maximum": 100,
+            "minimum": 1,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "offset": {
+            "default": 0,
+            "maximum": 10000,
+            "minimum": 0,
+            "title": "Offset",
+            "type": "integer"
+          }
+        },
+        "title": "PageInput",
+        "type": "object"
+      },
+      "output_schema": {
+        "$defs": {
+          "DAGSummary": {
+            "properties": {
+              "dag_id": {
+                "title": "Dag Id",
+                "type": "string"
+              },
+              "is_paused": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Is Paused"
+              },
+              "is_active": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Is Active"
+              },
+              "description": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Description"
+              }
+            },
+            "required": [
+              "dag_id"
+            ],
+            "title": "DAGSummary",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "dags": {
+            "items": {
+              "$ref": "#/$defs/DAGSummary"
+            },
+            "title": "Dags",
+            "type": "array"
+          },
+          "total_entries": {
+            "title": "Total Entries",
+            "type": "integer"
+          },
+          "next_offset": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Offset"
+          }
+        },
+        "required": [
+          "dags",
+          "total_entries",
+          "next_offset"
+        ],
+        "title": "DAGsOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "airflow.list_runs",
+      "purpose": "List recent runs of the approved training DAG.",
+      "permission": "read",
+      "timeout": 30,
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "limit": {
+            "default": 20,
+            "maximum": 100,
+            "minimum": 1,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "offset": {
+            "default": 0,
+            "maximum": 10000,
+            "minimum": 0,
+            "title": "Offset",
+            "type": "integer"
+          },
+          "dag_id": {
+            "default": "mlops_training",
+            "pattern": "^[A-Za-z0-9_.-]{1,150}$",
+            "title": "Dag Id",
+            "type": "string"
+          }
+        },
+        "title": "RunsInput",
+        "type": "object"
+      },
+      "output_schema": {
+        "$defs": {
+          "RunSummary": {
+            "properties": {
+              "dag_id": {
+                "title": "Dag Id",
+                "type": "string"
+              },
+              "dag_run_id": {
+                "title": "Dag Run Id",
+                "type": "string"
+              },
+              "state": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "State"
+              },
+              "logical_date": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Logical Date"
+              },
+              "start_date": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Start Date"
+              },
+              "end_date": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "End Date"
+              },
+              "conf": {
+                "additionalProperties": true,
+                "title": "Conf",
+                "type": "object"
+              }
+            },
+            "required": [
+              "dag_id",
+              "dag_run_id"
+            ],
+            "title": "RunSummary",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "dag_runs": {
+            "items": {
+              "$ref": "#/$defs/RunSummary"
+            },
+            "title": "Dag Runs",
+            "type": "array"
+          },
+          "total_entries": {
+            "title": "Total Entries",
+            "type": "integer"
+          },
+          "next_offset": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Offset"
+          }
+        },
+        "required": [
+          "dag_runs",
+          "total_entries",
+          "next_offset"
+        ],
+        "title": "RunsOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "airflow.run_status",
+      "purpose": "Inspect actual run and task states; queued does not mean success.",
+      "permission": "read",
+      "timeout": 30,
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "dag_id": {
+            "default": "mlops_training",
+            "pattern": "^[A-Za-z0-9_.-]{1,150}$",
+            "title": "Dag Id",
+            "type": "string"
+          },
+          "run_id": {
+            "maxLength": 250,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_.:+@-]+$",
+            "title": "Run Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "run_id"
+        ],
+        "title": "RunInput",
+        "type": "object"
+      },
+      "output_schema": {
+        "$defs": {
+          "RunSummary": {
+            "properties": {
+              "dag_id": {
+                "title": "Dag Id",
+                "type": "string"
+              },
+              "dag_run_id": {
+                "title": "Dag Run Id",
+                "type": "string"
+              },
+              "state": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "State"
+              },
+              "logical_date": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Logical Date"
+              },
+              "start_date": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Start Date"
+              },
+              "end_date": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "End Date"
+              },
+              "conf": {
+                "additionalProperties": true,
+                "title": "Conf",
+                "type": "object"
+              }
+            },
+            "required": [
+              "dag_id",
+              "dag_run_id"
+            ],
+            "title": "RunSummary",
+            "type": "object"
+          },
+          "TaskSummary": {
+            "properties": {
+              "task_id": {
+                "title": "Task Id",
+                "type": "string"
+              },
+              "state": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "State"
+              },
+              "try_number": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Try Number"
+              },
+              "start_date": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Start Date"
+              },
+              "end_date": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "End Date"
+              },
+              "duration": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Duration"
+              }
+            },
+            "required": [
+              "task_id"
+            ],
+            "title": "TaskSummary",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "run": {
+            "$ref": "#/$defs/RunSummary"
+          },
+          "tasks": {
+            "items": {
+              "$ref": "#/$defs/TaskSummary"
+            },
+            "title": "Tasks",
+            "type": "array"
+          },
+          "completed": {
+            "title": "Completed",
+            "type": "boolean"
+          },
+          "succeeded": {
+            "title": "Succeeded",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "run",
+          "tasks",
+          "completed",
+          "succeeded"
+        ],
+        "title": "RunOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "airflow.trigger_training",
+      "purpose": "Trigger the approved DAG only after explicit action-bound confirmation.",
+      "permission": "write",
+      "timeout": 30,
+      "input_schema": {
+        "$defs": {
+          "TrainingConf": {
+            "additionalProperties": false,
+            "properties": {
+              "c": {
+                "default": 1.0,
+                "exclusiveMinimum": 0,
+                "maximum": 1000,
+                "title": "C",
+                "type": "number"
+              },
+              "seed": {
+                "default": 42,
+                "maximum": 2147483647,
+                "minimum": 0,
+                "title": "Seed",
+                "type": "integer"
+              },
+              "test_size": {
+                "default": 0.25,
+                "maximum": 0.5,
+                "minimum": 0.1,
+                "title": "Test Size",
+                "type": "number"
+              },
+              "f1_threshold": {
+                "default": 0.85,
+                "maximum": 1,
+                "minimum": 0,
+                "title": "F1 Threshold",
+                "type": "number"
+              },
+              "experiment_name": {
+                "default": "mlops-assignment-03",
+                "pattern": "^[A-Za-z0-9_.-]{1,100}$",
+                "title": "Experiment Name",
+                "type": "string"
+              }
+            },
+            "title": "TrainingConf",
+            "type": "object"
+          }
+        },
+        "additionalProperties": false,
+        "properties": {
+          "dag_id": {
+            "default": "mlops_training",
+            "pattern": "^[A-Za-z0-9_.-]{1,150}$",
+            "title": "Dag Id",
+            "type": "string"
+          },
+          "conf": {
+            "$ref": "#/$defs/TrainingConf"
+          },
+          "poll_seconds": {
+            "default": 0,
+            "maximum": 20,
+            "minimum": 0,
+            "title": "Poll Seconds",
+            "type": "integer"
+          }
+        },
+        "title": "TriggerInput",
+        "type": "object"
+      },
+      "output_schema": {
+        "$defs": {
+          "RunSummary": {
+            "properties": {
+              "dag_id": {
+                "title": "Dag Id",
+                "type": "string"
+              },
+              "dag_run_id": {
+                "title": "Dag Run Id",
+                "type": "string"
+              },
+              "state": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "State"
+              },
+              "logical_date": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Logical Date"
+              },
+              "start_date": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Start Date"
+              },
+              "end_date": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "End Date"
+              },
+              "conf": {
+                "additionalProperties": true,
+                "title": "Conf",
+                "type": "object"
+              }
+            },
+            "required": [
+              "dag_id",
+              "dag_run_id"
+            ],
+            "title": "RunSummary",
+            "type": "object"
+          },
+          "TaskSummary": {
+            "properties": {
+              "task_id": {
+                "title": "Task Id",
+                "type": "string"
+              },
+              "state": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "State"
+              },
+              "try_number": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Try Number"
+              },
+              "start_date": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Start Date"
+              },
+              "end_date": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "End Date"
+              },
+              "duration": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Duration"
+              }
+            },
+            "required": [
+              "task_id"
+            ],
+            "title": "TaskSummary",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "run": {
+            "$ref": "#/$defs/RunSummary"
+          },
+          "tasks": {
+            "items": {
+              "$ref": "#/$defs/TaskSummary"
+            },
+            "title": "Tasks",
+            "type": "array"
+          },
+          "completed": {
+            "title": "Completed",
+            "type": "boolean"
+          },
+          "succeeded": {
+            "title": "Succeeded",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "run",
+          "tasks",
+          "completed",
+          "succeeded"
+        ],
+        "title": "RunOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "airflow.failed_tasks",
+      "purpose": "List failed and upstream-failed tasks for an approved DAG run.",
+      "permission": "read",
+      "timeout": 30,
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "dag_id": {
+            "default": "mlops_training",
+            "pattern": "^[A-Za-z0-9_.-]{1,150}$",
+            "title": "Dag Id",
+            "type": "string"
+          },
+          "run_id": {
+            "maxLength": 250,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_.:+@-]+$",
+            "title": "Run Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "run_id"
+        ],
+        "title": "RunInput",
+        "type": "object"
+      },
+      "output_schema": {
+        "$defs": {
+          "TaskSummary": {
+            "properties": {
+              "task_id": {
+                "title": "Task Id",
+                "type": "string"
+              },
+              "state": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "State"
+              },
+              "try_number": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Try Number"
+              },
+              "start_date": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Start Date"
+              },
+              "end_date": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "End Date"
+              },
+              "duration": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Duration"
+              }
+            },
+            "required": [
+              "task_id"
+            ],
+            "title": "TaskSummary",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "dag_id": {
+            "title": "Dag Id",
+            "type": "string"
+          },
+          "run_id": {
+            "title": "Run Id",
+            "type": "string"
+          },
+          "failed_tasks": {
+            "items": {
+              "$ref": "#/$defs/TaskSummary"
+            },
+            "title": "Failed Tasks",
+            "type": "array"
+          }
+        },
+        "required": [
+          "dag_id",
+          "run_id",
+          "failed_tasks"
+        ],
+        "title": "FailedTasksOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "airflow.diagnostics",
+      "purpose": "Read task state and available bounded logs.",
+      "permission": "read",
+      "timeout": 30,
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "dag_id": {
+            "default": "mlops_training",
+            "pattern": "^[A-Za-z0-9_.-]{1,150}$",
+            "title": "Dag Id",
+            "type": "string"
+          },
+          "run_id": {
+            "maxLength": 250,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_.:+@-]+$",
+            "title": "Run Id",
+            "type": "string"
+          },
+          "task_id": {
+            "pattern": "^[A-Za-z0-9_.-]{1,250}$",
+            "title": "Task Id",
+            "type": "string"
+          },
+          "try_number": {
+            "default": 1,
+            "maximum": 100,
+            "minimum": 1,
+            "title": "Try Number",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "run_id",
+          "task_id"
+        ],
+        "title": "DiagnosticsInput",
+        "type": "object"
+      },
+      "output_schema": {
+        "$defs": {
+          "TaskSummary": {
+            "properties": {
+              "task_id": {
+                "title": "Task Id",
+                "type": "string"
+              },
+              "state": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "State"
+              },
+              "try_number": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Try Number"
+              },
+              "start_date": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Start Date"
+              },
+              "end_date": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "End Date"
+              },
+              "duration": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Duration"
+              }
+            },
+            "required": [
+              "task_id"
+            ],
+            "title": "TaskSummary",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "dag_id": {
+            "title": "Dag Id",
+            "type": "string"
+          },
+          "run_id": {
+            "title": "Run Id",
+            "type": "string"
+          },
+          "task": {
+            "$ref": "#/$defs/TaskSummary"
+          },
+          "log": {
+            "title": "Log",
+            "type": "string"
+          },
+          "log_available": {
+            "title": "Log Available",
+            "type": "boolean"
+          },
+          "log_truncated": {
+            "default": false,
+            "title": "Log Truncated",
+            "type": "boolean"
+          },
+          "uncertainty": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Uncertainty"
+          }
+        },
+        "required": [
+          "dag_id",
+          "run_id",
+          "task",
+          "log",
+          "log_available"
+        ],
+        "title": "DiagnosticsOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "kubernetes.list_pods",
+      "purpose": "List approved-namespace application Pods and health",
+      "permission": "read",
+      "timeout": 30,
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "namespace": {
+            "anyOf": [
+              {
+                "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Namespace"
+          },
+          "app": {
+            "default": "inference",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,62}$",
+            "title": "App",
+            "type": "string"
+          },
+          "limit": {
+            "default": 100,
+            "maximum": 200,
+            "minimum": 1,
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "title": "ListInput",
+        "type": "object"
+      },
+      "output_schema": {
+        "$defs": {
+          "ContainerHealth": {
+            "properties": {
+              "name": {
+                "title": "Name",
+                "type": "string"
+              },
+              "ready": {
+                "title": "Ready",
+                "type": "boolean"
+              },
+              "restart_count": {
+                "title": "Restart Count",
+                "type": "integer"
+              },
+              "image": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Image"
+              },
+              "image_id": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Image Id"
+              },
+              "waiting_reason": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Waiting Reason"
+              },
+              "termination_reason": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Termination Reason"
+              }
+            },
+            "required": [
+              "name",
+              "ready",
+              "restart_count"
+            ],
+            "title": "ContainerHealth",
+            "type": "object"
+          },
+          "PodHealth": {
+            "properties": {
+              "name": {
+                "title": "Name",
+                "type": "string"
+              },
+              "namespace": {
+                "title": "Namespace",
+                "type": "string"
+              },
+              "phase": {
+                "title": "Phase",
+                "type": "string"
+              },
+              "ready": {
+                "title": "Ready",
+                "type": "boolean"
+              },
+              "restart_count": {
+                "title": "Restart Count",
+                "type": "integer"
+              },
+              "conditions": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "title": "Conditions",
+                "type": "object"
+              },
+              "containers": {
+                "items": {
+                  "$ref": "#/$defs/ContainerHealth"
+                },
+                "title": "Containers",
+                "type": "array"
+              },
+              "diagnoses": {
+                "items": {
+                  "type": "string"
+                },
+                "title": "Diagnoses",
+                "type": "array"
+              },
+              "node": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Node"
+              }
+            },
+            "required": [
+              "name",
+              "namespace",
+              "phase",
+              "ready",
+              "restart_count",
+              "conditions",
+              "containers",
+              "diagnoses"
+            ],
+            "title": "PodHealth",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "namespace": {
+            "title": "Namespace",
+            "type": "string"
+          },
+          "pods": {
+            "items": {
+              "$ref": "#/$defs/PodHealth"
+            },
+            "title": "Pods",
+            "type": "array"
+          },
+          "continuation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Continuation"
+          }
+        },
+        "required": [
+          "namespace",
+          "pods"
+        ],
+        "title": "PodList",
+        "type": "object"
+      }
+    },
+    {
+      "name": "kubernetes.list_deployments",
+      "purpose": "List application Deployments and rollout state",
+      "permission": "read",
+      "timeout": 30,
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "namespace": {
+            "anyOf": [
+              {
+                "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Namespace"
+          },
+          "app": {
+            "default": "inference",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,62}$",
+            "title": "App",
+            "type": "string"
+          },
+          "limit": {
+            "default": 100,
+            "maximum": 200,
+            "minimum": 1,
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "title": "ListInput",
+        "type": "object"
+      },
+      "output_schema": {
+        "$defs": {
+          "DeploymentState": {
+            "properties": {
+              "name": {
+                "title": "Name",
+                "type": "string"
+              },
+              "namespace": {
+                "title": "Namespace",
+                "type": "string"
+              },
+              "desired_replicas": {
+                "title": "Desired Replicas",
+                "type": "integer"
+              },
+              "ready_replicas": {
+                "title": "Ready Replicas",
+                "type": "integer"
+              },
+              "available_replicas": {
+                "title": "Available Replicas",
+                "type": "integer"
+              },
+              "updated_replicas": {
+                "title": "Updated Replicas",
+                "type": "integer"
+              },
+              "generation": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Generation"
+              },
+              "observed_generation": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Observed Generation"
+              },
+              "images": {
+                "items": {
+                  "type": "string"
+                },
+                "title": "Images",
+                "type": "array"
+              },
+              "conditions": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "title": "Conditions",
+                "type": "object"
+              }
+            },
+            "required": [
+              "name",
+              "namespace",
+              "desired_replicas",
+              "ready_replicas",
+              "available_replicas",
+              "updated_replicas",
+              "generation",
+              "observed_generation",
+              "images",
+              "conditions"
+            ],
+            "title": "DeploymentState",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "namespace": {
+            "title": "Namespace",
+            "type": "string"
+          },
+          "deployments": {
+            "items": {
+              "$ref": "#/$defs/DeploymentState"
+            },
+            "title": "Deployments",
+            "type": "array"
+          },
+          "continuation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Continuation"
+          }
+        },
+        "required": [
+          "namespace",
+          "deployments"
+        ],
+        "title": "DeploymentList",
+        "type": "object"
+      }
+    },
+    {
+      "name": "kubernetes.inspect_service",
+      "purpose": "Inspect Service selector and ready endpoint addresses",
+      "permission": "read",
+      "timeout": 30,
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "namespace": {
+            "anyOf": [
+              {
+                "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Namespace"
+          },
+          "service": {
+            "default": "inference",
+            "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+            "title": "Service",
+            "type": "string"
+          }
+        },
+        "title": "ServiceInput",
+        "type": "object"
+      },
+      "output_schema": {
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "namespace": {
+            "title": "Namespace",
+            "type": "string"
+          },
+          "service_type": {
+            "title": "Service Type",
+            "type": "string"
+          },
+          "cluster_ip": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cluster Ip"
+          },
+          "selector": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Selector",
+            "type": "object"
+          },
+          "ports": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Ports",
+            "type": "array"
+          },
+          "matching_pods": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Matching Pods",
+            "type": "array"
+          },
+          "ready_addresses": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Ready Addresses",
+            "type": "array"
+          },
+          "not_ready_addresses": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Not Ready Addresses",
+            "type": "array"
+          },
+          "diagnoses": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Diagnoses",
+            "type": "array"
+          }
+        },
+        "required": [
+          "name",
+          "namespace",
+          "service_type",
+          "cluster_ip",
+          "selector",
+          "ports",
+          "matching_pods",
+          "ready_addresses",
+          "not_ready_addresses",
+          "diagnoses"
+        ],
+        "title": "ServiceState",
+        "type": "object"
+      }
+    },
+    {
+      "name": "kubernetes.pod_health",
+      "purpose": "Inspect Pod readiness, restarts and waiting reasons",
+      "permission": "read",
+      "timeout": 30,
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "namespace": {
+            "anyOf": [
+              {
+                "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Namespace"
+          },
+          "pod": {
+            "maxLength": 253,
+            "pattern": "^[a-z0-9]([-a-z0-9.]*[a-z0-9])?$",
+            "title": "Pod",
+            "type": "string"
+          }
+        },
+        "required": [
+          "pod"
+        ],
+        "title": "PodInput",
+        "type": "object"
+      },
+      "output_schema": {
+        "$defs": {
+          "ContainerHealth": {
+            "properties": {
+              "name": {
+                "title": "Name",
+                "type": "string"
+              },
+              "ready": {
+                "title": "Ready",
+                "type": "boolean"
+              },
+              "restart_count": {
+                "title": "Restart Count",
+                "type": "integer"
+              },
+              "image": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Image"
+              },
+              "image_id": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Image Id"
+              },
+              "waiting_reason": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Waiting Reason"
+              },
+              "termination_reason": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Termination Reason"
+              }
+            },
+            "required": [
+              "name",
+              "ready",
+              "restart_count"
+            ],
+            "title": "ContainerHealth",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "namespace": {
+            "title": "Namespace",
+            "type": "string"
+          },
+          "phase": {
+            "title": "Phase",
+            "type": "string"
+          },
+          "ready": {
+            "title": "Ready",
+            "type": "boolean"
+          },
+          "restart_count": {
+            "title": "Restart Count",
+            "type": "integer"
+          },
+          "conditions": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Conditions",
+            "type": "object"
+          },
+          "containers": {
+            "items": {
+              "$ref": "#/$defs/ContainerHealth"
+            },
+            "title": "Containers",
+            "type": "array"
+          },
+          "diagnoses": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Diagnoses",
+            "type": "array"
+          },
+          "node": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Node"
+          }
+        },
+        "required": [
+          "name",
+          "namespace",
+          "phase",
+          "ready",
+          "restart_count",
+          "conditions",
+          "containers",
+          "diagnoses"
+        ],
+        "title": "PodHealth",
+        "type": "object"
+      }
+    },
+    {
+      "name": "kubernetes.pod_logs",
+      "purpose": "Read bounded sanitized Pod logs",
+      "permission": "read",
+      "timeout": 30,
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "namespace": {
+            "anyOf": [
+              {
+                "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Namespace"
+          },
+          "pod": {
+            "maxLength": 253,
+            "pattern": "^[a-z0-9]([-a-z0-9.]*[a-z0-9])?$",
+            "title": "Pod",
+            "type": "string"
+          },
+          "tail_lines": {
+            "default": 100,
+            "maximum": 500,
+            "minimum": 1,
+            "title": "Tail Lines",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "pod"
+        ],
+        "title": "LogInput",
+        "type": "object"
+      },
+      "output_schema": {
+        "properties": {
+          "pod": {
+            "title": "Pod",
+            "type": "string"
+          },
+          "namespace": {
+            "title": "Namespace",
+            "type": "string"
+          },
+          "logs": {
+            "title": "Logs",
+            "type": "string"
+          },
+          "tail_lines": {
+            "title": "Tail Lines",
+            "type": "integer"
+          },
+          "redacted": {
+            "title": "Redacted",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "pod",
+          "namespace",
+          "logs",
+          "tail_lines",
+          "redacted"
+        ],
+        "title": "PodLogs",
+        "type": "object"
+      }
+    },
+    {
+      "name": "kubernetes.pod_events",
+      "purpose": "Read relevant Pod warning and scheduling events",
+      "permission": "read",
+      "timeout": 30,
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "namespace": {
+            "anyOf": [
+              {
+                "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Namespace"
+          },
+          "pod": {
+            "maxLength": 253,
+            "pattern": "^[a-z0-9]([-a-z0-9.]*[a-z0-9])?$",
+            "title": "Pod",
+            "type": "string"
+          }
+        },
+        "required": [
+          "pod"
+        ],
+        "title": "PodInput",
+        "type": "object"
+      },
+      "output_schema": {
+        "$defs": {
+          "PodEvent": {
+            "properties": {
+              "reason": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Reason"
+              },
+              "message": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Message"
+              },
+              "event_type": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Event Type"
+              },
+              "count": {
+                "title": "Count",
+                "type": "integer"
+              },
+              "last_timestamp": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Last Timestamp"
+              }
+            },
+            "required": [
+              "reason",
+              "message",
+              "event_type",
+              "count",
+              "last_timestamp"
+            ],
+            "title": "PodEvent",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "pod": {
+            "title": "Pod",
+            "type": "string"
+          },
+          "namespace": {
+            "title": "Namespace",
+            "type": "string"
+          },
+          "events": {
+            "items": {
+              "$ref": "#/$defs/PodEvent"
+            },
+            "title": "Events",
+            "type": "array"
+          }
+        },
+        "required": [
+          "pod",
+          "namespace",
+          "events"
+        ],
+        "title": "PodEvents",
+        "type": "object"
+      }
+    },
+    {
+      "name": "kubernetes.deployment_version",
+      "purpose": "Read deployment image versions and model identity",
+      "permission": "read",
+      "timeout": 30,
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "namespace": {
+            "anyOf": [
+              {
+                "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Namespace"
+          },
+          "deployment": {
+            "default": "inference",
+            "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+            "title": "Deployment",
+            "type": "string"
+          }
+        },
+        "title": "DeploymentInput",
+        "type": "object"
+      },
+      "output_schema": {
+        "$defs": {
+          "DeploymentState": {
+            "properties": {
+              "name": {
+                "title": "Name",
+                "type": "string"
+              },
+              "namespace": {
+                "title": "Namespace",
+                "type": "string"
+              },
+              "desired_replicas": {
+                "title": "Desired Replicas",
+                "type": "integer"
+              },
+              "ready_replicas": {
+                "title": "Ready Replicas",
+                "type": "integer"
+              },
+              "available_replicas": {
+                "title": "Available Replicas",
+                "type": "integer"
+              },
+              "updated_replicas": {
+                "title": "Updated Replicas",
+                "type": "integer"
+              },
+              "generation": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Generation"
+              },
+              "observed_generation": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Observed Generation"
+              },
+              "images": {
+                "items": {
+                  "type": "string"
+                },
+                "title": "Images",
+                "type": "array"
+              },
+              "conditions": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "title": "Conditions",
+                "type": "object"
+              }
+            },
+            "required": [
+              "name",
+              "namespace",
+              "desired_replicas",
+              "ready_replicas",
+              "available_replicas",
+              "updated_replicas",
+              "generation",
+              "observed_generation",
+              "images",
+              "conditions"
+            ],
+            "title": "DeploymentState",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "deployment": {
+            "$ref": "#/$defs/DeploymentState"
+          },
+          "labels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Labels",
+            "type": "object"
+          },
+          "annotations": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Annotations",
+            "type": "object"
+          },
+          "model_run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Run Id"
+          },
+          "rollout_complete": {
+            "title": "Rollout Complete",
+            "type": "boolean"
+          },
+          "caveats": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Caveats",
+            "type": "array"
+          }
+        },
+        "required": [
+          "deployment",
+          "labels",
+          "annotations",
+          "model_run_id",
+          "rollout_complete",
+          "caveats"
+        ],
+        "title": "DeploymentVersion",
+        "type": "object"
+      }
+    }
+  ],
+  "external_service_claims": "None: service startup and schema registration only",
+  "container_cleaned": true,
+  "commands": [
+    {
+      "command": [
+        "docker",
+        "--host=unix:///var/run/docker.sock",
+        "image",
+        "inspect",
+        "--format",
+        "{{.Id}} {{.Config.User}}",
+        "mlops-agent:source-f541ca4ddc0a618a"
+      ],
+      "exit_code": 0,
+      "duration_seconds": 0.025,
+      "stdout": "sha256:02c81f95f93658acb60e91fd6ef9767d34c0ed6641f9841cec62552b70d11497 1000:1000\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "docker",
+        "--host=unix:///var/run/docker.sock",
+        "run",
+        "-d",
+        "--name",
+        "mlops-agent-smoke-1794077183618141973",
+        "--read-only",
+        "--tmpfs",
+        "/tmp:rw,noexec,nosuid,size=32m",
+        "--security-opt",
+        "no-new-privileges",
+        "--cap-drop",
+        "ALL",
+        "--env",
+        "MLOPS_API_TOKEN",
+        "-p",
+        "127.0.0.1::8000",
+        "mlops-agent:source-f541ca4ddc0a618a"
+      ],
+      "exit_code": 0,
+      "duration_seconds": 5.566,
+      "stdout": "06ac786891f2875dbdf88be60caa2c4d149bd9a31bf209ea53d6b95c2a215051\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "docker",
+        "--host=unix:///var/run/docker.sock",
+        "port",
+        "mlops-agent-smoke-1794077183618141973",
+        "8000/tcp"
+      ],
+      "exit_code": 0,
+      "duration_seconds": 0.026,
+      "stdout": "127.0.0.1:32771\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "docker",
+        "--host=unix:///var/run/docker.sock",
+        "rm",
+        "-f",
+        "mlops-agent-smoke-1794077183618141973"
+      ],
+      "exit_code": 0,
+      "duration_seconds": 1.291,
+      "stdout": "mlops-agent-smoke-1794077183618141973\n",
+      "stderr": ""
+    }
+  ],
+  "source_tree_sha256": "f541ca4ddc0a618a8fff21fc47c1b74b127d8727ac5401f863c21d29b8849947",
+  "source_dirty": true,
+  "git_commit_base": "f5baa78eb26168040107f18f38b383ee59f0ed9e"
+}

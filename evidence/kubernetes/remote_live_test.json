@@ -1,0 +1,19 @@
+{
+  "timestamp": "2026-11-07T18:35:00.355905+00:00",
+  "command": [
+    ".venv/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/integration/test_kubernetes_remote_live.py"
+  ],
+  "required_environment_flags": [
+    "RUN_INTEGRATION=1",
+    "RUN_REMOTE_KUBERNETES=1"
+  ],
+  "duration_seconds": 0.964,
+  "exit_code": 1,
+  "status": "BLOCKED",
+  "output": "F                                                                        [100%]\n=================================== FAILURES ===================================\n____ test_real_remote_inference_has_two_ready_replicas_and_service_backends ____\n\n    def test_real_remote_inference_has_two_ready_replicas_and_service_backends():\n        settings = Settings()\n        if not settings.kube_api_url or not settings.kube_api_token:\n            pytest.skip(\"Remote Kubernetes URL/token are not configured\")\n        response = httpx.get(\n            settings.kube_api_url + f\"/api/v1/namespaces/{settings.namespace}/pods\",\n            headers={\"Authorization\": \"Bearer \" + settings.kube_api_token.get_secret_value()},\n            timeout=settings.http_timeout,\n        )\n        if (\n            response.status_code == 403\n            and response.headers.get(\"server\", \"\").lower() == \"envoy\"\n            and response.headers.get(\"content-type\", \"\").startswith(\"text/plain\")\n            and response.text.strip() == \"Your request was blocked.\"\n        ):\n>           pytest.fail(\"KUBERNETES_NETWORK_POLICY_DENIED: upstream transport blocked; no cluster result\")\nE           Failed: KUBERNETES_NETWORK_POLICY_DENIED: upstream transport blocked; no cluster result\n\ntests/integration/test_kubernetes_remote_live.py:35: Failed\n=========================== short test summary info ============================\nFAILED tests/integration/test_kubernetes_remote_live.py::test_real_remote_inference_has_two_ready_replicas_and_service_backends\n1 failed in 0.37s\n",
+  "interpretation": "The opt-in real workload test must fail on a network-policy denial; it is not counted as a passing cluster test."
+}

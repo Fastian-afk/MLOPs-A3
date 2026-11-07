@@ -11,7 +11,7 @@ export MLOPS_API_TOKEN
 bash scripts/smoke_test.sh
 ```
 
-`python -m scripts.run_local --stop` stops only helper-owned process groups. The helper reuses healthy separately launched services and leaves those running.
+`python -m scripts.run_local --stop` stops only helper-owned process groups. The helper reuses healthy separately launched services and leaves those running. To use live Groq, configure its key securely and launch with `python -m scripts.run_local --planner groq --groq-model openai/gpt-oss-20b`; no key belongs in command arguments or evidence. The older Llama model was unavailable on the recorded account.
 
 ## Prepare the local data and experiments
 
@@ -48,15 +48,15 @@ The server uses `MLOPS_SHARED_DIR` for durable run files and `MLOPS_DATASET_PATH
 
 ## Five conversations
 
-The examples use one session for clarity. Set the required `MLOPS_API_TOKEN` securely in both server and client shells; every chat request needs bearer authentication. Existing exports under `evidence/conversations/` record the modes and tool outcomes actually exercised in the implementation environment.
+The examples use one session for clarity. `provider_trace` distinguishes actual Groq planning/request usage from any deterministic coverage guard; a planner label alone is not proof that a provider call succeeded. Set the required `MLOPS_API_TOKEN` securely in both server and client shells; every chat request needs bearer authentication. Current exports under `evidence/conversations/groq/` record four live provider requests plus the explicit confirmation flow; older offline exports remain separately labeled under `evidence/conversations/`. Three scenarios are operationally verified and two remain blocked by the upstream Kubernetes denial despite successful provider planning.
 
 To record all five automatically against the actual local API:
 
 ```bash
-python -m scripts.demo_scenarios --confirm-training
+python -m scripts.demo_scenarios --confirm-training --output-dir evidence/conversations/local-groq --provider-interval-seconds 30
 ```
 
-The flag explicitly authorizes the demonstration's proposed Airflow trigger; the script still performs the API's proposal/confirmation flow and polls actual final state. Without the flag it records the proposal without triggering. It does not change Kubernetes state. Configure the same MLflow/Airflow settings in the client process as in the server so actual run lookup and status polling use the intended services.
+The output directory preserves the shipped evidence, and the provider interval spaces live requests under the recorded account budget. The flag explicitly authorizes the demonstration's proposed Airflow trigger; the script still performs the API's proposal/confirmation flow and polls actual final state. Without the flag it records the proposal without triggering. It does not change Kubernetes state. Configure the same MLflow/Airflow settings in the client process as in the server so actual run lookup and status polling use the intended services.
 
 
 ### 1. Dataset provenance
@@ -103,6 +103,18 @@ Ask exactly:
 
 Show the selected MLflow run, its DVC dataset reference, deployment/Pod state and recent Airflow workflow state. Check the trace contains all four systems and no trigger/mutating tool. The answer separates facts and missing evidence. Retraining needs a stated freshness policy, failed quality gate or measured degradation; it is never automatically initiated by this informational question.
 
+## Native Windows cluster verification
+
+For the existing Docker Desktop kind cluster, the reviewed native helper does not need Windows Python or a registry credential:
+
+```powershell
+.\scripts\windows_deploy.ps1 -ConfirmDeploy -InjectSelectorFailure
+```
+
+The flags explicitly authorize deployment and the optional selector fault in namespace `mlops`. The helper checks the trusted tiny fixture checksum, builds/loads a commit-tagged image, requires two ready replicas and uses an in-cluster probe Pod for real ClusterIP/DNS requests. It records before/fault/recovery responses, resources and logs under `evidence/kubernetes/windows-<UTC timestamp>/`. Temporary Service changes and probe Pods are cleaned up. These Windows commands must actually execute on that host before claiming live cluster verification; source/parse checks alone do not establish it.
+
+The exact 2,686-byte fixture from real run `339b16bb4dc3467aa6004ff170f7f504` is committed with its original training source/hash/metrics in `demo_artifacts/metadata.json`. Its preserved model lineage differs deliberately from the current service image's source tag. See [NEXT_STEPS.md](NEXT_STEPS.md) for checkout, script execution and full-stack instructions.
+
 ## Kubernetes setup and evidence
 
 On a suitable Docker/kind host:
@@ -125,7 +137,7 @@ curl --fail -H 'Content-Type: application/json' \
 
 The helper builds/loads an immutable image that contains the promoted model. Verify two ready replicas and an actual prediction through the service; an open Pod port alone is not sufficient. The agent should use the namespaced read-only service account rather than cluster-admin credentials. Keep its kubeconfig securely outside the repository.
 
-In the implementation cloud runtime, kind provisioning was blocked by unavailable rootless cgroup delegation. See `evidence/kubernetes/runtime_cluster.json`; these commands require a suitable host or an existing authorized cluster.
+In the current implementation cloud runtime, kind provisioning was blocked by unavailable rootless cgroup delegation (`evidence/kubernetes/current_runtime_cluster.json`). The configured remote Windows tunnel also returned an upstream Envoy HTTP 403 before Kubernetes (`evidence/kubernetes/remote_live.json`). Neither response establishes cluster workload health or an invalid token. Local Windows verification avoids this cloud route and requires no additional exposure of administrator credentials.
 
 ## Two deliberate failures
 
@@ -172,7 +184,7 @@ Its export is `evidence/failures/kubernetes_selector_mocked.json`, labeled `VERI
 | 0:00–0:40 | Explain data/control flow and read/write boundary | `architecture.md` diagram, registry schemas and read-only RBAC |
 | 0:40–1:25 | Resolve one real run's data and compare five experiments | MLflow metrics, DVC hash, source commit and reproduction export |
 | 1:25–2:15 | Show confirmation then actual workflow state | Proposal, actual DAG run ID, five task states, retry/gate behavior |
-| 2:15–3:05 | Diagnose deployment using observed resources | Two replicas, probes, service/endpoints, logs and version |
+| 2:15–3:05 | Show actual cluster evidence if local verification ran; otherwise disclose access blocker | Two replicas, probes, Service/endpoints, logs/version, or exact blocked export |
 | 3:05–4:10 | Run the exact integrated question | Four-system tool trace, facts/uncertainties, no automatic trigger |
 | 4:10–5:00 | Explain two failures and verified limits | Fault/recovery exports, tests summary, `LIMITATIONS.md` |
 
@@ -187,4 +199,5 @@ Start slow services and prepare evidence before the five-minute demonstration. I
 - **Why a read-only Kubernetes agent?** The assignment permits a safe operations subset. Omitting mutation avoids exposing a restart/edit path while still satisfying inspection and diagnosis; operators retain separate authorized changes.
 - **How does confirmation resist injection?** A model/tool response cannot supply authority. The server issues a short-lived action/session-bound nonce and rechecks it before an allowlisted write.
 - **What if a tool times out?** The result records a timeout and uncertainty. The agent cannot truthfully report successful infrastructure behavior without a successful tool response.
+- **Why can a valid token still fail?** An upstream transport/egress denial can prevent any Kubernetes response. A plain-text Envoy 403 is different from an API-server JSON/RBAC result; do not label it a bad token or unhealthy application.
 - **What remains for production?** Identity-backed authorization, TLS, shared confirmation state, managed service backends/storage, artifact integrity policy and observability beyond this CPU demonstration.

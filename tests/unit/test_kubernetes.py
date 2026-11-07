@@ -98,6 +98,21 @@ def test_kubernetes_auth_error_is_sanitized(clients):
     assert "sensitive-value" not in str(error.value)
 
 
+def test_upstream_policy_denial_is_not_reported_as_kubernetes_authorization(clients):
+    from agent.tools.kubernetes_tools import KubernetesNetworkPolicyError
+
+    core, _, tools = clients
+    failure = RuntimeError("unsafe remote details")
+    failure.status = 403
+    failure.headers = {"Server": "envoy", "Content-Type": "text/plain"}
+    failure.body = "Your request was blocked."
+    core.read_namespaced_pod.side_effect = failure
+    with pytest.raises(KubernetesNetworkPolicyError) as error:
+        tools.pod_health(PodInput(pod="inference-abc"))
+    assert error.value.code == "kubernetes_network_policy_denied"
+    assert "unsafe remote details" not in str(error.value)
+
+
 def test_pod_logs_are_bounded_and_redacted(clients):
     core, _, tools = clients
     core.read_namespaced_pod_log.return_value = (

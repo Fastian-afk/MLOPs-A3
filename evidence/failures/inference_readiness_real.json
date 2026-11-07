@@ -1,6 +1,6 @@
 {
   "status": "VERIFIED_REAL",
-  "timestamp": "2026-11-07T16:52:39.576821+00:00",
+  "timestamp": "2026-11-07T18:31:29.644607+00:00",
   "scope": "real Docker container; NOT a Kubernetes incident",
   "injected_fault": "MODEL_PATH points to an absent artifact in a real read-only Docker container",
   "failed_checks": {
@@ -34,7 +34,7 @@
       }
     }
   },
-  "logs": "INFO:     172.17.0.1:48784 - \"GET /health/live HTTP/1.1\" 200 OK\nINFO:     172.17.0.1:48800 - \"GET /health/live HTTP/1.1\" 200 OK\nINFO:     172.17.0.1:48810 - \"GET /health/ready HTTP/1.1\" 503 Service Unavailable\nINFO:     172.17.0.1:48816 - \"POST /predict HTTP/1.1\" 503 Service Unavailable\nINFO:     172.17.0.1:48820 - \"GET /version HTTP/1.1\" 200 OK\nINFO:     Started server process [1]\nINFO:     Waiting for application startup.\nModel could not be loaded; readiness remains false\nINFO:     Application startup complete.\nINFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)\n",
+  "logs": "INFO:     172.17.0.1:33116 - \"GET /health/live HTTP/1.1\" 200 OK\nINFO:     172.17.0.1:33122 - \"GET /health/live HTTP/1.1\" 200 OK\nINFO:     172.17.0.1:33126 - \"GET /health/ready HTTP/1.1\" 503 Service Unavailable\nINFO:     172.17.0.1:33138 - \"POST /predict HTTP/1.1\" 503 Service Unavailable\nINFO:     172.17.0.1:33148 - \"GET /version HTTP/1.1\" 200 OK\nINFO:     Started server process [1]\nINFO:     Waiting for application startup.\nModel could not be loaded; readiness remains false\nINFO:     Application startup complete.\nINFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)\n",
   "diagnosis": "The process remains live, but the model artifact cannot be loaded. Readiness and prediction return MODEL_NOT_READY instead of serving invalid predictions.",
   "corrective_action": "Recreate the container from the same immutable image without overriding the bundled valid model path",
   "recovery_checks": {

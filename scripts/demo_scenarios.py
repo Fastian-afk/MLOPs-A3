@@ -22,12 +22,25 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--url", default="http://127.0.0.1:8000")
     parser.add_argument("--confirm-training", action="store_true")
+    parser.add_argument("--output-dir", type=Path, default=Path("evidence/conversations"))
+    parser.add_argument(
+        "--provider-interval-seconds",
+        type=float,
+        help="Minimum spacing between provider requests (Groq default 30s)",
+    )
     args = parser.parse_args()
     token = os.environ.get("MLOPS_API_TOKEN")
     if not token:
         parser.error("Set MLOPS_API_TOKEN securely")
     client = httpx.Client(base_url=args.url, headers={"Authorization": "Bearer " + token}, timeout=120)
     settings = Settings()
+    interval = (
+        args.provider_interval_seconds
+        if args.provider_interval_seconds is not None
+        else (30 if settings.planner == "groq" else 0)
+    )
+    if interval < 0:
+        parser.error("Provider interval must be nonnegative")
     local_password = Path(".runtime/airflow/simple_auth_manager_passwords.json")
     if (
         not settings.airflow_token
@@ -61,12 +74,27 @@ def main():
             "Find the best recent model, identify the dataset version used to train it, check the deployment status, and explain whether retraining is necessary.",
         ),
     ]
-    directory = Path("evidence/conversations")
+    directory = args.output_dir
     directory.mkdir(parents=True, exist_ok=True)
+    last_provider_request = 0.0
     for index, (name, question) in enumerate(scenarios, 1):
-        response = client.post("/agent/chat", json={"message": question, "session_id": f"demo-{index}"})
-        response.raise_for_status()
-        result = response.json()
+        attempts = []
+        for attempt in range(3):
+            # A confirmed training proposal uses the dedicated confirmation flow,
+            # so this informational-provider pacing never authorizes a write.
+            if index != 3 and last_provider_request:
+                time.sleep(max(0, interval - (time.monotonic() - last_provider_request)))
+            response = client.post("/agent/chat", json={"message": question, "session_id": f"demo-{index}"})
+            response.raise_for_status()
+            result = response.json()
+            provider = result.get("provider_trace")
+            if provider:
+                last_provider_request = time.monotonic()
+            if not provider or provider.get("error_code") != "LLM_RATE_LIMITED" or attempt == 2:
+                break
+            attempts.append(result)
+            delay = provider.get("retry_after_seconds")
+            time.sleep(max(interval, float(delay) if isinstance(delay, (int, float)) else 30))
         turns = [{"user": question, "agent": result}]
         if index == 3 and args.confirm_training and result["proposed_actions"]:
             confirmation = result["proposed_actions"][0]["confirmation_token"]
@@ -109,6 +137,16 @@ def main():
             }
         errors = [e for t in turns for e in t.get("agent", {}).get("evidence", []) if e["status"] != "ok"]
         label = "BLOCKED" if errors else "VERIFIED_REAL"
+        provider_trace = result.get("provider_trace")
+        if provider_trace and provider_trace.get("error_code"):
+            label = "FAILED"
+        if any(e.get("error_code") in {"INVALID_REQUEST", "INVALID_PROVIDER_PLAN"} for e in errors):
+            label = "FAILED"
+        if index == 2 and not any(
+            e["tool"] == "mlflow.best_run" and e["status"] == "ok" and e["data"].get("best_run")
+            for e in result.get("evidence", [])
+        ):
+            label = "FAILED"
         if index == 3:
             polled = next((t["actual_status"] for t in turns if "actual_status" in t), None)
             if not polled or not polled.get("completed"):
@@ -119,7 +157,13 @@ def main():
             "timestamp": datetime.now(UTC).isoformat(),
             "environment": "actual local services; Kubernetes may be blocked",
             "status": label,
-            "planner": settings.planner,
+            "planner": result["planner"],
+            "provider_verified": bool(
+                provider_trace
+                and not provider_trace.get("error_code")
+                and provider_trace.get("planned_steps")
+            ),
+            "rate_limited_attempts": redact(attempts),
             "turns": redact(turns),
         }
         (directory / f"{index:02d}_{name}.json").write_text(json.dumps(record, indent=2) + "\n")
