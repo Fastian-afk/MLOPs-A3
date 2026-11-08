@@ -4,6 +4,14 @@ Run these commands in PowerShell on the computer running Docker Desktop and the
 existing `kind-mlops-assignment` cluster. The native helper uses the trusted tiny
 model already included in the repository; Windows Python is not required.
 
+The completed user-operated run is already committed in
+`1da4c7e663425c40ee3da78ded2e976357d9705a`. Its
+[verification.json](evidence/kubernetes/windows-20261107T192746Z-0a1e3c80/verification.json)
+records two ready replicas, successful predictions before and after the selector
+fault, traffic failure during the fault, and successful cleanup. The commands
+below reproduce that run; another execution or evidence commit is not required
+merely to submit the existing repository.
+
 ## Update the checkout and run the corrected helper
 
 The first helper version incorrectly passed native command arrays through
@@ -64,8 +72,11 @@ if ($result.cleanup.service_restored -ne $true -or $result.cleanup.errors.Count 
 The expected values are `VERIFIED_REAL`, at least `2` ready replicas, and `True`
 for the three traffic checks. The probe executes **inside the cluster**, so it
 tests actual ClusterIP/DNS routing rather than only reaching a Pod by port-forward.
-Logs, events, manifests, endpoints and prediction results are retained in the
-same evidence directory.
+Events, manifests, endpoints and prediction results are retained in the same
+evidence directory. The committed probe result JSONs preserve stdout obtained
+through `kubectl logs`. Raw inference-Pod `.log` files are ignored by Git and were
+not included in the reviewed upload; the review does not claim to have inspected
+those application logs.
 
 ## Optional direct local HTTP prediction
 
@@ -118,7 +129,7 @@ conversational stack locally against the same cluster; see [NEXT_STEPS.md](NEXT_
 
 ## Commit only actual successful Windows evidence
 
-After the verification guards above pass, run from the checkout:
+For a new successful rerun, after the verification guards above pass, run from the checkout:
 
 ```powershell
 $evidencePath = 'evidence/kubernetes/' + $proof.Name

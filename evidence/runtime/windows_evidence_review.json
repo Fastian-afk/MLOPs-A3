@@ -1,0 +1,173 @@
+{
+  "reviewed_at": "2026-11-08T10:19:53.822477+00:00",
+  "status": "PASS",
+  "review_scope": "Static consistency review of actual user-operated Windows kind exports, not a new cloud-origin Kubernetes API test",
+  "evidence_commit": "1da4c7e663425c40ee3da78ded2e976357d9705a",
+  "evidence_directory": "evidence/kubernetes/windows-20261107T192746Z-0a1e3c80",
+  "source_status": "VERIFIED_REAL (operator-run local kind cluster)",
+  "checks": [
+    {
+      "check": "Successful operator-run evidence and intended context/namespace",
+      "result": "PASS"
+    },
+    {
+      "check": "Two desired, updated, Ready and available replicas",
+      "result": "PASS"
+    },
+    {
+      "check": "Both Pods Running, Ready and zero restarts",
+      "result": "PASS"
+    },
+    {
+      "check": "Two ready endpoint addresses match actual Pod IPs",
+      "result": "PASS"
+    },
+    {
+      "check": "ClusterIP Service selector matches both Pod labels",
+      "result": "PASS"
+    },
+    {
+      "check": "Actual probes, requests/limits and ConfigMap reference",
+      "result": "PASS"
+    },
+    {
+      "check": "Actual deployed image matches recorded immutable source tag",
+      "result": "PASS"
+    },
+    {
+      "check": "Actual trusted model bytes match manifest and export SHA256",
+      "result": "PASS"
+    },
+    {
+      "check": "Recorded model training lineage matches manifest",
+      "result": "PASS"
+    },
+    {
+      "check": "baseline_clusterip_probe: health, readiness, version and prediction HTTP200",
+      "result": "PASS"
+    },
+    {
+      "check": "baseline_clusterip_probe: returned model/dataset/training lineage",
+      "result": "PASS"
+    },
+    {
+      "check": "recovery_clusterip_probe: health, readiness, version and prediction HTTP200",
+      "result": "PASS"
+    },
+    {
+      "check": "recovery_clusterip_probe: returned model/dataset/training lineage",
+      "result": "PASS"
+    },
+    {
+      "check": "Identical baseline and recovered prediction/version",
+      "result": "PASS"
+    },
+    {
+      "check": "Injected selector matches neither Pod; endpoints empty and routing fails",
+      "result": "PASS"
+    },
+    {
+      "check": "Cleanup reports Service restored with no errors",
+      "result": "PASS"
+    },
+    {
+      "check": "mlops-probe-e6ce9ea6a0: individual stdout JSON equals summary and inputs match namespace/image",
+      "result": "PASS"
+    },
+    {
+      "check": "mlops-probe-5450b5cf7e: individual stdout JSON equals summary and inputs match namespace/image",
+      "result": "PASS"
+    },
+    {
+      "check": "mlops-probe-e9722afe10: individual stdout JSON equals summary and inputs match namespace/image",
+      "result": "PASS"
+    },
+    {
+      "check": "Training and deployed source commits are actual ancestors of evidence commit",
+      "result": "PASS"
+    }
+  ],
+  "reviewed_files_sha256": {
+    "evidence/kubernetes/windows-20261107T192746Z-0a1e3c80/deployment-request.json": "8e650c4e93baabc22cd0a05e52a4fdb35a7262013510e4de3e2e31b7abfe53cd",
+    "evidence/kubernetes/windows-20261107T192746Z-0a1e3c80/mlops-probe-5450b5cf7e-result.json": "62b633a1eff11a27be7892eb90e4bb6958927f9b01a84de7a450241ef2179dbd",
+    "evidence/kubernetes/windows-20261107T192746Z-0a1e3c80/mlops-probe-5450b5cf7e.json": "53e189ef28fce693f518ba83422749c6b8a4751321c67a97241772ca610b0a92",
+    "evidence/kubernetes/windows-20261107T192746Z-0a1e3c80/mlops-probe-e6ce9ea6a0-result.json": "95910a8c8ea9a3c9347b33fef11a87986573dcae74362950c06e37f734001b3c",
+    "evidence/kubernetes/windows-20261107T192746Z-0a1e3c80/mlops-probe-e6ce9ea6a0.json": "8fa94286ea5f41161267a254b66d9e6af4fabbbf4704c9e6bd0fd09fe26218d7",
+    "evidence/kubernetes/windows-20261107T192746Z-0a1e3c80/mlops-probe-e9722afe10-result.json": "95910a8c8ea9a3c9347b33fef11a87986573dcae74362950c06e37f734001b3c",
+    "evidence/kubernetes/windows-20261107T192746Z-0a1e3c80/mlops-probe-e9722afe10.json": "c145c5ff08474a8386eb20d94541eb791fa79c80552fe98c21d0f143b3049d70",
+    "evidence/kubernetes/windows-20261107T192746Z-0a1e3c80/selector-fault-patch.json": "86597766e7a79541895f945e9bc005b4102219f9d4056a34808c80f6733ba4bc",
+    "evidence/kubernetes/windows-20261107T192746Z-0a1e3c80/verification.json": "d63a7aa1509577a474331fae397bbf32d403dd3640808c7fd1f990abe7f53ef2"
+  },
+  "hosted_ci_for_evidence_commit": [
+    {
+      "workflow": "lint-and-tests",
+      "url": "https://github.com/Fastian-afk/MLOPs-A3/actions/runs/42406658094",
+      "head_sha": "1da4c7e663425c40ee3da78ded2e976357d9705a",
+      "observed_status": "completed successfully"
+    },
+    {
+      "workflow": "windows-helper-arguments",
+      "url": "https://github.com/Fastian-afk/MLOPs-A3/actions/runs/42406658051",
+      "head_sha": "1da4c7e663425c40ee3da78ded2e976357d9705a",
+      "observed_status": "completed successfully"
+    }
+  ],
+  "limits": [
+    "Cloud-agent Kubernetes API requests remain blocked by the previously recorded upstream Envoy HTTP403; this review makes no new cloud connectivity claim.",
+    "Historical deployment-diagnosis and integrated Groq conversations remain operationally BLOCKED for Kubernetes reads.",
+    "Three probe result JSONs preserve stdout collected with kubectl logs. Raw inference Pod .log files were not committed or reviewed.",
+    "The operator script supplied the real fault observation/diagnosis; this is not proof of a successful live AI Kubernetes diagnosis.",
+    "No grade guarantee or claim that the entire Compose stack was executed."
+  ],
+  "final_local_validation": {
+    "source_commit": "1da4c7e663425c40ee3da78ded2e976357d9705a",
+    "working_changes": "Documentation reconciliation and this review record only; no production source changes",
+    "checks": [
+      {
+        "command": ".venv/bin/python -m pytest -q tests/unit",
+        "exit_code": 0,
+        "passed": 132,
+        "skipped": 1,
+        "note": "Portable PowerShell runtime was not on PATH; rerun below selected the already verified runtime explicitly."
+      },
+      {
+        "command": "PWSH_PATH=/tmp/mlops-windows-helper-validation/runtime/pwsh .venv/bin/python -m pytest -q tests/unit",
+        "exit_code": 0,
+        "passed": 133,
+        "skipped": 0,
+        "warnings": 81,
+        "pytest_reported_seconds": 3.81
+      },
+      {
+        "command": ".venv/bin/ruff check .",
+        "exit_code": 0
+      },
+      {
+        "command": ".venv/bin/mypy",
+        "exit_code": 0,
+        "configured_files": 3
+      },
+      {
+        "command": ".venv/bin/python scripts/verify_submission.py",
+        "exit_code": 0,
+        "missing_files": [],
+        "secret_scan_findings": []
+      },
+      {
+        "check": "Known credential values and Groq/JWT patterns across tracked files plus new review JSON",
+        "result": "PASS",
+        "findings": []
+      },
+      {
+        "check": "Root Markdown relative links outside code blocks",
+        "result": "PASS",
+        "broken_links": []
+      },
+      {
+        "command": "git diff --check",
+        "exit_code": 0
+      }
+    ],
+    "scope": "Unit and static checks; no fresh live provider, Airflow, MLflow or Kubernetes integration test run for these documentation-only changes"
+  }
+}

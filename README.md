@@ -17,7 +17,7 @@ The repository began empty. The uploaded assignment defines the requirements; th
 
 See [architecture.md](architecture.md) for data flow, trust boundaries and the confirmation lifecycle.
 
-DVC historical reproduction, five clean-source MLflow candidates, five-stage Airflow execution and Docker inference have real exports. Groq authentication and four informational API conversations are verified with `openai/gpt-oss-20b` (provider success remains separate from blocked Kubernetes reads); the previously configured Llama model was no longer available. Kubernetes remains unverified: cloud kind requires unavailable cgroup delegation, and the configured remote tunnel returns an upstream HTTP 403 before Kubernetes responds. See `evidence/validation.json` for current test counts and [TECHNICAL_REPORT.md](TECHNICAL_REPORT.md) for exact evidence and limits.
+DVC historical reproduction, five clean-source MLflow candidates, five-stage Airflow execution and Docker inference have real exports. Groq authentication and four informational planning calls succeeded with `openai/gpt-oss-20b`; the previously configured Llama model was no longer available. The real Windows Kubernetes run verifies two ready replicas, ClusterIP predictions, an injected selector failure and recovery: [deployment evidence](evidence/kubernetes/windows-20261107T192746Z-0a1e3c80/verification.json). Cloud-side agent Kubernetes reads remain blocked by an upstream HTTP 403, so the two affected Groq conversations retain their blocked operational status. See [TECHNICAL_REPORT.md](TECHNICAL_REPORT.md) for exact evidence and limits.
 
 
 ## Prerequisites
@@ -50,7 +50,7 @@ RUN_INTEGRATION=1 pytest -q tests/integration
 RUN_INTEGRATION=1 pytest -q tests/e2e
 ```
 
-The end-to-end agent request additionally needs the securely configured `MLOPS_API_TOKEN`. The latest recorded suite has 132 unit passes, 3 live integration passes plus 1 remote target skipped by default, and 2 live API passes. The remote workload test was also explicitly run with `RUN_REMOTE_KUBERNETES=1` and failed on the diagnosed upstream policy denial; it is recorded as `BLOCKED`, not counted as a passing cluster check.
+The end-to-end agent request additionally needs the securely configured `MLOPS_API_TOKEN`. The corrective Windows-helper suite records 133 unit passes in `evidence/runtime/windows_fix_validation.json`. The earlier full-stack batch records 132 unit passes, 3 live integration passes plus 1 remote target skipped by default, and 2 live API passes in `evidence/validation.json`. The remote workload test was also explicitly run with `RUN_REMOTE_KUBERNETES=1` and failed on the diagnosed upstream policy denial; it is recorded as `BLOCKED`, separately from the successful operator-run Windows deployment.
 
 Key configuration names (the agent uses the `MLOPS_` prefix):
 
@@ -237,7 +237,7 @@ The full Python/Airflow service stack runs on Linux or WSL2. A separate native P
 .\scripts\windows_deploy.ps1 -ConfirmDeploy -InjectSelectorFailure
 ```
 
-Run it on the existing local `mlops-assignment` kind cluster. `-ConfirmDeploy` explicitly authorizes namespaced deployment; `-InjectSelectorFailure` additionally authorizes a temporary selector fault and recovery. The helper verifies two Ready replicas and performs predictions from inside the cluster through ClusterIP/DNS, then captures resources, events, logs and before/fault/recovery evidence. It restores the Service and deletes its own probe Pods. The PowerShell helper is source/parse checked in the cloud; successful Windows execution must be recorded on that host before claiming live Kubernetes verification.
+Run it on the existing local `mlops-assignment` kind cluster. `-ConfirmDeploy` explicitly authorizes namespaced deployment; `-InjectSelectorFailure` additionally authorizes a temporary selector fault and recovery. The helper verifies two Ready replicas and performs predictions from inside the cluster through ClusterIP/DNS, then captures resources, events, logs and before/fault/recovery evidence. It restores the Service and deletes its own probe Pods. Successful native Windows execution is recorded in [the committed exports](evidence/kubernetes/windows-20261107T192746Z-0a1e3c80/verification.json), added by commit `1da4c7e`. The final [consistency review](evidence/runtime/windows_evidence_review.json) checks the actual exports against model provenance and probe results. Probe stdout JSON is committed; raw inference Pod log files were not uploaded.
 
 The tiny `demo_artifacts/model.joblib` is the exact 2,686-byte quality-gated artifact from real run `339b16bb4dc3467aa6004ff170f7f504`, not a newly invented model. Its SHA256, dataset hash and training commit are recorded in `demo_artifacts/metadata.json`. This intentionally small trusted fixture makes the inference demonstration self-contained; large models, caches and databases remain excluded. The helper checks its checksum and preserves any different existing serving artifact. Never load untrusted joblib/pickle files.
 
@@ -270,4 +270,4 @@ Windows-to-cloud connection instructions remain in [WINDOWS_KUBERNETES.md](WINDO
 
 Exact PowerShell live checks and evidence upload commands: [WINDOWS_LIVE_CHECKS.md](WINDOWS_LIVE_CHECKS.md).
 
-Windows PowerShell 5.1 native-argument regression now passes in [hosted Windows CI](https://github.com/Fastian-afk/MLOPs-A3/actions/runs/42404721165). This verifies command argument handling, not a live Kubernetes deployment.
+Windows PowerShell 5.1 native-argument regression passes in [hosted Windows CI](https://github.com/Fastian-afk/MLOPs-A3/actions/runs/42404721165). That CI checks command argument handling; the separate operator-run exports above verify the real Kubernetes deployment.

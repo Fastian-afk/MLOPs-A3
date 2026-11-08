@@ -1,4 +1,4 @@
-# Run the remaining local demonstration
+# Reproduce the local demonstration
 
 ## What is already verified
 
@@ -10,7 +10,15 @@ results are recorded in `evidence/validation.json`, `evidence/groq/` and
 `evidence/conversations/groq/` (with earlier offline exports retained separately). Hosted Actions has also passed at the source commit
 linked in `evidence/runtime/github_actions.json`.
 
-The cluster portion is still incomplete. Cloud kind cannot start because its
+The user-operated Windows cluster run is now recorded in commit
+`1da4c7e663425c40ee3da78ded2e976357d9705a`, under
+[`evidence/kubernetes/windows-20261107T192746Z-0a1e3c80/verification.json`](evidence/kubernetes/windows-20261107T192746Z-0a1e3c80/verification.json).
+It verifies two ready replicas, successful in-cluster ClusterIP predictions,
+selector-fault traffic failure, prediction recovery and cleanup. The commands
+below reproduce that completed run; another deployment is not required merely
+to submit the recorded repository.
+
+The separate cloud-agent Kubernetes route remains blocked. Cloud kind cannot start because its
 rootless host lacks cgroup delegation. The configured Windows cluster tunnel was
 allowlisted and had a published credential, but actual requests returned upstream
 Envoy/plain-text HTTP 403 before Kubernetes responded. That does not establish a
@@ -58,9 +66,11 @@ flag authorizes the temporary Service selector mismatch. The helper:
    cluster to verify ClusterIP/DNS health, version and a real prediction.
 5. With the fault flag, records the selector failure and failed Service routing,
    restores the manifest, and verifies prediction recovery.
-6. Captures deployment, Pods, Service, endpoints, events, logs and probe results in
-   `evidence/kubernetes/windows-<UTC timestamp>/verification.json`, restores any
-   temporary Service change and removes its own probe Pods.
+6. Captures deployment, Pods, Service, endpoints, events and probe results in
+   `evidence/kubernetes/windows-<UTC timestamp>/`, restores any temporary Service
+   change and removes its own probe Pods. The committed probe result JSONs contain
+   stdout collected through `kubectl logs`. Raw inference-Pod `.log` files are
+   ignored by Git and were not included in the reviewed upload.
 
 The fixture is the exact 2,686-byte artifact from recorded real run
 `339b16bb4dc3467aa6004ff170f7f504`, with training source
@@ -69,11 +79,12 @@ is separate from the current image/service source commit. This small example
 artifact makes the demonstration self-contained; it is not a retraining claim or
 a large model store.
 
-The PowerShell helper has been reviewed and parser/control-flow checked in the
-cloud. Real Windows cluster execution is still required. A script-supplied fault
-diagnosis is an operator observation; to demonstrate the AI diagnosis criterion,
-run the local conversational agent against the same cluster and retain its actual
-Kubernetes tool responses as well.
+The PowerShell helper has both native argument regression checks and the recorded
+real Windows cluster execution above. Its fault observations are operator-run
+deployment evidence. A successful live AI diagnosis against this cluster remains
+a separate evidence gap: run the local conversational agent against it and retain
+actual Kubernetes tool responses if extending the demonstration. The two existing
+Groq conversations with blocked Kubernetes reads retain their original status.
 
 ## 2. Linux/WSL2: the full conversational stack
 
@@ -123,9 +134,9 @@ conversation can remain partly blocked by the cloud route policy.
 
 ## 4. Retain real evidence before updating assessment status
 
-After the local cluster checks succeed, retain its timestamped exports and actual
-agent conversations. Run applicable opt-in tests with the services/configuration
-available. Preserve passed, failed, skipped and blocked results separately. Update
-the report and rubric only for checks that actually ran. The whole Compose stack
-has not been launched here; its configuration and individual image/container
-checks are separate evidence.
+The successful Windows exports are already committed. For any future rerun,
+retain its timestamped exports and any new actual agent conversations. Run
+applicable opt-in tests with the services/configuration available. Preserve passed,
+failed, skipped and blocked results separately. Update the report and rubric only
+for checks that actually ran. The whole Compose stack has not been launched here;
+its configuration and individual image/container checks are separate evidence.

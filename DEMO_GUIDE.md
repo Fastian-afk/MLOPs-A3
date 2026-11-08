@@ -111,7 +111,9 @@ For the existing Docker Desktop kind cluster, the reviewed native helper does no
 .\scripts\windows_deploy.ps1 -ConfirmDeploy -InjectSelectorFailure
 ```
 
-The flags explicitly authorize deployment and the optional selector fault in namespace `mlops`. The helper checks the trusted tiny fixture checksum, builds/loads a commit-tagged image, requires two ready replicas and uses an in-cluster probe Pod for real ClusterIP/DNS requests. It records before/fault/recovery responses, resources and logs under `evidence/kubernetes/windows-<UTC timestamp>/`. Temporary Service changes and probe Pods are cleaned up. These Windows commands must actually execute on that host before claiming live cluster verification; source/parse checks alone do not establish it.
+The flags explicitly authorize deployment and the optional selector fault in namespace `mlops`. The helper checks the trusted tiny fixture checksum, builds/loads a commit-tagged image, requires two ready replicas and uses an in-cluster probe Pod for real ClusterIP/DNS requests. It records before/fault/recovery responses and resources under `evidence/kubernetes/windows-<UTC timestamp>/`. Temporary Service changes and probe Pods are cleaned up.
+
+The real user-operated run is committed in `1da4c7e663425c40ee3da78ded2e976357d9705a`: [verification.json](evidence/kubernetes/windows-20261107T192746Z-0a1e3c80/verification.json) records two ready replicas, successful baseline/recovery predictions, no endpoints during the selector fault, and successful cleanup. These commands are available to replay the completed deployment. The committed probe result JSONs are stdout captured through `kubectl logs`; raw inference-Pod `.log` files were ignored by Git and were not uploaded for review.
 
 The exact 2,686-byte fixture from real run `339b16bb4dc3467aa6004ff170f7f504` is committed with its original training source/hash/metrics in `demo_artifacts/metadata.json`. Its preserved model lineage differs deliberately from the current service image's source tag. See [NEXT_STEPS.md](NEXT_STEPS.md) for checkout, script execution and full-stack instructions.
 
@@ -156,7 +158,19 @@ The script uses the local generated password file securely in memory and exports
 
 A directly executed validation/gate test proves the Python training safety invariant. It is not a real scheduler incident. The evidence label must identify which operation actually ran.
 
-### Failure B: model readiness failure and cluster diagnosis
+### Failure B: real Kubernetes selector mismatch
+
+The recorded Windows run above supplies an actual second infrastructure failure:
+the helper temporarily changed the Service selector to match no Pods, observed
+empty endpoints and a failed in-cluster request, restored `app=inference`, and
+verified a successful prediction. Its `selector_failure` and
+`recovery_clusterip_probe` sections preserve those observations. This is real
+operator-run fault/recovery evidence; it does not change the blocked status of
+the cloud agent's Kubernetes diagnosis conversation. To add live AI diagnosis,
+run the conversational stack with an accessible namespaced Kubernetes reader and
+retain its actual tool trace during a separately authorized replay.
+
+### Additional real Docker readiness failure
 
 A real Docker application fault can be reproduced without a cluster:
 
@@ -166,8 +180,6 @@ python -m scripts.verify_inference_container --build --image "mlops-inference:ru
 ```
 
 The verifier builds/runs the non-root image, checks a real prediction, injects a missing `MODEL_PATH`, confirms live=200 but ready/predict=503, then recreates the correct image and verifies recovery. It removes all containers it starts and exports `evidence/kubernetes/inference_container.json` plus `evidence/failures/inference_readiness_real.json`. The script targets the standard local Docker socket used by the recorded runtime; use a host with that authorized socket. This verifies container readiness, not Kubernetes routing.
-
-On the approved demo cluster, deliberately break only the demonstration namespace's service selector or model readiness configuration using an operator's authorized `kubectl`. Ask the agent to diagnose unavailability from current resources/events/logs. Restore the checked-in manifest, wait for ready endpoints and repeat a prediction. Record before/fault/recovery observations.
 
 The agent itself exposes no Kubernetes mutation endpoint. If no cluster is available, run the reproducible mocked diagnosis:
 
@@ -184,7 +196,7 @@ Its export is `evidence/failures/kubernetes_selector_mocked.json`, labeled `VERI
 | 0:00–0:40 | Explain data/control flow and read/write boundary | `architecture.md` diagram, registry schemas and read-only RBAC |
 | 0:40–1:25 | Resolve one real run's data and compare five experiments | MLflow metrics, DVC hash, source commit and reproduction export |
 | 1:25–2:15 | Show confirmation then actual workflow state | Proposal, actual DAG run ID, five task states, retry/gate behavior |
-| 2:15–3:05 | Show actual cluster evidence if local verification ran; otherwise disclose access blocker | Two replicas, probes, Service/endpoints, logs/version, or exact blocked export |
+| 2:15–3:05 | Show committed Windows cluster evidence and explain the separate cloud-route blocker | Two replicas, probes, Service/endpoints, model version and in-cluster probe outputs |
 | 3:05–4:10 | Run the exact integrated question | Four-system tool trace, facts/uncertainties, no automatic trigger |
 | 4:10–5:00 | Explain two failures and verified limits | Fault/recovery exports, tests summary, `LIMITATIONS.md` |
 
